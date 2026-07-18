@@ -1,0 +1,21 @@
+<article>
+  <h1><%= Appkit.config.app_name.call %></h1>
+
+  <%= form_with model: @user, url: first_run_path do |form| %>
+    <fieldset>
+      <label for="user_name"><%= t(".name_placeholder") %></label>
+      <%= form.text_field :name, required: true, autofocus: true, autocomplete: "name",
+          placeholder: t(".name_placeholder") %>
+
+      <label for="user_email_address"><%= t(".email_placeholder") %></label>
+      <%= form.email_field Appkit.config.email_attribute, required: true, autocomplete: "username",
+          placeholder: t(".email_placeholder") %>
+
+      <label for="user_password"><%= t(".password_placeholder") %></label>
+      <%= form.password_field :password, required: true, autocomplete: "new-password",
+          placeholder: t(".password_placeholder"), maxlength: 72 %>
+    </fieldset>
+
+    <button type="submit"><%= t(".submit") %></button>
+  <% end %>
+</article>

@@ -6,3 +6,12 @@ en:
         email_placeholder: "Email address"
         password_placeholder: "Password"
         submit: "Sign in"
+      transfers:
+        show:
+          submit: "Sign in"
+    first_runs:
+      show:
+        name_placeholder: "Name"
+        email_placeholder: "Email address"
+        password_placeholder: "Password"
+        submit: "Create account"
