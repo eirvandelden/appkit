@@ -1,0 +1,41 @@
+en:
+  appkit:
+    flash:
+      notifications: "Notifications"
+    sessions:
+      rejection: "Try another email address or password."
+      new:
+        email_placeholder: "Email address"
+        password_placeholder: "Password"
+        submit: "Sign in"
+      transfers:
+        show:
+          submit: "Sign in"
+    first_runs:
+      show:
+        name_placeholder: "Name"
+        email_placeholder: "Email address"
+        password_placeholder: "Password"
+        submit: "Create account"
+    preferences:
+      edit:
+        title: "Preferences"
+        language: "Language"
+        locale: "Locale"
+        timezone: "Timezone"
+        appearance: "Appearance"
+        color_scheme: "Color scheme"
+        color_scheme_hint: "System follows your device settings"
+        light_theme: "Light theme"
+        dark_theme: "Dark theme"
+        submit: "Save preferences"
+        success: "Preferences updated successfully."
+    themes:
+      color_schemes:
+        system: "System"
+        light: "Light"
+        dark: "Dark"
+      "solunized-white": "Solunized White"
+      "solunized-light": "Solunized Light"
+      "solunized-black": "Solunized Black"
+      "solunized-dark": "Solunized Dark"

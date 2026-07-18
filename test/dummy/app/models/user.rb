@@ -1,8 +1,11 @@
 class User < ActiveRecord::Base
   include Appkit::Authenticatable
   include Appkit::Transferable
+  include Appkit::UserTheming
 
   enum :role, { member: 0, administrator: 1 }
+
+  validates :locale, inclusion: { in: %w[en nl it] }
 
   # Exercises Appkit.config.email_attribute with a non-default column name,
   # without requiring a second physical column in the dummy schema.

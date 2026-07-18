@@ -1,0 +1,41 @@
+it:
+  appkit:
+    flash:
+      notifications: "Notifiche"
+    sessions:
+      rejection: "Prova un altro indirizzo email o un'altra password."
+      new:
+        email_placeholder: "Indirizzo email"
+        password_placeholder: "Password"
+        submit: "Accedi"
+      transfers:
+        show:
+          submit: "Accedi"
+    first_runs:
+      show:
+        name_placeholder: "Nome"
+        email_placeholder: "Indirizzo email"
+        password_placeholder: "Password"
+        submit: "Crea account"
+    preferences:
+      edit:
+        title: "Preferenze"
+        language: "Lingua"
+        locale: "Lingua"
+        timezone: "Fuso orario"
+        appearance: "Aspetto"
+        color_scheme: "Schema colori"
+        color_scheme_hint: "Sistema segue le impostazioni del dispositivo"
+        light_theme: "Tema chiaro"
+        dark_theme: "Tema scuro"
+        submit: "Salva preferenze"
+        success: "Preferenze aggiornate con successo."
+    themes:
+      color_schemes:
+        system: "Sistema"
+        light: "Chiaro"
+        dark: "Scuro"
+      "solunized-white": "Solunized Bianco"
+      "solunized-light": "Solunized Chiaro"
+      "solunized-black": "Solunized Nero"
+      "solunized-dark": "Solunized Scuro"

@@ -1,10 +1,14 @@
-ActiveRecord::Schema.define(version: 1) do
+ActiveRecord::Schema.define(version: 2) do
   create_table :users do |t|
     t.string :name
     t.string :email, null: false
     t.string :password_digest
     t.boolean :active, default: true
     t.integer :role, default: 0, null: false
+    t.string :locale, default: "en", null: false
+    t.integer :color_scheme, default: 0, null: false
+    t.integer :light_theme, default: 1, null: false
+    t.integer :dark_theme, default: 1, null: false
 
     t.timestamps
   end

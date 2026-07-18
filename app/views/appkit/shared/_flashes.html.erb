@@ -1,0 +1,9 @@
+<% if flash.any? %>
+  <section aria-label="<%= t("appkit.flash.notifications") %>" data-mvpa-flashes>
+    <% flash.each do |type, message| %>
+      <aside role="<%= type == "notice" ? "status" : "alert" %>">
+        <%= message %>
+      </aside>
+    <% end %>
+  </section>
+<% end %>

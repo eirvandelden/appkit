@@ -1,0 +1,47 @@
+<article>
+  <h1><%= t(".title") %></h1>
+
+  <%= form_with model: @user, url: preferences_path do |form| %>
+    <% if @user.errors.any? %>
+      <aside role="alert">
+        <h2><%= t("errors.template.header", count: @user.errors.count) %></h2>
+        <ul>
+          <% @user.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </aside>
+    <% end %>
+
+    <fieldset>
+      <legend><%= t(".language") %></legend>
+
+      <label for="user_locale"><%= t(".locale") %></label>
+      <%= form.select :locale, I18n.available_locales.map { |l| [t("locales.#{l}", default: l.to_s), l] } %>
+
+      <% if timezone_attribute_shown? %>
+        <label for="user_timezone"><%= t(".timezone") %></label>
+        <%= form.time_zone_select :timezone %>
+      <% end %>
+    </fieldset>
+
+    <fieldset>
+      <legend><%= t(".appearance") %></legend>
+
+      <label for="user_color_scheme"><%= t(".color_scheme") %></label>
+      <%= form.select :color_scheme,
+          Appkit.config.user_class.call.color_schemes.keys.map { |k| [t("appkit.themes.color_schemes.#{k}"), k] } %>
+      <small><%= t(".color_scheme_hint") %></small>
+
+      <label for="user_light_theme"><%= t(".light_theme") %></label>
+      <%= form.select :light_theme,
+          Appkit.config.user_class.call.light_themes.keys.map { |k| [t("appkit.themes.#{k}"), k] } %>
+
+      <label for="user_dark_theme"><%= t(".dark_theme") %></label>
+      <%= form.select :dark_theme,
+          Appkit.config.user_class.call.dark_themes.keys.map { |k| [t("appkit.themes.#{k}"), k] } %>
+    </fieldset>
+
+    <%= form.submit t(".submit") %>
+  <% end %>
+</article>

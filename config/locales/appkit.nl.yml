@@ -1,0 +1,41 @@
+nl:
+  appkit:
+    flash:
+      notifications: "Meldingen"
+    sessions:
+      rejection: "Probeer een ander e-mailadres of wachtwoord."
+      new:
+        email_placeholder: "E-mailadres"
+        password_placeholder: "Wachtwoord"
+        submit: "Inloggen"
+      transfers:
+        show:
+          submit: "Inloggen"
+    first_runs:
+      show:
+        name_placeholder: "Naam"
+        email_placeholder: "E-mailadres"
+        password_placeholder: "Wachtwoord"
+        submit: "Account aanmaken"
+    preferences:
+      edit:
+        title: "Voorkeuren"
+        language: "Taal"
+        locale: "Taal"
+        timezone: "Tijdzone"
+        appearance: "Weergave"
+        color_scheme: "Kleurenschema"
+        color_scheme_hint: "Systeem volgt je apparaatinstellingen"
+        light_theme: "Licht thema"
+        dark_theme: "Donker thema"
+        submit: "Voorkeuren opslaan"
+        success: "Voorkeuren succesvol bijgewerkt."
+    themes:
+      color_schemes:
+        system: "Systeem"
+        light: "Licht"
+        dark: "Donker"
+      "solunized-white": "Solunized Wit"
+      "solunized-light": "Solunized Licht"
+      "solunized-black": "Solunized Zwart"
+      "solunized-dark": "Solunized Donker"
