@@ -1,0 +1,13 @@
+alice_session:
+  user: alice
+  token: alice-session-token
+  last_active_at: <%= 1.hour.ago %>
+  user_agent: "Mozilla/5.0 (Test)"
+  ip_address: 127.0.0.1
+
+bob_session:
+  user: bob
+  token: bob-session-token
+  last_active_at: <%= 2.days.ago %>
+  user_agent: "Mozilla/5.0 (Test)"
+  ip_address: 127.0.0.1

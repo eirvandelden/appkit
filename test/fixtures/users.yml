@@ -1,0 +1,14 @@
+alice:
+  email: alice@example.com
+  password_digest: <%= BCrypt::Password.create("password") %>
+  active: true
+
+bob:
+  email: bob@example.com
+  password_digest: <%= BCrypt::Password.create("password") %>
+  active: true
+
+carol:
+  email: carol@example.com
+  password_digest: <%= BCrypt::Password.create("password") %>
+  active: false
