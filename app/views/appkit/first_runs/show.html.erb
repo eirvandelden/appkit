@@ -7,7 +7,7 @@
       <%= form.text_field :name, required: true, autofocus: true, autocomplete: "name",
           placeholder: t(".name_placeholder") %>
 
-      <label for="user_email_address"><%= t(".email_placeholder") %></label>
+      <%= form.label Appkit.config.email_attribute, t(".email_placeholder") %>
       <%= form.email_field Appkit.config.email_attribute, required: true, autocomplete: "username",
           placeholder: t(".email_placeholder") %>
 
