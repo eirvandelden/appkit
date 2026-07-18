@@ -1,0 +1,14 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "7c4e5f37091e56e253ac126f319524494620c4c4806e1461b831daf35ac64eb4",
+      "note": "False positive: Appkit::PwaController explicitly calls skip_forgery_protection (needed so the service_worker.js response, embedded via a <script> tag, is not blocked by Rails' cross-origin JavaScript check). Brakeman's ForgerySetting check only looks for an explicit protect_from_forgery call on the controller itself, or an explicit config.action_controller.default_protect_from_forgery = true visible in a host app's config; it does not know that Rails calls protect_from_forgery on ActionController::Base by default (Rails >= 5.2), nor does it account for skip_forgery_protection. Scanning the bare gem root (no host app config/application.rb) can never see that default, so this check always trips here. Host apps scanned with their own config are unaffected."
+    },
+    {
+      "fingerprint": "94fb8f8e7d54276bab652be99422a0a7ac352fd836e68952d7667382d7bd6e42",
+      "note": "False positive: `__dir__` in lib/appkit/version.rb is the gem's own lib directory at require time, not attacker-controlled input, so there is no command injection vector here."
+    }
+  ],
+  "updated": "2026-07-18 00:00:00 +0000",
+  "brakeman_version": "8.0.5"
+}

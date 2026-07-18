@@ -21,6 +21,9 @@ jobs:
       - name: Scan for common Rails security vulnerabilities using static analysis
         run: bundle exec brakeman -p test/dummy --no-pager --ignore-config config/brakeman.ignore
 
+      - name: Scan the engine's own app/lib code for security vulnerabilities
+        run: bundle exec brakeman -p . --force-scan --no-pager --ignore-config config/brakeman.gem.ignore
+
       - name: Scan for known security vulnerabilities in gems used
         run: bundle exec bundler-audit check --update
 

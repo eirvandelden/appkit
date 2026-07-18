@@ -3,7 +3,7 @@ module Appkit
     DEFAULT_ICONS = %w[/icon.svg /icon-192.png /icon-512.png /icon-mask-512.png].freeze
 
     attr_accessor :app_name, :email_attribute, :user_scope, :user_class, :first_run,
-                  :icons, :sw_extra_cache_paths, :brand_color, :timezone_attribute
+                  :icons, :sw_extra_cache_paths, :brand_color, :timezone_attribute, :locale_attribute
 
     def initialize
       @email_attribute = :email
@@ -13,6 +13,7 @@ module Appkit
       @icons = DEFAULT_ICONS
       @sw_extra_cache_paths = []
       @timezone_attribute = nil
+      @locale_attribute = :locale
     end
   end
 end

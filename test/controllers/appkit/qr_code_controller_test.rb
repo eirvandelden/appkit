@@ -11,5 +11,11 @@ module Appkit
       assert_equal "image/svg+xml", response.media_type
       assert_match(/<svg/, response.body)
     end
+
+    test "responds with not_found for a tampered or garbage signed id" do
+      get qr_code_url("not-a-valid-signed-id")
+
+      assert_response :not_found
+    end
   end
 end

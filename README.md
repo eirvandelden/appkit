@@ -10,6 +10,13 @@ a co-gem for its themed UI components. `mvpa-css` is not declared in
 it is declared in this repo's `Gemfile` instead. Consuming apps must add
 `mvpa-css` to their own `Gemfile` as well.
 
+Appkit also requires [`importmap-rails`](https://github.com/rails/importmap-rails)
+as a co-dependency. The engine's own `config/importmap.rb` pins
+`appkit/pwa.js`, `appkit/controllers/push_controller.js`, and
+`appkit/controllers/theme_controller.js` via the importmap DSL, and
+`lib/appkit/engine.rb` adds that file to the host app's
+`config.importmap.paths` automatically.
+
 The engine is deliberately **not** `isolate_namespace`d: host apps' URL
 helpers (`root_url`, etc.) need to work from inside engine controllers
 and views.
@@ -20,9 +27,6 @@ and views.
 gem "appkit", github: "eirvandelden/appkit"
 gem "mvpa-css", github: "eirvandelden/mvpa.css"
 ```
-
-Further installation and configuration steps (PWA/push, theme) will be
-documented as those features land in later tasks.
 
 Host apps should add this one-line directive to their own
 `ApplicationController` — it's not part of the engine itself:
@@ -35,12 +39,80 @@ class ApplicationController < ActionController::Base
 end
 ```
 
+See "Configuration" and "Web Push setup" below for the remaining
+per-app setup steps.
+
 ## Status
 
-Session-based authentication (login, FirstRun bootstrap, session
-transfer/QR handoff), VersionHeaders, Authorization, and static error
-pages are implemented. PWA/push and theme/preferences features are not
-yet built.
+Phase 0 is complete: session-based authentication (login, FirstRun
+bootstrap, session transfer/QR handoff), PWA installability with web
+push notifications, theme/preferences management, VersionHeaders,
+Authorization, static error pages, and CI (engine + reusable app
+workflow) are all implemented.
+
+## Configuration
+
+Host apps configure Appkit via `Appkit.config` (see
+`lib/appkit/configuration.rb` for the source of truth), typically in a
+`config/initializers/appkit.rb`:
+
+```ruby
+Appkit.configure do |config|
+  config.app_name = "My App"
+end
+```
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `app_name` | `nil` | Display name used in the PWA manifest. |
+| `email_attribute` | `:email` | Attribute on `user_class` used as the user's email/login identifier. |
+| `user_scope` | `-> { User.all }` | Relation used to look up users (e.g. for sign-in). |
+| `user_class` | `-> { "User".constantize }` | Lazily-resolved host app User class. |
+| `first_run` | creates a `User` with `role: :administrator` | Callable used by the FirstRun bootstrap flow to create the first administrator account. |
+| `icons` | `%w[/icon.svg /icon-192.png /icon-512.png /icon-mask-512.png]` | Icon paths advertised in the PWA manifest. |
+| `sw_extra_cache_paths` | `[]` | Extra paths the service worker should precache alongside the default offline shell. |
+| `brand_color` | `nil` | Theme color used in the PWA manifest and browser chrome. |
+| `timezone_attribute` | `nil` | Attribute on the user model for their timezone preference; the timezone field on the preferences form is only shown when this is set and the user responds to it. |
+| `locale_attribute` | `:locale` | Attribute on the user model for their locale preference; the locale field on the preferences form is only shown when this is set and the user responds to it. |
+
+## Web Push setup
+
+Push notifications use the `web-push` gem with VAPID keys. Generate a
+key pair with the bundled rake task:
+
+```
+bin/rails appkit:vapid_keys
+```
+
+This prints a public/private key pair and a `credentials.yml.enc`
+snippet to paste in (`bin/rails credentials:edit`):
+
+```yaml
+web_push:
+  vapid_public_key: ...
+  vapid_private_key: ...
+  subject: mailto:you@example.com
+```
+
+`Appkit::PushNotificationJob` reads these via
+`Rails.application.credentials.dig(:web_push, :subject/:vapid_public_key/:vapid_private_key)`
+at delivery time.
+
+## Version headers
+
+`Appkit::VersionHeaders` sets `X-Version`/`X-Rev` response headers from
+`Rails.application.config.app_version`/`config.git_revision`. Host apps
+must set both themselves; they are not provided by the engine. See
+`test/dummy/config/application.rb` for the pattern:
+
+```ruby
+module MyApp
+  class Application < Rails::Application
+    config.app_version = "1.2.3"
+    config.git_revision = "deadbeef"
+  end
+end
+```
 
 ## Continuous Integration
 

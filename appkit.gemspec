@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.description   = "A non-isolated Rails engine providing session-based authentication, " \
                         "PWA installability with web push notifications, and theme/preferences " \
                         "management for host Rails applications."
-  spec.license       = "osaassy"
+  spec.license       = "Nonstandard"
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     Dir["{app,config,lib}/**/*", "LICENSE.md", "THIRD_PARTY_NOTICES.md", "README.md", "CHANGELOG.md"]

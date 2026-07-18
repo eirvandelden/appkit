@@ -37,6 +37,30 @@ module Appkit
       assert_response :unprocessable_entity
     end
 
+    test "locale field and param are present by default (locale_attribute defaults to :locale)" do
+      sign_in_as users(:alice)
+
+      get edit_preferences_url
+      assert_select "select#user_locale"
+
+      patch preferences_url, params: {
+        user: { locale: "nl", color_scheme: "dark", light_theme: "solunized-white", dark_theme: "solunized-black" }
+      }
+      assert_redirected_to edit_preferences_url
+
+      assert_equal "nl", users(:alice).reload.locale
+    end
+
+    test "locale field and param are absent when locale_attribute is configured but the user does not respond to it" do
+      with_locale_attribute(:language) do
+        sign_in_as users(:alice)
+
+        get edit_preferences_url
+        assert_select "select#user_locale", count: 0
+        assert_select "select#user_language", count: 0
+      end
+    end
+
     test "timezone field and param are absent when timezone_attribute is not configured" do
       sign_in_as users(:alice)
 
@@ -81,6 +105,14 @@ module Appkit
         yield
       ensure
         Appkit.config.timezone_attribute = original
+      end
+
+      def with_locale_attribute(attribute)
+        original = Appkit.config.locale_attribute
+        Appkit.config.locale_attribute = attribute
+        yield
+      ensure
+        Appkit.config.locale_attribute = original
       end
   end
 end

@@ -1,6 +1,6 @@
 module Appkit
   class PreferencesController < ApplicationController
-    helper_method :timezone_attribute_shown?
+    helper_method :timezone_attribute_shown?, :locale_attribute_shown?
 
     def edit
       @user = Current.user
@@ -18,7 +18,8 @@ module Appkit
 
     private
       def preference_params
-        permitted = %i[locale color_scheme light_theme dark_theme]
+        permitted = %i[color_scheme light_theme dark_theme]
+        permitted << Appkit.config.locale_attribute if locale_attribute_shown?
         permitted << Appkit.config.timezone_attribute if timezone_attribute_shown?
 
         params.require(:user).permit(*permitted)
@@ -26,6 +27,10 @@ module Appkit
 
       def timezone_attribute_shown?
         Appkit.config.timezone_attribute && Current.user.respond_to?(Appkit.config.timezone_attribute)
+      end
+
+      def locale_attribute_shown?
+        Appkit.config.locale_attribute && Current.user.respond_to?(Appkit.config.locale_attribute)
       end
   end
 end

@@ -16,8 +16,11 @@
     <fieldset>
       <legend><%= t(".language") %></legend>
 
-      <label for="user_locale"><%= t(".locale") %></label>
-      <%= form.select :locale, I18n.available_locales.map { |l| [t("locales.#{l}", default: l.to_s), l] } %>
+      <% if locale_attribute_shown? %>
+        <%= form.label Appkit.config.locale_attribute, t(".locale") %>
+        <%= form.select Appkit.config.locale_attribute,
+            I18n.available_locales.map { |l| [t("locales.#{l}", default: l.to_s), l] } %>
+      <% end %>
 
       <% if timezone_attribute_shown? %>
         <%= form.label Appkit.config.timezone_attribute, t(".timezone") %>
