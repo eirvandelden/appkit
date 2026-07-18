@@ -29,6 +29,10 @@ module Appkit
         end
       end
 
+      def create_push_subscriptions_migration
+        migration_template "create_appkit_push_subscriptions.rb.tt", "db/migrate/create_appkit_push_subscriptions.rb"
+      end
+
       def copy_error_pages
         ERROR_PAGES.each { |page| copy_file "public/#{page}", "public/#{page}" }
       end

@@ -1,0 +1,9 @@
+<%= raw({
+  name: Appkit.config.app_name.call,
+  display: "standalone",
+  start_url: "/",
+  scope: "/",
+  theme_color: Appkit.config.brand_color,
+  background_color: "#f5f9fa",
+  icons: Appkit.config.icons.map { |path| Appkit::ManifestIcon.new(path).to_h }
+}.to_json) %>

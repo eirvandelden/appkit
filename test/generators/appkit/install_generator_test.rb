@@ -26,6 +26,16 @@ module Appkit
         end
       end
 
+      test "creates a push_subscriptions migration" do
+        run_generator
+
+        assert_migration "db/migrate/create_appkit_push_subscriptions.rb" do |content|
+          assert_match(/create_table :appkit_push_subscriptions/, content)
+          assert_match(/t\.references :user, null: false, foreign_key: true/, content)
+          assert_match(/add_index :appkit_push_subscriptions, :endpoint, unique: true/, content)
+        end
+      end
+
       test "copies the static error pages into the host's public directory" do
         run_generator
 

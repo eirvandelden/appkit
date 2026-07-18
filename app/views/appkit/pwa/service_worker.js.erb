@@ -1,0 +1,78 @@
+const CACHE_NAME = 'appkit-<%= Appkit::VERSION %>';
+const PRECACHE_URLS = <%= raw((["/"] + Appkit.config.sw_extra_cache_paths).to_json) %>;
+
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)));
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((names) => Promise.all(
+      names.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
+    )).then(() => self.clients.claim())
+  );
+});
+
+// Propshaft serves compiled assets at immutable digested URLs (asset name plus
+// a content hash), not at their plain source-relative path. Precaching a plain
+// path here would 404 and make cache.addAll reject, silently breaking the whole
+// install step. So assets are cached at runtime, keyed by their real digested
+// URL, on first fetch instead.
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(cacheFirst(event.request));
+  } else if (event.request.mode === 'navigate') {
+    event.respondWith(networkFirst(event.request));
+  } else {
+    event.respondWith(fetch(event.request));
+  }
+});
+
+async function cacheFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  cache.put(request, response.clone());
+  return response;
+}
+
+async function networkFirst(request) {
+  try {
+    return await fetch(request);
+  } catch (error) {
+    const cache = await caches.open(CACHE_NAME);
+    return await cache.match('/');
+  }
+}
+
+self.addEventListener('push', (event) => {
+  const payload = event.data.json();
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: payload.icon,
+      badge: payload.badge,
+      tag: payload.tag,
+      data: payload.data,
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const path = event.notification.data?.path || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow(path);
+    })
+  );
+});

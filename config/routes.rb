@@ -6,4 +6,8 @@ Rails.application.routes.draw do
   end
 
   resources :qr_code, only: :show, controller: "appkit/qr_code"
+
+  get "manifest" => "appkit/pwa#manifest"
+  get "service-worker" => "appkit/pwa#service_worker"
+  resource :push_subscription, only: %i[create destroy], controller: "appkit/push_subscriptions"
 end

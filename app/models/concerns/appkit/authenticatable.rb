@@ -4,6 +4,7 @@ module Appkit
 
     included do
       has_many :sessions, dependent: :destroy
+      has_many :push_subscriptions, class_name: "Appkit::PushSubscription", dependent: :destroy
       has_secure_password
     end
 
