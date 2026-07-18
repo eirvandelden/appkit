@@ -6,7 +6,7 @@ require "rails/test_help"
 
 load Rails.root.join("db/schema.rb")
 
-ActiveSupport::TestCase.fixture_paths = [File.expand_path("fixtures", __dir__)]
+ActiveSupport::TestCase.fixture_paths = [ File.expand_path("fixtures", __dir__) ]
 ActiveSupport::TestCase.fixtures :all
 
 # The sessions#create rate limiter uses Rails.cache, which otherwise leaks

@@ -19,7 +19,7 @@ module Appkit
     private
 
     def push_subscription_params
-      params.permit(:endpoint, keys: [:p256dh, :auth])
+      params.permit(:endpoint, keys: [ :p256dh, :auth ])
     end
   end
 end

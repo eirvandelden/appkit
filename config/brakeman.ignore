@@ -1,0 +1,10 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "6f5239fb87c64764d0c209014deb5cf504c2c10ee424bd33590f0a4f22e01d8f",
+      "note": "False positive: the dummy app's config.load_defaults enables CSRF protection by default (Rails >= 5.2), so an explicit protect_from_forgery call in ApplicationController is redundant."
+    }
+  ],
+  "updated": "2026-07-18 00:00:00 +0000",
+  "brakeman_version": "8.0.5"
+}

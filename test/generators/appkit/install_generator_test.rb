@@ -44,6 +44,15 @@ module Appkit
         end
       end
 
+      test "copies the thin CI caller workflow into the host's .github directory" do
+        run_generator
+
+        assert_file ".github/workflows/ci.yml" do |content|
+          assert_match(%r{uses: eirvandelden/appkit/\.github/workflows/rails-ci\.yml@main}, content)
+          assert_match(/run_system_tests: true/, content)
+        end
+      end
+
       private
         def without_sessions_table
           connection = ActiveRecord::Base.connection

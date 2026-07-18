@@ -37,6 +37,10 @@ module Appkit
         ERROR_PAGES.each { |page| copy_file "public/#{page}", "public/#{page}" }
       end
 
+      def copy_ci_workflow
+        template "github/workflows/ci.yml.tt", ".github/workflows/ci.yml"
+      end
+
       private
         def sessions_table_exists?
           ActiveRecord::Base.connection.table_exists?(:sessions)

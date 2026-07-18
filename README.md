@@ -42,6 +42,36 @@ transfer/QR handoff), VersionHeaders, Authorization, and static error
 pages are implemented. PWA/push and theme/preferences features are not
 yet built.
 
+## Continuous Integration
+
+This repo's own `.github/workflows/ci.yml` tests the engine against
+`test/dummy` (`bundle exec rake test`), lints with RuboCop, and scans for
+security issues with Brakeman/bundler-audit.
+
+Consuming apps get CI via `.github/workflows/rails-ci.yml`, a reusable
+`workflow_call` workflow with `scan_ruby`, `scan_js`, `lint`, `test`, and
+`system-test` jobs. Each app's own CI becomes a thin ~6-line caller (see
+`lib/generators/appkit/install/templates/github/workflows/ci.yml.tt`,
+copied in by `bin/rails generate appkit:install`):
+
+```yaml
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  ci:
+    uses: eirvandelden/appkit/.github/workflows/rails-ci.yml@main
+    with:
+      run_system_tests: true
+```
+
+Cross-repo reusable workflows require this repo to stay **public** — a
+private repo would need each consuming app's Settings → Actions → Access
+to explicitly allow `eirvandelden/appkit`, plus credentials for `bundle
+install` to fetch the git-sourced gem.
+
 ## Third-party notices
 
 Some of appkit's auth code is adapted from Basecamp's
