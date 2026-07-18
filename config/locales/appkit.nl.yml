@@ -29,6 +29,7 @@ nl:
         light_theme: "Licht thema"
         dark_theme: "Donker thema"
         submit: "Voorkeuren opslaan"
+      update:
         success: "Voorkeuren succesvol bijgewerkt."
     themes:
       color_schemes:

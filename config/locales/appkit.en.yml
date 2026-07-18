@@ -29,6 +29,7 @@ en:
         light_theme: "Light theme"
         dark_theme: "Dark theme"
         submit: "Save preferences"
+      update:
         success: "Preferences updated successfully."
     themes:
       color_schemes:
