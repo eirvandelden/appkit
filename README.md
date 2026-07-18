@@ -21,9 +21,29 @@ gem "appkit", github: "eirvandelden/appkit"
 gem "mvpa-css", github: "eirvandelden/mvpa.css"
 ```
 
-Further installation and configuration steps (auth, PWA/push, theme)
-will be documented as those features land in later tasks.
+Further installation and configuration steps (PWA/push, theme) will be
+documented as those features land in later tasks.
+
+Host apps should add this one-line directive to their own
+`ApplicationController` — it's not part of the engine itself:
+
+```ruby
+class ApplicationController < ActionController::Base
+  # Only allow modern browsers supporting webp images, web push, badges,
+  # import maps, CSS nesting, and CSS :has.
+  allow_browser versions: :modern
+end
+```
 
 ## Status
 
-This is scaffolding only — no auth, PWA/push, or theme features yet.
+Session-based authentication (login, FirstRun bootstrap, session
+transfer/QR handoff), VersionHeaders, Authorization, and static error
+pages are implemented. PWA/push and theme/preferences features are not
+yet built.
+
+## Third-party notices
+
+Some of appkit's auth code is adapted from Basecamp's
+[Writebook](https://github.com/basecamp/writebook) (MIT license). See
+`THIRD_PARTY_NOTICES.md` for details.

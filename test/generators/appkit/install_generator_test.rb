@@ -26,6 +26,14 @@ module Appkit
         end
       end
 
+      test "copies the static error pages into the host's public directory" do
+        run_generator
+
+        InstallGenerator::ERROR_PAGES.each do |page|
+          assert_file "public/#{page}"
+        end
+      end
+
       private
         def without_sessions_table
           connection = ActiveRecord::Base.connection

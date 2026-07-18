@@ -14,5 +14,7 @@ module Dummy
     config.root = File.expand_path("..", __dir__)
     config.load_defaults Rails::VERSION::STRING.to_f
     config.eager_load = false
+    config.app_version = "1.2.3"
+    config.git_revision = "deadbeef"
   end
 end
