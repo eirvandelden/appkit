@@ -114,6 +114,43 @@ module MyApp
 end
 ```
 
+## Health checks
+
+Appkit mounts [`okcomputer`](https://github.com/sportngin/okcomputer) so an
+uptime monitor (e.g. Uptime Kuma) can poll a check that's representative of
+real app health, not just a bare 200 OK. By default it registers:
+
+- `"default"` — trivial "app is running" check (from the gem itself).
+- `"database"` — real DB connectivity (from the gem itself, auto-registered
+  whenever `ActiveRecord` is defined).
+- `"cache"` — only when `Rails.cache` is a `SolidCache::Store`; skipped for
+  other cache backends.
+- `"queue"` — only when `Rails.application.config.active_job.queue_adapter`
+  is `:solid_queue`; verifies at least one `SolidQueue::Process` has
+  heartbeated recently (worker liveness), not queue depth/backlog.
+
+Point your uptime monitor at `<health_check_path>/all`, **not** the bare
+root — the root path only runs the trivial `"default"` check, while `/all`
+runs every registered check and returns `500` if any fail.
+
+Configure the mount path (default `"healthz"`, chosen to avoid colliding with
+Rails' own `/up` health check route):
+
+```ruby
+Appkit.configure do |config|
+  config.health_check_path = "healthz"
+end
+```
+
+To protect the endpoint with HTTP Basic auth, call `OkComputer.require_authentication`
+directly from your own initializer (Appkit does not wrap this, since Uptime
+Kuma polling usually doesn't need auth):
+
+```ruby
+OkComputer.require_authentication(Rails.application.credentials.dig(:health_check, :username),
+                                   Rails.application.credentials.dig(:health_check, :password))
+```
+
 ## Continuous Integration
 
 This repo's own `.github/workflows/ci.yml` tests the engine against

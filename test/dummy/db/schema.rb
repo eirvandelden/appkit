@@ -36,4 +36,27 @@ ActiveRecord::Schema.define(version: 3) do
     t.timestamps
   end
   add_index :appkit_push_subscriptions, :endpoint, unique: true
+
+  # Minimal Solid Queue / Solid Cache tables: only what the health checks
+  # under test actually query, not the full gem schema (e.g. jobs, executions).
+  create_table :solid_queue_processes do |t|
+    t.string :kind, null: false
+    t.datetime :last_heartbeat_at, null: false
+    t.bigint :supervisor_id
+    t.integer :pid, null: false
+    t.string :hostname
+    t.text :metadata
+    t.datetime :created_at, null: false
+    t.string :name, null: false
+  end
+  add_index :solid_queue_processes, :last_heartbeat_at
+
+  create_table :solid_cache_entries do |t|
+    t.binary :key, limit: 1024, null: false
+    t.binary :value, limit: 536870912, null: false
+    t.datetime :created_at, null: false
+    t.integer :key_hash, limit: 8, null: false
+    t.integer :byte_size, limit: 4, null: false
+  end
+  add_index :solid_cache_entries, :key_hash, unique: true
 end

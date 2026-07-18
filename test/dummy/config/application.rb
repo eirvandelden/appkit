@@ -7,6 +7,8 @@ require "action_controller/railtie"
 require "action_view/railtie"
 require "propshaft"
 require "turbo-rails"
+require "solid_queue"
+require "solid_cache"
 
 require "appkit"
 

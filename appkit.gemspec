@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "web-push", "~> 3.0"
   spec.add_dependency "turbo-rails", ">= 2.0"
   spec.add_dependency "rqrcode", "~> 2.0"
+  spec.add_dependency "okcomputer", "~> 1.19"
 
   spec.add_development_dependency "rails", ">= 8.0"
   spec.add_development_dependency "sqlite3"
@@ -28,4 +29,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop-rails-omakase"
   spec.add_development_dependency "brakeman"
   spec.add_development_dependency "bundler-audit"
+  spec.add_development_dependency "solid_queue"
+  spec.add_development_dependency "solid_cache"
 end
