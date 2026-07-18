@@ -1,0 +1,30 @@
+# Local lefthook configuration for the appkit gem
+# Extends the global lefthook.yml from dotfiles
+
+pre-commit:
+  commands:
+    stylelint:
+      skip: true
+    browserslist:
+      skip: true
+    erb_lint:
+      skip: true
+    eslint:
+      skip: true
+    spelling:
+      skip: true
+
+pre-push:
+  commands:
+    stylelint:
+      skip: true
+    browserslist:
+      skip: true
+    erb_lint:
+      skip: true
+    eslint:
+      skip: true
+    minitest:
+      skip: true
+    rspec:
+      skip: true

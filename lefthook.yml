@@ -1,0 +1,250 @@
+---
+pre-commit:
+  parallel: true
+  commands:
+    stylelint:
+      tags: css linter
+      glob: "*.{css,scss}"
+      run: yarn stylelint {staged_files}
+    browserslist:
+      tags: css browserslist
+      glob: ".browserslistrc"
+      run: npx browserslist
+    erb_lint:
+      tags: erb style
+      glob: "*.{erb}"
+      run: erb_lint {staged_files}
+    eslint:
+      tags: javascript linter
+      glob: "*.{js,ts,jsx,tsx}"
+      run: yarn eslint {staged_files}
+    spelling:
+      glob: "*.{js,rb,md}"
+      run: cspell {staged_files}
+    rubocop:
+      tags: ruby linter
+      glob: "*.{rb}"
+      run: rubocop -a --force-exclusion {staged_files} --parallel
+      stage_fixed: true
+    ruby-syntax:
+      tags:
+        - ruby
+        - syntax
+      glob: "*.rb"
+      run: ruby -c "{staged_files}"
+      fail_text: Hey there, it looks like your Ruby syntax is incorrect. Take a break if you're tired!
+    shellcheck:
+      tags: shell linter
+      glob: "*.{sh,bash}"
+      run: shellcheck -x -S warning {staged_files}
+    shellcheck-zsh:
+      tags: shell linter
+      glob: "*.zsh"
+      run: shellcheck -x -S warning -s bash {staged_files}
+    yamllint:
+      tags: yaml linter
+      glob: "*.{yml,yaml}"
+      run: yamllint {staged_files}
+    no-push-to-main:
+      tags: branch-protection
+      run: |
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+          echo "Direct commit to $branch is not allowed. Create a feature branch and open a PR."
+          exit 1
+        fi
+      fail_text: Direct commits to main/master are blocked. Create a feature branch first.
+    no-fixme:
+      tags: fixme
+      run: |
+        ! grep \
+          --exclude="sorbet/**/*" \
+          --exclude="lefthook.yml" \
+          --line-number \
+          --with-filename \
+          --fixed-strings \
+          FIXME "{staged_files}"
+      fail_text: Your staged files include a FIXME. See above for details.
+    no-nocommit:
+      tags: nocommit
+      run: |
+        ! grep \
+          --exclude="sorbet/**/*" \
+          --exclude="lefthook.yml" \
+          --line-number \
+          --with-filename \
+          --fixed-strings \
+          NOCOMMIT "{staged_files}"
+      fail_text: Your staged files include a NOCOMMIT. See above for details.
+
+# TODO: fix loading of extra words
+# commit-msg:
+#   parallel: true
+#   commands:
+#     spell-check:
+#       run: cspell --no-summary {1}
+
+pre-push:
+  parallel: true
+  commands:
+    # Do not push without security checking
+    brakeman:
+      tags:
+        - ruby
+        - rails
+        - security
+      glob: "Gemfile"
+      run: brakeman --quiet --no-pager --no-progress --no-summary
+      fail_text: |
+        Fix vulnerabilities if you can.
+        If you're in a hurry to push, use the `--no-verify` git flag.
+        If brakeman is presenting false positives or needs further configuration,
+        look into adding options to a configuration file.
+        See https://brakemanscanner.org/docs/options/
+    bundle-audit:
+      tags:
+        - ruby
+        - security
+        - bundle-audit
+      glob: "Gemfile"
+      run: bin/bundler-audit --config config/bundler-audit.yml
+      fail_text: |
+        Upgrade vulnerable dependencies if you can.
+        If you're in a hurry to push, use the `--no-verify` git flag.
+        If you need to ignore dependencies in the longer term,
+        see https://rubydoc.info/gems/bundler-audit/frames#configuration-file
+    stylelint:
+      run: yarn stylelint {push_files}
+      tags: css linter
+      glob:
+        - "*.{css,scss}"
+    browserslist:
+      tags: css browserslist
+      glob: ".browserslistrc"
+      run: npx browserslist
+    erb_lint:
+      tags: linter
+      glob: "*.erb"
+      run: erb_lint {push_files}
+    eslint:
+      tags: linter
+      glob: "*.{js,ts,jsx,tsx}"
+      run: yarn eslint {push_files}
+    rubocop:
+      tags: linter
+      glob: "*.rb"
+      run: rubocop --force-exclusion {push_files}
+    minitest:
+      tags:
+        - ruby
+        - tests
+        - minitest
+      glob: "app/**/*.rb"
+      run: |
+        for file in {push_files}; do
+          rel_path="${file#app/}"
+          base_name="${rel_path%.rb}"
+          test_file="test/${base_name}_test.rb"
+
+          if [ -f "$test_file" ]; then
+            echo "Running minitest for $file..."
+            bin/rails test "$test_file" || exit 1
+          fi
+        done
+      fail_text: |
+        Minitest failed for changed Ruby files.
+        Fix the failing tests or use `--no-verify` to skip.
+    rspec:
+      tags:
+        - ruby
+        - tests
+        - rspec
+      glob: "app/**/*.rb"
+      run: |
+        for file in {push_files}; do
+          rel_path="${file#app/}"
+          base_name="${rel_path%.rb}"
+          spec_file="spec/${base_name}_spec.rb"
+
+          if [ -f "$spec_file" ]; then
+            echo "Running rspec for $file..."
+            bin/rspec "$spec_file" || exit 1
+          fi
+        done
+      fail_text: |
+        RSpec failed for changed Ruby files.
+        Fix the failing tests or use `--no-verify` to skip.
+    shellcheck:
+      tags: shell linter
+      glob: "*.{sh,bash}"
+      run: shellcheck -x -S warning {push_files}
+    shellcheck-zsh:
+      tags: shell linter
+      glob: "*.zsh"
+      run: shellcheck -x -S warning -s bash {push_files}
+    yamllint:
+      tags: yaml linter
+      glob: "*.{yml,yaml}"
+      run: yamllint {push_files}
+    no-push-to-main:
+      tags: branch-protection
+      run: |
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+          echo "Direct push to $branch is not allowed. Create a feature branch and open a PR."
+          exit 1
+        fi
+      fail_text: Direct pushes to main/master are blocked. Create a feature branch first.
+    no-fixme:
+      tags: fixme
+      run: |
+        ! grep \
+          --exclude="sorbet/**/*" \
+          --exclude="lefthook.yml" \
+          --line-number \
+          --with-filename \
+          --fixed-strings \
+          FIXME "{push_files}"
+      fail_text: Your pushed files include a FIXME. See above for details.
+    no-nocommit:
+      tags: nocommit
+      run: |
+        ! grep \
+          --exclude="sorbet/**/*" \
+          --exclude="lefthook.yml" \
+          --line-number \
+          --with-filename \
+          --fixed-strings \
+          NOCOMMIT "{push_files}"
+      fail_text: Your pushed files include a NOCOMMIT. See above for details.
+
+# Run installs and migrations after pull
+post-merge:
+  parallel: true
+  files: "git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD"
+  only:
+    - ref: "main"
+  skip:
+    - rebase
+  commands:
+    migrations:
+      run: lefthook run migrations
+      env:
+        LEFTHOOK_QUIET: execution_info,meta,skips,summary
+    client-dependencies:
+      glob: "{yarn.lock,package.json}"
+      run: yarn install
+
+# custom migrations command for running rails migrations
+migrations:
+  piped: true
+  files: "git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD"
+  commands:
+    bundle:
+      priority: 1
+      glob: "Gemfile*"
+      run: if [ -f Gemfile.lock ]; then rv ci; else bundle install; fi
+    migrate:
+      priority: 2
+      glob: "db/migrations/*"
+      run: rails db:migrate
