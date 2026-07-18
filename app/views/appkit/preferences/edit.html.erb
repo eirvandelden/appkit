@@ -20,8 +20,8 @@
       <%= form.select :locale, I18n.available_locales.map { |l| [t("locales.#{l}", default: l.to_s), l] } %>
 
       <% if timezone_attribute_shown? %>
-        <label for="user_timezone"><%= t(".timezone") %></label>
-        <%= form.time_zone_select :timezone %>
+        <%= form.label Appkit.config.timezone_attribute, t(".timezone") %>
+        <%= form.time_zone_select Appkit.config.timezone_attribute %>
       <% end %>
     </fieldset>
 

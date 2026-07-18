@@ -1,4 +1,4 @@
-ActiveRecord::Schema.define(version: 2) do
+ActiveRecord::Schema.define(version: 3) do
   create_table :users do |t|
     t.string :name
     t.string :email, null: false
@@ -9,6 +9,7 @@ ActiveRecord::Schema.define(version: 2) do
     t.integer :color_scheme, default: 0, null: false
     t.integer :light_theme, default: 1, null: false
     t.integer :dark_theme, default: 1, null: false
+    t.string :tz
 
     t.timestamps
   end

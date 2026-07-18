@@ -59,6 +59,21 @@ module Appkit
       end
     end
 
+    test "field, permitted param, and persistence follow a custom timezone_attribute, not the literal :timezone" do
+      with_timezone_attribute(:tz) do
+        sign_in_as users(:alice)
+
+        get edit_preferences_url
+        assert_select "select#user_tz"
+        assert_select "select#user_timezone", count: 0
+
+        patch preferences_url, params: { user: { tz: "Amsterdam" } }
+        assert_redirected_to edit_preferences_url
+
+        assert_equal "Amsterdam", users(:alice).reload.tz
+      end
+    end
+
     private
       def with_timezone_attribute(attribute)
         original = Appkit.config.timezone_attribute

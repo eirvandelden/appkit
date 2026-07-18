@@ -19,7 +19,7 @@ module Appkit
     private
       def preference_params
         permitted = %i[locale color_scheme light_theme dark_theme]
-        permitted << :timezone if timezone_attribute_shown?
+        permitted << Appkit.config.timezone_attribute if timezone_attribute_shown?
 
         params.require(:user).permit(*permitted)
       end
