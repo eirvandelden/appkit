@@ -7,7 +7,7 @@ on:
 
 jobs:
   scan_ruby:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     steps:
       - name: Checkout code
@@ -29,7 +29,7 @@ jobs:
         run: bundle exec bundler-audit check --update
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     env:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
