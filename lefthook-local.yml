@@ -1,3 +1,4 @@
+---
 # Local lefthook configuration for the appkit gem
 # Extends the global lefthook.yml from dotfiles
 
@@ -27,4 +28,12 @@ pre-push:
     minitest:
       skip: true
     rspec:
+      skip: true
+    # No bin/brakeman or bin/bundler-audit binstubs at gem root, and CI already
+    # runs both correctly (dummy-app + gem-root scans, proper --ignore-config
+    # flags) — a bare pre-push run here would just duplicate CI without that
+    # wiring and block on already-handled false positives.
+    brakeman:
+      skip: true
+    bundle-audit:
       skip: true
