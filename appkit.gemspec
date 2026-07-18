@@ -18,6 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "railties", ">= 8.0"
   spec.add_dependency "web-push", "~> 3.0"
+  spec.add_dependency "turbo-rails", ">= 2.0"
 
   spec.add_development_dependency "rails", ">= 8.0"
   spec.add_development_dependency "sqlite3"

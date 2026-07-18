@@ -1,0 +1,7 @@
+/*
+ * Dummy app manifest — pulls in mvpa-css tokens/base and the engine's own
+ * stylesheets so the login layout has real custom properties to reference.
+ */
+
+@import "mvpa/mvpa.css";
+@import "appkit/login.css";

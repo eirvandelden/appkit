@@ -1,0 +1,45 @@
+/*
+ * Login layout
+ * Mobile-first, full-viewport centered card. Only mvpa-css custom
+ * properties are referenced here — no invented tokens.
+ */
+
+body[data-appkit-login] {
+  margin: 0;
+}
+
+body[data-appkit-login] main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-block-size: 100dvh;
+  padding-inline: var(--inline-space);
+  max-inline-size: none;
+}
+
+body[data-appkit-login] main > article {
+  inline-size: 100%;
+  padding: var(--block-space);
+  border-radius: var(--radius-large);
+}
+
+body[data-appkit-login] article h1 {
+  color: var(--color-accent);
+  margin-block-end: var(--block-space);
+}
+
+body[data-appkit-login] article input {
+  inline-size: 100%;
+  min-block-size: 44px;
+}
+
+body[data-appkit-login] article button {
+  min-block-size: 44px;
+}
+
+@media (min-width: 769px) {
+  body[data-appkit-login] main > article {
+    max-inline-size: 44ch;
+  }
+}

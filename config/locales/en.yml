@@ -1,0 +1,8 @@
+en:
+  appkit:
+    sessions:
+      rejection: "Try another email address or password."
+      new:
+        email_placeholder: "Email address"
+        password_placeholder: "Password"
+        submit: "Sign in"
