@@ -1,3 +1,4 @@
+require "rqrcode"
 require "appkit/version"
 require "appkit/configuration"
 require "appkit/engine" if defined?(Rails)
