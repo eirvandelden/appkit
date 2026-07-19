@@ -33,5 +33,15 @@ module Appkit
       assert_not Session.exists?(session.id)
       assert cookies[:session_token].blank?
     end
+
+    # Regression test: the login layout is also used for the session-transfer
+    # (magic-link) page, whose auto-submit Stimulus controller has no JS
+    # runtime to execute in if this tag is missing — it silently strands
+    # users on the intermediate page instead of erroring loudly.
+    test "login layout actually loads JavaScript" do
+      get new_session_url
+
+      assert_select "script[type='importmap']"
+    end
   end
 end
