@@ -10,12 +10,17 @@ a co-gem for its themed UI components. `mvpa-css` is not declared in
 it is declared in this repo's `Gemfile` instead. Consuming apps must add
 `mvpa-css` to their own `Gemfile` as well.
 
-Appkit also requires [`importmap-rails`](https://github.com/rails/importmap-rails)
-as a co-dependency. The engine's own `config/importmap.rb` pins
-`appkit/pwa.js`, `appkit/controllers/push_controller.js`, and
-`appkit/controllers/theme_controller.js` via the importmap DSL, and
+Appkit depends directly on [`importmap-rails`](https://github.com/rails/importmap-rails)
+(declared in `appkit.gemspec`, unlike `mvpa-css` — no action needed in
+consuming apps). The engine's own `config/importmap.rb` pins
+`appkit/pwa.js`, `appkit/controllers/push_controller.js`,
+`appkit/controllers/theme_controller.js`, and
+`appkit/controllers/auto_submit_controller.js` via the importmap DSL, and
 `lib/appkit/engine.rb` adds that file to the host app's
-`config.importmap.paths` automatically.
+`config.importmap.paths` automatically. The host's own layouts must still
+render `<%= javascript_importmap_tags %>` (including the `login` layout —
+a missing tag there silently breaks the auto-submit magic-link flow, since
+no JS runs on that page at all).
 
 The engine is deliberately **not** `isolate_namespace`d: host apps' URL
 helpers (`root_url`, etc.) need to work from inside engine controllers
