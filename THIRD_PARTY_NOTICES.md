@@ -17,8 +17,8 @@ The following files are adapted (ported and generalized/namespaced under
 - `app/models/concerns/appkit/authorization.rb` (ported verbatim from
   `app/models/concerns/authorization.rb`)
 - `app/helpers/appkit/forms_helper.rb` (ported near-verbatim from `app/helpers/forms_helper.rb`)
-- `app/javascript/controllers/auto_submit_controller.js` (ported verbatim from
-  `app/javascript/controllers/auto_submit_controller.js`)
+- `app/javascript/appkit/controllers/auto_submit_controller.js` (ported verbatim from
+  Writebook's `app/javascript/controllers/auto_submit_controller.js`)
 - `app/views/appkit/sessions/transfers/show.html.erb` (adapted from
   `app/views/sessions/transfers/show.html.erb`)
 - `lib/generators/appkit/install/templates/public/404.html`,

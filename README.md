@@ -21,6 +21,28 @@ The engine is deliberately **not** `isolate_namespace`d: host apps' URL
 helpers (`root_url`, etc.) need to work from inside engine controllers
 and views.
 
+### JavaScript controllers
+
+`eagerLoadControllersFrom` only autoloads Stimulus controllers from the
+host app's own `controllers/` importmap namespace — it does **not** pick
+up appkit's `appkit/controllers/*` pins automatically. Host apps must
+register each one explicitly in their `app/javascript/controllers/index.js`:
+
+```js
+import PushController from "appkit/controllers/push_controller"
+application.register("push", PushController)
+
+import ThemeController from "appkit/controllers/theme_controller"
+application.register("theme", ThemeController)
+
+import AutoSubmitController from "appkit/controllers/auto_submit_controller"
+application.register("auto-submit", AutoSubmitController)
+```
+
+Skipping `auto-submit` breaks the session-transfer (magic-link) flow
+silently: the transfer `show` page renders but never submits, so the
+user gets stuck on the intermediate page instead of being logged in.
+
 ## Installation
 
 ```ruby
