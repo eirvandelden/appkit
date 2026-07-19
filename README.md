@@ -96,6 +96,25 @@ end
 | `brand_color` | `nil` | Theme color used in the PWA manifest and browser chrome. |
 | `timezone_attribute` | `nil` | Attribute on the user model for their timezone preference; the timezone field on the preferences form is only shown when this is set and the user responds to it. |
 | `locale_attribute` | `:locale` | Attribute on the user model for their locale preference; the locale field on the preferences form is only shown when this is set and the user responds to it. |
+| `session_expiry` | `1.year` | How long a session may sit idle before `Appkit::SessionExpiryJob` destroys it. Matches the signed-cookie lifetime by default, so it changes no real user's experience — see "Session hygiene" below. |
+| `session_class` | `-> { "Session".constantize }` | Lazily-resolved host app Session class. |
+
+## Session hygiene
+
+The signed session cookie stops renewing once a browser drops it, but a
+stolen token replayed directly against the server never goes through the
+cookie at all — nothing expires it. `Appkit::SessionExpiryJob` closes that
+gap by destroying any session whose `last_active_at` is older than
+`config.session_expiry`. It isn't scheduled automatically (the engine doesn't
+own the host's recurring-job config) — add it yourself, e.g. in
+`config/recurring.yml`:
+
+```yaml
+production:
+  appkit_session_expiry:
+    class: Appkit::SessionExpiryJob
+    schedule: every day at midnight
+```
 
 ## Web Push setup
 

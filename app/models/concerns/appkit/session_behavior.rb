@@ -17,6 +17,13 @@ module Appkit
       def start!(user_agent:, ip_address:)
         create! user_agent: user_agent, ip_address: ip_address
       end
+
+      # A cookie only stops renewing once the browser drops it; a stolen token
+      # replayed directly against the server never does. This is the backstop:
+      # sessions idle past the configured expiry are destroyed regardless.
+      def expire_stale!
+        where(last_active_at: ...Appkit.config.session_expiry.ago).destroy_all
+      end
     end
 
     def resume(user_agent:, ip_address:)
