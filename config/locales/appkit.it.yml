@@ -29,6 +29,7 @@ it:
         light_theme: "Tema chiaro"
         dark_theme: "Tema scuro"
         submit: "Salva preferenze"
+      update:
         success: "Preferenze aggiornate con successo."
     themes:
       color_schemes:

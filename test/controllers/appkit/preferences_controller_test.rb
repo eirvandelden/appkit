@@ -19,7 +19,7 @@ module Appkit
 
       assert_redirected_to edit_preferences_url
       follow_redirect!
-      assert_not_nil flash[:notice]
+      assert_equal I18n.t("appkit.preferences.update.success"), flash[:notice]
 
       users(:alice).reload.tap do |user|
         assert_equal "nl", user.locale
