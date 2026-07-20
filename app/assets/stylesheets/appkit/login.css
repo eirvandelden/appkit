@@ -25,7 +25,8 @@ body[data-appkit-login] main > article {
 }
 
 body[data-appkit-login] article h1 {
-  color: var(--color-accent);
+  /* Falls back to magenta if the host app forgot to set --color-accent. */
+  color: var(--color-accent, var(--color-magenta));
   margin-block-end: var(--block-space);
 }
 

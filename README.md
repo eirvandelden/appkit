@@ -48,6 +48,20 @@ Skipping `auto-submit` breaks the session-transfer (magic-link) flow
 silently: the transfer `show` page renders but never submits, so the
 user gets stuck on the intermediate page instead of being logged in.
 
+### Login page branding
+
+The login layout colors its heading with `--color-accent`. Host apps set
+this once, e.g. in a `themes/brand.css`:
+
+```css
+:root {
+  --color-accent: var(--color-blue);
+}
+```
+
+If a host app forgets to set it, the login page falls back to magenta
+rather than rendering unstyled.
+
 ## Installation
 
 ```ruby
