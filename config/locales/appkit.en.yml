@@ -31,6 +31,8 @@ en:
         submit: "Save preferences"
       update:
         success: "Preferences updated successfully."
+    shared:
+      skip_to_main_content: "Skip to main content"
     themes:
       color_schemes:
         system: "System"
