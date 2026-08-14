@@ -18,5 +18,16 @@ module Appkit
     ensure
       Rails.application.singleton_class.remove_method(:credentials)
     end
+
+    test "renders the favicon from the host app's configured svg icon" do
+      original_icons = Appkit.config.icons
+      Appkit.config.icons = [ "/custom-icon.svg", "/icon-192.png" ]
+
+      render partial: "appkit/shared/pwa_meta"
+
+      assert_select "link[rel='icon'][href='/custom-icon.svg']"
+    ensure
+      Appkit.config.icons = original_icons
+    end
   end
 end

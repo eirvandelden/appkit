@@ -7,6 +7,10 @@ module Appkit
       icon_192 || png_icon_paths.max_by { |path| path[/-(\d+)\./, 1].to_i }
     end
 
+    def favicon_path
+      Appkit.config.icons.find { |path| File.extname(path) == ".svg" }
+    end
+
     private
       def png_icon_paths
         Appkit.config.icons.select { |path| File.extname(path) == ".png" && !path.include?("mask") }
