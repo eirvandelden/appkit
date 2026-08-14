@@ -31,6 +31,8 @@ nl:
         submit: "Voorkeuren opslaan"
       update:
         success: "Voorkeuren succesvol bijgewerkt."
+    shared:
+      skip_to_main_content: "Ga naar inhoud"
     themes:
       color_schemes:
         system: "Systeem"
