@@ -1,11 +1,21 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Model substrings reported by navigator.userAgentData.getHighEntropyValues(["model"])
+// for known e-ink devices. Empty until confirmed against a real device over HTTPS —
+// Chrome/Edge hide the model from the User-Agent string itself.
+const EINK_DEVICE_MODELS = []
+
 export default class extends Controller {
   connect() {
+    this.isEinkDevice = false
     this.systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)")
     this.applySystemThemeChange = this.applySystemThemeChange.bind(this)
     this.systemThemeQuery.addEventListener("change", this.applySystemThemeChange)
     this.applyTheme()
+    this.detectEinkDevice().then(isEinkDevice => {
+      this.isEinkDevice = isEinkDevice
+      if (isEinkDevice) this.applyTheme()
+    })
   }
 
   disconnect() {
@@ -20,7 +30,9 @@ export default class extends Controller {
     html.dataset.lightTheme = lightTheme
     html.dataset.darkTheme = darkTheme
 
-    if (colorScheme === "light") {
+    if (this.isEinkDevice) {
+      this.applySystemTheme("eink-light", "eink-dark")
+    } else if (colorScheme === "light") {
       html.dataset.theme = lightTheme
     } else if (colorScheme === "dark") {
       html.dataset.theme = darkTheme
@@ -30,15 +42,20 @@ export default class extends Controller {
   }
 
   applySystemThemeChange() {
-    const { colorScheme, lightTheme, darkTheme } = this.themeSettings()
-
-    if (colorScheme === "system") this.applySystemTheme(lightTheme, darkTheme)
+    this.applyTheme()
   }
 
   applySystemTheme(lightTheme, darkTheme) {
     const html = document.documentElement
 
     html.dataset.theme = this.systemThemeQuery.matches ? darkTheme : lightTheme
+  }
+
+  async detectEinkDevice() {
+    if (!window.isSecureContext || !navigator.userAgentData) return false
+
+    const { model } = await navigator.userAgentData.getHighEntropyValues(["model"])
+    return EINK_DEVICE_MODELS.some(knownModel => model.includes(knownModel))
   }
 
   themeSettings() {
