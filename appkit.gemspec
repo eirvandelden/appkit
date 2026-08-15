@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "railties", ">= 8.0"
   spec.add_dependency "web-push", "~> 3.0"
   spec.add_dependency "turbo-rails", ">= 2.0"
-  spec.add_dependency "rqrcode", "~> 2.0"
+  spec.add_dependency "rqrcode", "~> 3.0"
   spec.add_dependency "okcomputer", "~> 1.19"
   spec.add_dependency "importmap-rails", ">= 1.0"
 
