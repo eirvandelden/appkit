@@ -1,9 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Model substrings reported by navigator.userAgentData.getHighEntropyValues(["model"])
-// for known e-ink devices. Empty until confirmed against a real device over HTTPS —
-// Chrome/Edge hide the model from the User-Agent string itself.
-const EINK_DEVICE_MODELS = []
+// for known e-ink devices. "HiBreak" confirmed against a BigMe HiBreak Pro.
+const EINK_DEVICE_MODELS = ["HiBreak"]
 
 export default class extends Controller {
   connect() {
