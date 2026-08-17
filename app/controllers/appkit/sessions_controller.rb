@@ -1,7 +1,7 @@
 module Appkit
   class SessionsController < ApplicationController
     layout "login"
-    allow_unauthenticated_access only: %i[new create]
+    require_unauthenticated_access only: %i[new create]
     rate_limit to: 10, within: 3.minutes, only: :create, with: -> { render_rejection :too_many_requests }
 
     before_action :ensure_user_exists, only: :new

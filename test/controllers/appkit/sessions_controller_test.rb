@@ -34,6 +34,14 @@ module Appkit
       assert cookies[:session_token].blank?
     end
 
+    test "visiting the login page while already signed in redirects home" do
+      sign_in_as users(:alice)
+
+      get new_session_url
+
+      assert_redirected_to root_url
+    end
+
     # Regression test: the login layout is also used for the session-transfer
     # (magic-link) page, whose auto-submit Stimulus controller has no JS
     # runtime to execute in if this tag is missing — it silently strands
