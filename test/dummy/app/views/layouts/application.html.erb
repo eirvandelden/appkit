@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= Appkit.config.app_name.call %></title>
+  </head>
+  <body>
+    <%= render "appkit/shared/nav", home_path: root_path %>
+    <main><%= yield %></main>
+  </body>
+</html>

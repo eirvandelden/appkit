@@ -1,5 +1,5 @@
 class HomeController < ApplicationController
   def index
-    render plain: "signed in as #{Current.user.email} via session #{Current.session.id}"
+    render plain: "signed in as #{Current.user.email} via session #{Current.session.id}", layout: true
   end
 end
