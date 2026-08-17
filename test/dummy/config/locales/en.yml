@@ -1,0 +1,6 @@
+en:
+  navigation:
+    home: "Home"
+    preferences: "Preferences"
+  common:
+    logout: "Logout"

@@ -4,6 +4,6 @@ class AdminController < ApplicationController
   before_action :ensure_can_administer
 
   def index
-    head :ok
+    render plain: "admin area", layout: true
   end
 end
