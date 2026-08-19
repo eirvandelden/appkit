@@ -6,7 +6,7 @@ class NavCurrentPageTest < ActionDispatch::IntegrationTest
 
     get root_url
 
-    assert_select "a[href='#{root_path}'][aria-current='page']", text: I18n.t("navigation.home")
+    assert_select "a[href='#{root_path}'][aria-current='page']", text: I18n.t("appkit.navigation.home")
   end
 
   test "the home link is not marked as the current page when visiting another page" do

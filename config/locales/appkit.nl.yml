@@ -33,6 +33,10 @@ nl:
         success: "Voorkeuren succesvol bijgewerkt."
     shared:
       skip_to_main_content: "Ga naar inhoud"
+    navigation:
+      home: "Home"
+      preferences: "Voorkeuren"
+      logout: "Uitloggen"
     themes:
       color_schemes:
         system: "Systeem"
