@@ -2,6 +2,7 @@
   <h2><%= Appkit.config.app_name.call %></h2>
   <ul>
     <li><%= link_to t("navigation.home"), home_path, "aria-current": (current_page?(home_path) ? "page" : nil) %></li>
+    <%= yield %>
     <li><%= link_to t("navigation.preferences"), edit_preferences_path %></li>
     <li><%= button_to t("common.logout"), session_path, method: :delete %></li>
   </ul>
