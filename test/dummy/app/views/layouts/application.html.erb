@@ -4,7 +4,8 @@
     <title><%= Appkit.config.app_name.call %></title>
   </head>
   <body>
-    <%= render "appkit/shared/nav", home_path: root_path %>
+    <%= render layout: "appkit/shared/nav", locals: { home_path: root_path } do %>
+    <% end %>
     <main><%= yield %></main>
   </body>
 </html>
