@@ -8,10 +8,10 @@ module Appkit
       end
 
       assert_select "nav ul" do
-        assert_select "li:nth-child(1) a[href='/somewhere']", text: I18n.t("navigation.home")
+        assert_select "li:nth-child(1) a[href='/somewhere']", text: I18n.t("appkit.navigation.home")
         assert_select "li:nth-child(2)", text: "App link"
-        assert_select "li:nth-child(3) a[href='#{edit_preferences_path}']", text: I18n.t("navigation.preferences")
-        assert_select "li:nth-child(4) form[action='#{session_path}'] button", text: I18n.t("common.logout")
+        assert_select "li:nth-child(3) a[href='#{edit_preferences_path}']", text: I18n.t("appkit.navigation.preferences")
+        assert_select "li:nth-child(4) form[action='#{session_path}'] button", text: I18n.t("appkit.navigation.logout")
       end
     end
 

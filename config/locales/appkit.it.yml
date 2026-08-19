@@ -33,6 +33,10 @@ it:
         success: "Preferenze aggiornate con successo."
     shared:
       skip_to_main_content: "Vai al contenuto principale"
+    navigation:
+      home: "Home"
+      preferences: "Preferenze"
+      logout: "Esci"
     themes:
       color_schemes:
         system: "Sistema"

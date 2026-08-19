@@ -33,6 +33,10 @@ en:
         success: "Preferences updated successfully."
     shared:
       skip_to_main_content: "Skip to main content"
+    navigation:
+      home: "Home"
+      preferences: "Preferences"
+      logout: "Logout"
     themes:
       color_schemes:
         system: "System"
