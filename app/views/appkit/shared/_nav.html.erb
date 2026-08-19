@@ -1,4 +1,4 @@
-<nav data-controller="nav" data-action="click->nav#click">
+<nav>
   <h2><%= Appkit.config.app_name.call %></h2>
   <ul>
     <li><%= link_to t("navigation.home"), home_path, "aria-current": (current_page?(home_path) ? "page" : nil) %></li>
