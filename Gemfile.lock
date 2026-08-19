@@ -1,14 +1,14 @@
 GIT
   remote: https://github.com/eirvandelden/mvpa.css.git
-  revision: e39a6280aa3dc4c51ed29f9e95b4f80e11e3b4ea
+  revision: 3122fd2094698431bea7f0b734a96243a7083a61
   specs:
-    mvpa-css (0.1.0.pre.git.e39a628)
+    mvpa-css (0.1.0.pre.git.3122fd2)
       railties (>= 6.0)
 
 PATH
   remote: .
   specs:
-    appkit (0.1.0.pre.git.23aee27)
+    appkit (0.1.0.pre.git.79947bd)
       importmap-rails (>= 1.0)
       okcomputer (~> 1.19)
       railties (>= 8.0)
@@ -359,7 +359,7 @@ CHECKSUMS
   activerecord (8.1.3.1) sha256=0a2fb6c28f4938f6b013a3a549bec0a7e37d535f3dc8990e804bcc3258c0403b
   activestorage (8.1.3.1) sha256=f555254f387b1cffa499d2fd3115d12635eadc5b15206a8534316a67036163ef
   activesupport (8.1.3.1) sha256=85458765f25ea48b9019c46b6bb3fa5683197bf4280d9f06710a6e8d7a831376
-  appkit (0.1.0.pre.git.23aee27)
+  appkit (0.1.0.pre.git.79947bd)
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   bcrypt (3.1.22) sha256=1f0072e88c2d705d94aff7f2c5cb02eb3f1ec4b8368671e19112527489f29032
@@ -395,7 +395,7 @@ CHECKSUMS
   marcel (1.2.1) sha256=1678e9360e32f9eafa917c80029e2f6d10b2715c66a4b87b6d0da9b9cd1f859f
   mini_mime (1.1.5) sha256=8681b7e2e4215f2a159f9400b5816d85e9d8c6c6b491e96a12797e798f8bccef
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
-  mvpa-css (0.1.0.pre.git.e39a628)
+  mvpa-css (0.1.0.pre.git.3122fd2)
   net-imap (0.6.6) sha256=96aa4ee50df3060203e649efc341f53480b791d49e150f2fdebf68beb141a8df
   net-pop (0.1.2) sha256=848b4e982013c15b2f0382792268763b748cce91c9e91e36b0f27ed26420dff3
   net-protocol (0.2.2) sha256=aa73e0cba6a125369de9837b8d8ef82a61849360eba0521900e2c3713aa162a8
