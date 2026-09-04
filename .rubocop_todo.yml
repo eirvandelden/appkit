@@ -1,0 +1,7 @@
+---
+# Appkit::SessionExpiryJob is part of this engine's published surface: four apps schedule it by
+# name in their own config/recurring.yml. Renaming it to satisfy the verb-first rule would stop
+# the job running in every one of them. Jobs added from here on are still held to the rule.
+Obsession/Rails/ServiceName:
+  Exclude:
+    - "app/jobs/appkit/session_expiry_job.rb"
