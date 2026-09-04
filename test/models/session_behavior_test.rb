@@ -4,9 +4,9 @@ class SessionBehaviorTest < ActiveSupport::TestCase
   test "start! creates a session with a unique token and last_active_at set" do
     session = users(:alice).sessions.start!(user_agent: "Mozilla/5.0", ip_address: "127.0.0.1")
 
-    assert session.persisted?
-    assert session.token.present?
-    assert session.last_active_at.present?
+    assert_predicate session, :persisted?
+    assert_predicate session.token, :present?
+    assert_predicate session.last_active_at, :present?
   end
 
   test "token must be unique" do
@@ -22,7 +22,7 @@ class SessionBehaviorTest < ActiveSupport::TestCase
 
     session.valid?
 
-    assert session.last_active_at.present?
+    assert_predicate session.last_active_at, :present?
   end
 
   test "resume refreshes last_active_at once the activity refresh rate has elapsed" do
@@ -31,7 +31,7 @@ class SessionBehaviorTest < ActiveSupport::TestCase
 
     session.resume(user_agent: "Mozilla/5.0 (Updated)", ip_address: "10.0.0.1")
 
-    assert session.last_active_at > previous_last_active_at
+    assert_operator session.last_active_at, :>, previous_last_active_at
     assert_equal "10.0.0.1", session.ip_address
   end
 
@@ -61,7 +61,7 @@ class SessionBehaviorTest < ActiveSupport::TestCase
 
     Session.expire_stale!
 
-    assert fresh.reload.persisted?
+    assert_predicate fresh.reload, :persisted?
   end
 
   test "expire_stale! respects a configured session_expiry override" do

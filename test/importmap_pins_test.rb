@@ -11,7 +11,8 @@ class ImportmapPinsTest < ActiveSupport::TestCase
 
   test "every file under app/javascript/appkit/ has a matching importmap pin" do
     js_root = Appkit::Engine.root.join("app/javascript/appkit")
-    files = Dir.glob(js_root.join("**/*.js")).map { |path| "appkit/#{Pathname.new(path).relative_path_from(js_root)}".delete_suffix(".js") }
+    files = Dir.glob(js_root.join("**/*.js")).map { |path|
+ "appkit/#{Pathname.new(path).relative_path_from(js_root)}".delete_suffix(".js") }
     importmap_source = Appkit::Engine.root.join("config/importmap.rb").read
     pinned = importmap_source.scan(/pin\s+"([^"]+)"/).flatten
 

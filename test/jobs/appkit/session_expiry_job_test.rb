@@ -17,7 +17,7 @@ module Appkit
 
       SessionExpiryJob.perform_now
 
-      assert fresh.reload.persisted?
+      assert_predicate fresh.reload, :persisted?
     end
   end
 end

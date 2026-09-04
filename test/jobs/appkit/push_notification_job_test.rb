@@ -37,6 +37,7 @@ module Appkit
       PushNotificationJob.perform_now(subscription, { title: "Hello", body: "World" })
 
       call = gateway.calls.sole
+
       assert_equal "https://push.example.com/abc", call[:endpoint]
       assert_equal "p256dh-key", call[:p256dh]
       assert_equal "auth-key", call[:auth]

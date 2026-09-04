@@ -9,6 +9,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
 
   test "return_to_after_authenticating round-trips to the originally requested page" do
     get root_url
+
     assert_redirected_to new_session_url
 
     post session_url, params: { email_address: users(:alice).email, password: "password" }
@@ -23,7 +24,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     delete session_url
 
     assert_not Session.exists?(session.id)
-    assert cookies[:session_token].blank?
+    assert_predicate cookies[:session_token], :blank?
   end
 
   test "authenticated_as sets Current.session, not just Current.user" do
@@ -53,13 +54,16 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     def assert_session_cookie_expires_far_in_future
       set_cookie_headers = Array(response.headers["Set-Cookie"])
       set_cookie = set_cookie_headers.find { |header| header.include?("session_token") }
+
       assert set_cookie, "Expected a Set-Cookie header for session_token"
 
       expires_match = set_cookie.match(/expires=([^;]+)/i)
+
       assert expires_match, "Expected Set-Cookie to include expires="
 
       expires_at = Time.parse(expires_match[1])
-      assert expires_at > 6.months.from_now,
-        "Expected cookie to expire more than 6 months from now, got #{expires_at}"
+
+      assert_operator expires_at, :>, 6.months.from_now,
+"Expected cookie to expire more than 6 months from now, got #{expires_at}"
     end
 end

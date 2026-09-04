@@ -21,7 +21,7 @@ module Appkit
         end
 
         assert_redirected_to root_url
-        assert cookies[:session_token].present?
+        assert_predicate cookies[:session_token], :present?
       end
 
       test "update responds with bad_request for an expired or invalid transfer id" do

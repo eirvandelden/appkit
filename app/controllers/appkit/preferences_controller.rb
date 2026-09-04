@@ -25,12 +25,12 @@ module Appkit
         params.require(:user).permit(*permitted)
       end
 
-      def timezone_attribute_shown?
-        Appkit.config.timezone_attribute && Current.user.respond_to?(Appkit.config.timezone_attribute)
-      end
-
       def locale_attribute_shown?
         Appkit.config.locale_attribute && Current.user.respond_to?(Appkit.config.locale_attribute)
+      end
+
+      def timezone_attribute_shown?
+        Appkit.config.timezone_attribute && Current.user.respond_to?(Appkit.config.timezone_attribute)
       end
   end
 end

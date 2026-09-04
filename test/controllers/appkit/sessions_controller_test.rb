@@ -31,7 +31,7 @@ module Appkit
 
       assert_redirected_to root_url
       assert_not Session.exists?(session.id)
-      assert cookies[:session_token].blank?
+      assert_predicate cookies[:session_token], :blank?
     end
 
     test "visiting the login page while already signed in redirects home" do

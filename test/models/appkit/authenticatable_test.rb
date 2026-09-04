@@ -8,7 +8,7 @@ module Appkit
 
       user.deactivate!
 
-      assert user.sessions.reload.empty?
+      assert_empty user.sessions.reload
       assert_not user.active?
       assert_not_equal original_email, user.reload.email
       assert_match(/-deactivated-.+@example\.com\z/, user.email)

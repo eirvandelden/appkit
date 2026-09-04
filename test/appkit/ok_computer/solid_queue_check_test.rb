@@ -13,7 +13,7 @@ module Appkit
         check = SolidQueueCheck.new
         check.run
 
-        assert check.success?
+        assert_predicate check, :success?
       end
 
       test "fails with a mark_failure message when no process has a recent heartbeat" do

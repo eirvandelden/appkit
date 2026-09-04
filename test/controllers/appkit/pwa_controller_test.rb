@@ -26,16 +26,20 @@ module Appkit
       assert_equal Appkit.config.icons.size, icons.size
 
       svg_icon = icons.find { |icon| icon["src"] == "/icon.svg" }
+
       assert_nil svg_icon["sizes"]
 
       icon_192 = icons.find { |icon| icon["src"] == "/icon-192.png" }
+
       assert_equal "192x192", icon_192["sizes"]
 
       icon_512 = icons.find { |icon| icon["src"] == "/icon-512.png" }
+
       assert_equal "512x512", icon_512["sizes"]
       assert_nil icon_512["purpose"]
 
       mask_icon = icons.find { |icon| icon["src"] == "/icon-mask-512.png" }
+
       assert_equal "512x512", mask_icon["sizes"]
       assert_equal "maskable", mask_icon["purpose"]
     end
