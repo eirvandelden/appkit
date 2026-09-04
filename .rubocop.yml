@@ -14,3 +14,9 @@ AllCops:
   Exclude:
     - "test/dummy/db/schema.rb"
     - "tmp/**/*"
+
+# test/dummy is a generated Rails application, not a test helper. Its boot file requires
+# bundler/setup because that is how a Rails app boots.
+Packaging/BundlerSetupInTests:
+  Exclude:
+    - "test/dummy/config/boot.rb"
