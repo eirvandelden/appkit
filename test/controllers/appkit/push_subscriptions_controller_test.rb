@@ -14,6 +14,7 @@ module Appkit
 
       assert_response :no_content
       subscription = PushSubscription.last
+
       assert_equal users(:alice), subscription.user
       assert_equal "p256dh-key", subscription.p256dh_key
       assert_equal "auth-key", subscription.auth_key

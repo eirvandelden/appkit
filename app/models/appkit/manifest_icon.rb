@@ -24,16 +24,16 @@ module Appkit
         "#{dimension}x#{dimension}" if dimension
       end
 
+      def svg?
+        File.extname(path) == ".svg"
+      end
+
       def purpose
         "maskable" if maskable?
       end
 
       def maskable?
         path.include?("mask")
-      end
-
-      def svg?
-        File.extname(path) == ".svg"
       end
   end
 end

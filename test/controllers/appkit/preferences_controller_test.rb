@@ -19,6 +19,7 @@ module Appkit
 
       assert_redirected_to edit_preferences_url
       follow_redirect!
+
       assert_equal I18n.t("appkit.preferences.update.success"), flash[:notice]
 
       users(:alice).reload.tap do |user|
@@ -41,11 +42,13 @@ module Appkit
       sign_in_as users(:alice)
 
       get edit_preferences_url
+
       assert_select "select#user_locale"
 
       patch preferences_url, params: {
         user: { locale: "nl", color_scheme: "dark", light_theme: "solunized-white", dark_theme: "solunized-black" }
       }
+
       assert_redirected_to edit_preferences_url
 
       assert_equal "nl", users(:alice).reload.locale
@@ -56,6 +59,7 @@ module Appkit
         sign_in_as users(:alice)
 
         get edit_preferences_url
+
         assert_select "select#user_locale", count: 0
         assert_select "select#user_language", count: 0
       end
@@ -76,9 +80,11 @@ module Appkit
         sign_in_as users(:alice)
 
         get edit_preferences_url
+
         assert_select "select#user_timezone"
 
         patch preferences_url, params: { user: { timezone: "Amsterdam" } }
+
         assert_redirected_to edit_preferences_url
       end
     end
@@ -88,10 +94,12 @@ module Appkit
         sign_in_as users(:alice)
 
         get edit_preferences_url
+
         assert_select "select#user_tz"
         assert_select "select#user_timezone", count: 0
 
         patch preferences_url, params: { user: { tz: "Amsterdam" } }
+
         assert_redirected_to edit_preferences_url
 
         assert_equal "Amsterdam", users(:alice).reload.tz

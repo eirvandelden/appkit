@@ -27,7 +27,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "bcrypt"
   spec.add_development_dependency "propshaft"
-  spec.add_development_dependency "rubocop-rails-omakase"
   spec.add_development_dependency "brakeman"
   spec.add_development_dependency "bundler-audit"
   spec.add_development_dependency "solid_queue"
