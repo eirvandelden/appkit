@@ -12,8 +12,6 @@ pre-commit:
       skip: true
     eslint:
       skip: true
-    spelling:
-      skip: true
 
 pre-push:
   commands:
