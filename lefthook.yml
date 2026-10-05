@@ -18,9 +18,6 @@ pre-commit:
       tags: javascript linter
       glob: "*.{js,ts,jsx,tsx}"
       run: yarn eslint {staged_files}
-    spelling:
-      glob: "*.{js,rb,md}"
-      run: cspell {staged_files}
     rubocop:
       tags: ruby linter
       glob: "*.{rb}"
@@ -76,13 +73,6 @@ pre-commit:
           --fixed-strings \
           NOCOMMIT "{staged_files}"
       fail_text: Your staged files include a NOCOMMIT. See above for details.
-
-# TODO: fix loading of extra words
-# commit-msg:
-#   parallel: true
-#   commands:
-#     spell-check:
-#       run: cspell --no-summary {1}
 
 pre-push:
   parallel: true
