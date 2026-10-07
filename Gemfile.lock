@@ -23,13 +23,13 @@ GIT
 PATH
   remote: .
   specs:
-    appkit (0.1.0.pre.git.418ba2d)
-      importmap-rails (>= 1.0)
-      okcomputer (~> 1.19)
-      railties (>= 8.0)
-      rqrcode (~> 3.0)
-      turbo-rails (>= 2.0)
-      web-push (~> 3.0)
+    appkit (0.1.0.pre.git.0d25b88)
+      importmap-rails (~> 2.2)
+      okcomputer (~> 1.20)
+      railties (~> 8.1)
+      rqrcode (~> 3.2)
+      turbo-rails (~> 2.0)
+      web-push (~> 3.1)
 
 GEM
   remote: https://gem.coop/
@@ -193,7 +193,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.4-x86_64-linux-musl)
       racc (~> 1.4)
-    okcomputer (1.19.2)
+    okcomputer (1.20.0)
       benchmark
     openssl (4.0.2)
     parallel (2.1.0)
@@ -375,7 +375,7 @@ DEPENDENCIES
   lefthook
   mvpa-css!
   propshaft
-  rails (>= 8.0)
+  rails (~> 8.1)
   rubocop-eirvandelden!
   solid_cache
   solid_queue
@@ -394,7 +394,7 @@ CHECKSUMS
   activerecord (8.1.4) sha256=3b4957ea7f246c9231bd7faa909312eac03a9101aaf87977b6c52733ff00b04f
   activestorage (8.1.4) sha256=f4956f3ec9ee63e5e0b332b57c877cb627f82b56f4cc902279310d2aa285c7a8
   activesupport (8.1.4) sha256=891dd3fe43c4fc8391934b237b1189bb1f661c932a84a840043db9d46a4e80df
-  appkit (0.1.0.pre.git.418ba2d)
+  appkit (0.1.0.pre.git.0d25b88)
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   bcrypt (3.1.22) sha256=1f0072e88c2d705d94aff7f2c5cb02eb3f1ec4b8368671e19112527489f29032
@@ -444,7 +444,7 @@ CHECKSUMS
   nokogiri (1.19.4-x86_64-darwin) sha256=7fd17057d3e1f00e9954a74b3cd76595d3d4a5ef233b7ed9599047c204f70551
   nokogiri (1.19.4-x86_64-linux-gnu) sha256=379fae440b28915e3f19d752ce2dcf8465ed2b2fbefd2a7ca0dd497bc981a06a
   nokogiri (1.19.4-x86_64-linux-musl) sha256=17dfb7c1fa194ae02fbf7c51a7afc8d278045ab3fdacfd86f91d02d7b274470b
-  okcomputer (1.19.2) sha256=d069aedf1e31b8ebe7e1fdf9e327dee158ea49b9fbdebebc2f1bed4690cb7a6d
+  okcomputer (1.20.0) sha256=cc0cc3bcd3abea12705493bc557d7002f090b9fe189cf78072fe0c3c60c6a223
   openssl (4.0.2) sha256=1037ad2868ae58df9ad917891c0c0f9815a1172f6846d4bcdd508e4c2ee747c2
   parallel (2.1.0) sha256=b35258865c2e31134c5ecb708beaaf6772adf9d5efae28e93e99260877b09356
   parser (3.3.12.0) sha256=21a6d7f755d5a24dfbdc6e6b772e4e879a52e7631a88bc5a3a134606052c9828
