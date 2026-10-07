@@ -37,12 +37,11 @@ pre-push:
       skip: true
     rspec:
       skip: true
-    # There is no bin/brakeman binstub at gem root, and CI already runs both
-    # scans correctly (dummy-app + gem-root scans, proper --ignore-config
-    # flags) — a bare pre-push run here would just duplicate CI without that
-    # wiring and block on already-handled false positives. CI also runs
-    # bundler-audit.
+    # No bin/brakeman binstub at gem root, and CI already runs it correctly
+    # (dummy-app + gem-root scans, proper --ignore-config flags) — a bare
+    # pre-push run here would just duplicate CI without that wiring and block
+    # on already-handled false positives.
     brakeman:
       skip: true
     bundle-audit:
-      skip: true
+      glob: "{Gemfile,appkit.gemspec}"
