@@ -40,3 +40,27 @@ Round 1 fixes: all four landed as their `→` notes say. `lefthook run --help` (
 Security: no new finding. `spinel-coop/setup-rv@main` stays unpinned; that predates this branch.
 
 Checks run on `4c57978`: `bundle exec rake test` 105 runs, 0 failures. RuboCop: 83 files, no offenses. Both Brakeman scans from `ci.yml`: no warnings. `bin/bundler-audit`: no vulnerabilities (local advisory database, not updated). yamllint: warnings only, three of them new (see the last nit).
+
+## Round 3 — 2026-10-08T08:12Z — 54282c7
+
+- [ ] Nit: The plan does not record the `no_auto_install: true` key that `29c9711` added to `lefthook-local.yml`. The "Files that change" entry and the Design decisions leave it out. Line 77 still names the `--no-auto-install` flag as the only guard against a sync into the global `core.hooksPath`. Add the key to line 44 and add one Design decisions line, so the plan describes the config that ships. — `docs/changes/stable-gem-version/plan.md:44` →
+
+Compliance, acceptance criteria from `intent.md`:
+
+- After a commit, `bundle install` leaves `git status` clean → `test/lockfile_test.rb` "Gemfile.lock is not tracked by git" and "git ignores Gemfile.lock". Both pass.
+- In a checkout of commit `abc1234`, the version is `0.1.0.pre.git.abc1234` → `test/appkit_test.rb` "version names the checked-out commit". Passes. The test and `lib/appkit/version.rb` both call `git rev-parse --short HEAD` on the same repository, so the abbreviation length agrees.
+- On a push, CI installs gems and runs tests, RuboCop, Brakeman and bundler-audit → pending. `origin/stable-gem-version` is still at `947b1b7`, so the 15 commits after it have not run in CI. No pull request exists yet (plan step 10). The new `gems` step ran locally with `bash -eo pipefail` against a fresh lockfile. It wrote `hash`, `cache-prefix` (`gems-Linux-X64-ruby-4.0.5-`) and `cache-key` to `$GITHUB_OUTPUT`. The `grep -v` removes exactly the two lines that name the commit. The restore-key prefix matches setup-rv's own `action.yml`.
+- After a fresh clone, the lefthook bundle step installs gems and `bin/bundler-audit` runs → verified in round 2. `lefthook dump` on `54282c7` still shows the merged `migrations.bundle` (`bundle install`, glob `{Gemfile,appkit.gemspec}`) and `pre-push.bundle-audit` (`bin/bundler-audit --config config/bundler-audit.yml`, no skip).
+- The README says appkit does not commit its `Gemfile.lock`, and why → `README.md` `## Development`. Unchanged since round 2.
+
+Proof list: every test named in `plan.md` exists. No existing test was weakened, skipped or deleted.
+
+Round 2 fixes: all three landed as their `→` notes say. The 130-character cache-key lines are gone. yamllint now reports only the earlier `document-start` warning and the RuboCop cache `key:` line at `.github/workflows/ci.yml:107`; both lines are on `main` too.
+
+`no_auto_install: true` works. `lefthook dump` shows it at the top level of the merged config. Two scratch clones got their own `core.hooksPath`, a stale `lefthook.checksum` and copies of the real hook files. In the clone without the key, `lefthook run pre-commit` tried a sync ("Skipping hook sync"). In the clone with the key, it did not try. The global hook files did not change during this review.
+
+Outside the diff, still open: `~/.config/git/hooks/{pre-commit,pre-push,post-merge}` are still lefthook-generated files, not the stow symlinks. They were written again at 10:03:25 CEST, 10 seconds before `29c9711` was committed. The two commits after it did not rewrite them. Until Etienne restores the symlinks (rule 12), repos without their own `lefthook.yml` run no hooks, which includes `no-push-to-main`.
+
+Security: no new finding. `permissions: contents: read` is in place. The `gems` step gets the Ruby version through `env`, not through `${{ }}` inside `run`, so the step has no expression injection.
+
+Checks run on `54282c7`: `bundle exec rake test` 105 runs, 0 failures. RuboCop: 83 files, no offenses. Both Brakeman scans from `ci.yml`: no warnings. `bin/bundler-audit check`: no vulnerabilities (local advisory database, not updated). yamllint: warnings only, none new.
