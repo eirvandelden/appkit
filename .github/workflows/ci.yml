@@ -25,17 +25,24 @@ jobs:
 
       - name: Resolve gems
         id: gems
+        env:
+          RUBY_RELEASE: ${{ steps.ruby.outputs.ruby-version }}
         run: |
           bundle lock
-          echo "hash=$(grep -v '^ *appkit (' Gemfile.lock | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          hash=$(grep -v '^ *appkit (' Gemfile.lock | sha256sum | cut -d' ' -f1)
+          prefix="gems-$RUNNER_OS-$RUNNER_ARCH-ruby-$RUBY_RELEASE-"
+          {
+            echo "hash=$hash"
+            echo "cache-prefix=$prefix"
+            echo "cache-key=$prefix$hash"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Cache gems
         uses: actions/cache@v6
         with:
           path: vendor/bundle
-          key: gems-${{ runner.os }}-${{ runner.arch }}-ruby-${{ steps.ruby.outputs.ruby-version }}-${{ steps.gems.outputs.hash }}
-          restore-keys: |
-            gems-${{ runner.os }}-${{ runner.arch }}-ruby-${{ steps.ruby.outputs.ruby-version }}-
+          key: ${{ steps.gems.outputs.cache-key }}
+          restore-keys: ${{ steps.gems.outputs.cache-prefix }}
 
       - name: Install gems
         run: |
@@ -67,17 +74,24 @@ jobs:
 
       - name: Resolve gems
         id: gems
+        env:
+          RUBY_RELEASE: ${{ steps.ruby.outputs.ruby-version }}
         run: |
           bundle lock
-          echo "hash=$(grep -v '^ *appkit (' Gemfile.lock | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          hash=$(grep -v '^ *appkit (' Gemfile.lock | sha256sum | cut -d' ' -f1)
+          prefix="gems-$RUNNER_OS-$RUNNER_ARCH-ruby-$RUBY_RELEASE-"
+          {
+            echo "hash=$hash"
+            echo "cache-prefix=$prefix"
+            echo "cache-key=$prefix$hash"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Cache gems
         uses: actions/cache@v6
         with:
           path: vendor/bundle
-          key: gems-${{ runner.os }}-${{ runner.arch }}-ruby-${{ steps.ruby.outputs.ruby-version }}-${{ steps.gems.outputs.hash }}
-          restore-keys: |
-            gems-${{ runner.os }}-${{ runner.arch }}-ruby-${{ steps.ruby.outputs.ruby-version }}-
+          key: ${{ steps.gems.outputs.cache-key }}
+          restore-keys: ${{ steps.gems.outputs.cache-prefix }}
 
       - name: Install gems
         run: |
@@ -112,17 +126,24 @@ jobs:
 
       - name: Resolve gems
         id: gems
+        env:
+          RUBY_RELEASE: ${{ steps.ruby.outputs.ruby-version }}
         run: |
           bundle lock
-          echo "hash=$(grep -v '^ *appkit (' Gemfile.lock | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          hash=$(grep -v '^ *appkit (' Gemfile.lock | sha256sum | cut -d' ' -f1)
+          prefix="gems-$RUNNER_OS-$RUNNER_ARCH-ruby-$RUBY_RELEASE-"
+          {
+            echo "hash=$hash"
+            echo "cache-prefix=$prefix"
+            echo "cache-key=$prefix$hash"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Cache gems
         uses: actions/cache@v6
         with:
           path: vendor/bundle
-          key: gems-${{ runner.os }}-${{ runner.arch }}-ruby-${{ steps.ruby.outputs.ruby-version }}-${{ steps.gems.outputs.hash }}
-          restore-keys: |
-            gems-${{ runner.os }}-${{ runner.arch }}-ruby-${{ steps.ruby.outputs.ruby-version }}-
+          key: ${{ steps.gems.outputs.cache-key }}
+          restore-keys: ${{ steps.gems.outputs.cache-prefix }}
 
       - name: Install gems
         run: |
