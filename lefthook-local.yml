@@ -2,6 +2,9 @@
 # Local lefthook configuration for the appkit gem
 # Extends the global lefthook.yml from dotfiles
 
+# core.hooksPath is the global hooks directory; syncing would replace its stowed hooks.
+no_auto_install: true
+
 # appkit does not commit Gemfile.lock, so a stale local one must be completed
 # before it is installed: bundle lock keeps locked versions, rv ci installs them.
 migrations:
