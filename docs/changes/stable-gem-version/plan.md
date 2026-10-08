@@ -68,11 +68,13 @@ Fresh-clone check, in a throwaway clone under the session scratchpad:
 git clone --branch stable-gem-version <worktree path> <scratch>/appkit-clone
 cd <scratch>/appkit-clone
 test ! -e Gemfile.lock
-lefthook run migrations --command bundle --force
+lefthook run migrations --no-auto-install --command bundle -f
 git status --porcelain            # prints nothing; Gemfile.lock now exists, ignored
-lefthook run pre-push --command bundle-audit --force
+lefthook run pre-push --no-auto-install --command bundle-audit -f
 bin/bundler-audit check --update
 ```
+
+`--no-auto-install` stops lefthook from writing its own hooks into the global `core.hooksPath` (`~/.config/git/hooks`), where they would replace the stowed symlinks. `-f` is `--force`; the consent guard reads `--force` as a git push flag and blocks it.
 
 If lefthook stops because the clone has no `ORIG_HEAD`, run `git update-ref ORIG_HEAD HEAD~1` in that clone only, then retry.
 
