@@ -18,3 +18,25 @@ Compliance, acceptance criteria from `intent.md`:
 Proof list: every test named in `plan.md` exists. No existing test was weakened, skipped or deleted: "version is present" became a stricter assertion.
 
 Checks run on `e39d8c1`: `bundle exec rake test` 105 runs, 0 failures. The two changed test files pass on their own (`ruby -Itest`). `bin/rails test <file>` fails at the engine root with `cannot load such file -- test_helper`; this predates the branch. RuboCop: 83 files, no offenses. Both Brakeman scans from `ci.yml`: no warnings. `bin/bundler-audit`: no vulnerabilities (local advisory database, not updated). yamllint: warnings only. Three of them are the new 130-character cache-key lines.
+
+## Round 2 — 2026-10-08T08:01Z — 4c57978
+
+- [ ] Important: The global hooks `~/.config/git/hooks/{pre-commit,pre-push,post-merge}` are still lefthook-generated files, not the stow symlinks. Round 1's finding was closed by a plan text fix only. The hooks were re-synced again at 2026-10-08 09:53 CEST, the minute `fa5675a` was committed. The cause: appkit's lefthook config lacks the dotfiles' `no_auto_install: true`. So any `lefthook run` in appkit re-syncs the global hooks. That includes the generated hooks themselves and the nested `lefthook run migrations` at `lefthook.yml:221`. The generated hooks also drop `set_global_config`. So a repo without its own `lefthook.yml` runs no hooks at all. In a scratch repo, `lefthook run pre-commit` printed "No config files … have been found" and exited 0. That silently disables `no-push-to-main`, the linters and Brakeman there. Add `no_auto_install: true` to `lefthook-local.yml`, which this branch already edits. Use a separate branch if that counts as the out-of-scope lefthook sync. Restoring the three symlinks needs Etienne (rule 12). — `lefthook-local.yml:4` →
+- [ ] Nit: Design decisions still say an existing checkout keeps its untracked lockfile and its gem versions. The corrected Risks line says that pulling this change deletes that lockfile. After that pull, the next `bundle install` resolves the newest allowed gems. Align line 19 with line 85. — `docs/changes/stable-gem-version/plan.md:19` →
+- [ ] Nit: The three new cache-key lines are 130 characters long, so yamllint warns `line-length` at lines 36, 78 and 123. Playbook rule 2 says to fix all linter issues in touched files. For example, the `gems` step can write the whole key to `$GITHUB_OUTPUT`. — `.github/workflows/ci.yml:36` →
+
+Compliance, acceptance criteria from `intent.md`:
+
+- After a commit, `bundle install` leaves `git status` clean → `test/lockfile_test.rb` "Gemfile.lock is not tracked by git" and "git ignores Gemfile.lock". Both pass. In a scratch clone of `4c57978`, no `Gemfile.lock` exists after the clone. After the lefthook bundle step, the lockfile exists and `git status --porcelain` is empty.
+- In a checkout of commit `abc1234`, the version is `0.1.0.pre.git.abc1234` → `test/appkit_test.rb` "version names the checked-out commit". Passes.
+- On a push, CI installs gems and runs tests, RuboCop, Brakeman and bundler-audit → pending. `origin/stable-gem-version` is still at `947b1b7`, so the 11 commits after it have not run in CI. No pull request exists yet (plan step 10). In a freshly resolved lockfile, `grep -v '^ *appkit ('` removes exactly the two lines that name the commit (PATH specs and CHECKSUMS). `appkit!` under DEPENDENCIES has no version. `permissions: contents: read` suffices: `actions/cache` uses the runtime token, and `rubocop -f github` writes annotations to stdout.
+- After a fresh clone, the lefthook bundle step installs gems and `bin/bundler-audit` runs → verified by this review. It ran the plan's Verification block in a scratch clone, with `BUNDLE_PATH` in the scratchpad and `git update-ref ORIG_HEAD HEAD~1` as the plan allows. `lefthook run migrations --no-auto-install --command bundle -f` installed the gems and exited 0. `lefthook run pre-push --no-auto-install --command bundle-audit -f` and `bin/bundler-audit check` found no vulnerabilities. The review left out `--update`, to keep the shared advisory database as it is. The global hook files did not change during this check.
+- The README says appkit does not commit its `Gemfile.lock`, and why → `README.md` `## Development`. The round 1 wording fix is in.
+
+Proof list: every test named in `plan.md` exists. No existing test was weakened, skipped or deleted.
+
+Round 1 fixes: all four landed as their `→` notes say. `lefthook run --help` (lefthook 2.2.0) confirms that `-f` is `--force`.
+
+Security: no new finding. `spinel-coop/setup-rv@main` stays unpinned; that predates this branch.
+
+Checks run on `4c57978`: `bundle exec rake test` 105 runs, 0 failures. RuboCop: 83 files, no offenses. Both Brakeman scans from `ci.yml`: no warnings. `bin/bundler-audit`: no vulnerabilities (local advisory database, not updated). yamllint: warnings only, three of them new (see the last nit).
