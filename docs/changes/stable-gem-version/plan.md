@@ -82,7 +82,7 @@ If lefthook stops because the clone has no `ORIG_HEAD`, run `git update-ref ORIG
 
 - A new gem release can turn CI red on an unchanged commit. The intent accepts this.
 - `actions/cache` jobs share one key; the second and third job to finish log "cache already exists". This is harmless; setup-rv behaves the same.
-- Pulling this change into an existing checkout deletes its local `Gemfile.lock`, because git removes a file that stops being tracked. The next `bundle install` (or the post-merge bundle step) writes it again.
+- Pulling this change into an existing checkout deletes its local `Gemfile.lock`, because git removes a file that stops being tracked. The post-merge bundle step does not write it again: that pull changes neither `Gemfile` nor `appkit.gemspec`, so the glob `{Gemfile,appkit.gemspec}` skips the step. The lockfile returns on the next `bundle install` or `bundle exec`.
 - Open branches that still change `Gemfile.lock` get a modify/delete conflict when they rebase onto main. Resolve it with `git rm --cached Gemfile.lock`.
 - `config/bundler-audit.yml` ships in the gem, because `spec.files` takes all of `config/**`. It is inert there, as `config/brakeman.ignore` already is.
 - The pre-push hook runs `bin/bundler-audit` without `--update`. On a machine without the advisory database, bundler-audit downloads it with git inside the hook, where git exports `GIT_DIR`; that download can fail. Run `bin/bundler-audit update` once by hand. This machine has the database.
