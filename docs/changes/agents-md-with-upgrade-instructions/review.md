@@ -30,3 +30,29 @@ Findings:
 ## Round 2 — 2026-10-12T15:16:07Z — cc14877 (codex)
 
 - [x] Important: The diff still holds `docs/changes/agents-md-with-upgrade-instructions/` (intent and plan), which the workflow removes before finishing — `docs/changes/agents-md-with-upgrade-instructions/plan.md:1` → dismissed: the finish step removes the change folder in its own commit before the PR opens; the folder must stay until then for review and closure
+
+## Round 3 — 2026-10-12T15:21:10Z — 627b89f
+
+Checks run at 627b89f: `bundle exec rake test` (103 runs, 286 assertions, 0 failures), `bundle exec ruby -Itest test/models/appkit/push_subscription_test.rb` (3 runs, 0 failures), `bundle exec rubocop` (82 files, no offenses), both Brakeman scans (0 warnings), `bundle exec bundler-audit check --update` (no vulnerabilities). `bin/rails test <file>` fails with `cannot load such file -- test_helper`, as documented. `bin/rails -T` lists no `appkit:*` task. `appkit:vapid_keys` was not run.
+
+Round 1 fixes re-checked: all twelve hold, with three partial exceptions listed below (the `can_administer?` half of the Authorization finding, a new 23-word sentence at line 44, and the rollback side of the `align_sessions_for_appkit` note).
+
+Compliance:
+
+- An agent new to appkit finds what the engine provides, its test and lint commands and its gotchas → `AGENTS.md` What this is, Domain, Commands, Gotchas (`grep -c` prints `4`); every documented command ran as described. Undermined in part by the Domain claim below.
+- A migration that apps must copy gets a `### Upgrading` subsection with the generator command → `AGENTS.md:43` and the example at `AGENTS.md:61-63`.
+- An internal method change adds no `### Upgrading` subsection → `AGENTS.md:51`.
+- Claude Code reads the same content through `CLAUDE.md` → `test -L CLAUDE.md && readlink = AGENTS.md && cmp` passes.
+- Plan `## Proof` names checks, not tests; all four pass. No existing test is weakened, skipped or deleted.
+
+Findings:
+
+- [ ] Important: Domain says "Appkit reaches them through `Appkit.config.user_class`, `session_class` and `user_scope`". That is false in part. `SessionLookup#find_session_by_cookie` calls `Session.find_by` by constant (`app/controllers/concerns/appkit/authentication/session_lookup.rb:6`). `Appkit::Authenticatable` declares `has_many :sessions` (`authenticatable.rb:6`), and `Appkit::PushSubscription` declares `belongs_to :user` (`push_subscription.rb:5`). An app that points `session_class` at another class still gets login lookups against `Session`. Say that the host classes must be named `User` and `Session`, or name these constant references as exceptions, as the `Current` sentence does. — `AGENTS.md:9` →
+- [ ] Nit: Round 1's Authorization fix is partial. That finding asked to name the host's `User#can_administer?`; `AGENTS.md` still does not. `ensure_current_user` also needs a `@user` that responds to `current?` (`app/models/concerns/appkit/authorization.rb:5`, `:9`). — `AGENTS.md:9` →
+- [ ] Nit: Domain omits other host requirements the engine relies on. Engine controllers inherit the host's `::ApplicationController` (there is no `Appkit::ApplicationController`; see `app/controllers/appkit/first_runs_controller.rb:2`), so that class must include `Appkit::Authentication`. The host must define a `root` route (`authentication.rb:46`, `sessions_controller.rb:24`). `Appkit::VersionHeaders` needs `config.app_version` and `config.git_revision` (README "Version headers"). — `AGENTS.md:9` →
+- [ ] Nit: "`bin/rails -T` here lists only the gem's build and release tasks" is not exact. It also lists `test`, `clean`, `clobber`, `install` and `install:local`. "lists only the tasks from the gem `Rakefile`" is exact. — `AGENTS.md:18` →
+- [ ] Nit: The `Appkit.config` item, rewritten in round 1, is one sentence of 23 words, above the 20-word STE limit. — `AGENTS.md:44` →
+- [ ] Nit: "That migration is safe to run" holds for `up` only. The `down` of `align_sessions.rb.tt` removes `last_active_at` (`lib/generators/appkit/install/templates/align_sessions.rb.tt:8-10`), a column that `create_sessions` created and `SessionBehavior` validates. A `db:rollback` past it breaks login in that app. Say that it is safe to run but not safe to roll back. — `AGENTS.md:66` →
+- [ ] Nit: The list of changes that need no app action names "engine CI changes". `rails-ci.yml` also lives in this repo's `.github/workflows/`, so the phrase can be read to cover it. That workflow also needs app-side binstubs beyond its inputs: `bin/brakeman`, `bin/bundler-audit`, `bin/importmap`, `bin/rubocop` (`.github/workflows/rails-ci.yml:26`, `:29`, `:45`, `:72`). The gotcha covers only new inputs. Name `.github/workflows/ci.yml` in the negative list, and extend the gotcha to any new binstub, secret or file the workflow needs from apps. — `AGENTS.md:51`, `AGENTS.md:31` →
+- [ ] Nit: The rule says a change "adds a `### Upgrading` subsection" to its entry. All changes share one `## Unreleased` entry today, so a second change would add a second `### Upgrading` heading. Say: add the steps to the existing `### Upgrading` subsection when the entry already has one. — `AGENTS.md:39` →
+- [ ] Nit: "The engine owns one model, `Appkit::PushSubscription` …, plus `Appkit::FirstRun`, `Appkit::ManifestIcon` and `Appkit::QrCodeLink`" reads as four models after "one". Say "one Active Record model … plus three plain Ruby classes". — `AGENTS.md:9` →
