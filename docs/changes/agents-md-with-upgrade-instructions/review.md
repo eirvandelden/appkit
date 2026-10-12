@@ -56,3 +56,7 @@ Findings:
 - [ ] Nit: The list of changes that need no app action names "engine CI changes". `rails-ci.yml` also lives in this repo's `.github/workflows/`, so the phrase can be read to cover it. That workflow also needs app-side binstubs beyond its inputs: `bin/brakeman`, `bin/bundler-audit`, `bin/importmap`, `bin/rubocop` (`.github/workflows/rails-ci.yml:26`, `:29`, `:45`, `:72`). The gotcha covers only new inputs. Name `.github/workflows/ci.yml` in the negative list, and extend the gotcha to any new binstub, secret or file the workflow needs from apps. — `AGENTS.md:51`, `AGENTS.md:31` →
 - [ ] Nit: The rule says a change "adds a `### Upgrading` subsection" to its entry. All changes share one `## Unreleased` entry today, so a second change would add a second `### Upgrading` heading. Say: add the steps to the existing `### Upgrading` subsection when the entry already has one. — `AGENTS.md:39` →
 - [ ] Nit: "The engine owns one model, `Appkit::PushSubscription` …, plus `Appkit::FirstRun`, `Appkit::ManifestIcon` and `Appkit::QrCodeLink`" reads as four models after "one". Say "one Active Record model … plus three plain Ruby classes". — `AGENTS.md:9` →
+
+## Round 4 — 2026-10-12T15:21:42Z — 627b89f (codex)
+
+No findings. `codex review --base origin/main`: the documentation and symlink match the current code and workflows.
