@@ -26,3 +26,7 @@ Findings:
 - [ ] Nit: Domain omits that host apps must define `Current` with `user` and `session` attributes. The engine references `Current` directly, not through `Appkit.config` (`authentication.rb`, `authorization.rb`, `theme_helper.rb`, two controllers). — `AGENTS.md:9` →
 - [ ] Nit: Some sentences exceed the playbook's 20-word STE limit, which plan step 6 says was checked. Examples: the "It provides …" sentence (about 39 words), the credentials/co-gem/layout item (about 29 words) and the renamed-or-removed item (about 23 words). — `AGENTS.md:5`, `AGENTS.md:45`, `AGENTS.md:46` →
 - [ ] Nit: "Any `bundle exec` or `bin/rails` command rewrites the self-reference" holds only when HEAD's short SHA differs from the locked one. That is true after every commit, so it is close enough, but "whenever HEAD moved since the last lock" is exact. — `AGENTS.md:26` →
+
+## Round 2 — 2026-10-12T15:16:07Z — cc14877 (codex)
+
+- [x] Important: The diff still holds `docs/changes/agents-md-with-upgrade-instructions/` (intent and plan), which the workflow removes before finishing — `docs/changes/agents-md-with-upgrade-instructions/plan.md:1` → dismissed: the finish step removes the change folder in its own commit before the PR opens; the folder must stay until then for review and closure
