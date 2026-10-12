@@ -60,3 +60,23 @@ Findings:
 ## Round 4 — 2026-10-12T15:21:42Z — 627b89f (codex)
 
 No findings. `codex review --base origin/main`: the documentation and symlink match the current code and workflows.
+
+## Round 5 — 2026-10-12T15:26:03Z — 668e53f
+
+Checks run at 668e53f: `bundle exec rake test` (103 runs, 286 assertions, 0 failures), `bundle exec ruby -Itest test/models/appkit/push_subscription_test.rb` (3 runs, 0 failures), `bundle exec rubocop` (82 files, no offenses), both Brakeman scans (0 warnings), `bundle exec bundler-audit check --update` (no vulnerabilities). `bin/rails test <file>` fails with `cannot load such file -- test_helper`, as documented. `bin/rails -T` lists `build`, `build:checksum`, `clean`, `clobber`, `install`, `install:local`, `release` and `test`, all from the gem `Rakefile`. `appkit:vapid_keys` was not run.
+
+Round 3 fixes re-checked against the code: all nine hold. The `rails-ci.yml` fix is partial; see the first nit below. Every other claim in `AGENTS.md` was checked against the named files (configuration, routes, controllers, concerns, jobs, generator and templates, layout, rake task, CI workflows, lefthook files, `.rubocop_todo.yml`, `test/test_helper.rb`, dummy app, README, CHANGELOG, gemspec, Gemfile). No false or unverifiable claim was found.
+
+Compliance:
+
+- An agent new to appkit finds what the engine provides, its test and lint commands and its gotchas → `AGENTS.md` What this is, Domain, Commands, Gotchas (`grep -c` prints `4`). Every documented command behaves as described.
+- A migration that apps must copy gets a `### Upgrading` subsection with the generator command → `AGENTS.md:43` and the example at `AGENTS.md:62-64`.
+- An internal method change adds no `### Upgrading` subsection → `AGENTS.md:52`.
+- Claude Code reads the same content through `CLAUDE.md` → `test -L CLAUDE.md && readlink = AGENTS.md && cmp` passes.
+- Plan `## Proof` names checks, not tests; all four pass. No existing test is weakened, skipped or deleted (the diff adds only `AGENTS.md`, `CLAUDE.md` and the change folder).
+
+Findings:
+
+- [ ] Nit: The `rails-ci.yml` gotcha lists the app binstubs the workflow calls, but the list omits `bin/rails` (`.github/workflows/rails-ci.yml:98`, `:128`), so it reads as complete when it is not. Round 3 also asked to cover any new secret or file the workflow needs from apps; the fix covers only binstubs. A new required secret breaks every app's CI at merge in the same way. — `AGENTS.md:31` →
+- [ ] Nit: Domain lists host requirements but omits `config.app_name`. It defaults to `nil`, and every engine view calls `.call` on it (`app/views/layouts/login.html.erb:4`, `app/views/appkit/sessions/new.html.erb:4`, `app/views/appkit/pwa/manifest.json.erb:2`). So an app must set it to a callable. The README example sets a String (`README.md:102`), which raises `NoMethodError` on the login page. An agent that follows the README hits this. — `AGENTS.md:9` →
+- [ ] Nit: "An app ... finds its new steps with `git diff <old-sha>..<new-sha> -- CHANGELOG.md`" does not say where to run it. The command needs an appkit clone with history; an agent working in a host app has none at hand. Say to run it in an appkit checkout. — `AGENTS.md:39` →
