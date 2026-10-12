@@ -1,0 +1,28 @@
+# Review: agents-md-with-upgrade-instructions
+
+## Round 1 — 2026-10-12T15:15:17Z — cc14877
+
+Checks run at cc14877: `bundle exec rake test` (103 runs, 0 failures), `bundle exec ruby -Itest test/models/appkit/push_subscription_test.rb` (3 runs, 0 failures), `bundle exec rubocop` (no offenses), both Brakeman scans (no warnings), `bundle exec bundler-audit check --update` (no vulnerabilities). `bin/rails test <file>` fails with `cannot load such file -- test_helper`, as documented. `appkit:vapid_keys` was not run.
+
+Compliance:
+
+- An agent new to appkit finds what the engine provides, its test and lint commands and its gotchas → `AGENTS.md` sections What this is, Domain, Commands, Gotchas (`grep -c` prints `4`); commands run green above. Partly undermined by the false claims below.
+- A migration that apps must copy gets a `### Upgrading` subsection with the generator command → `AGENTS.md:42` and the example at `AGENTS.md:59-61`.
+- An internal method change adds no `### Upgrading` subsection → `AGENTS.md:49`.
+- Claude Code reads the same content through `CLAUDE.md` → `test -L CLAUDE.md && readlink = AGENTS.md && cmp` passes.
+- Plan `## Proof` names no tests, only checks; all four checks pass. No existing test is weakened, skipped or deleted (the diff adds only `AGENTS.md` and `CLAUDE.md`).
+
+Findings:
+
+- [ ] Important: `bin/rails appkit:vapid_keys` is listed under appkit's own Commands, but it does not run in this repository. `bin/rails` in the repo root loads the gem `Rakefile`, which defines no Rails app tasks and does not load `lib/tasks`. `bin/rails -T` and `bundle exec rake -T` list no `appkit:*` task, so Rails raises an unrecognized-command error. The task only exists inside a host app. Say that it is a host-app command, or move it out of the appkit Commands list. — `AGENTS.md:18` →
+- [ ] Important: The `lefthook-local.yml` gotcha says "CI is the gate for those", but `.github/workflows/ci.yml` runs no stylelint, browserslist, ERB lint or ESLint. CI gates only the tests, Brakeman and bundler-audit. The CSS, JS and ERB checks run nowhere. — `AGENTS.md:32` →
+- [ ] Important: Domain says host models include `Appkit::Authorization`. It is a controller concern: it defines `ensure_can_administer`/`ensure_current_user` with `head :forbidden`, and the dummy app includes it in `AdminController` (`test/dummy/app/controllers/admin_controller.rb:2`). The file lives in `app/models/concerns/`, which is easy to misread. Move it to the controller list, and name the host's `User#can_administer?` it needs. — `AGENTS.md:9` →
+- [ ] Important: The engine ships the `login` layout itself, and it already renders `javascript_importmap_tags` (`app/views/layouts/login.html.erb:12`, fixed in 29314b7). The gotcha implies apps must add the tag to their login layout, and the upgrade list cites it as an example of an app-side layout requirement. Neither holds: an app only needs it when it overrides that layout. The README wording is ambiguous; `AGENTS.md` repeats it as fact. — `AGENTS.md:25`, `AGENTS.md:46` →
+- [ ] Important: The rule lists "a new required input on `rails-ci.yml`" as something an `### Upgrading` step handles. The gotcha two sections up says apps call that workflow at `@main`, so a new required input breaks every app's CI at merge, before any app upgrades. An upgrade step cannot fix that. The rule should say: add new inputs as optional with a default, or update the callers first. — `AGENTS.md:47` →
+- [ ] Nit: The example's step 1 (`bin/rails generate appkit:install --skip`) also creates a new `align_sessions_for_appkit` migration in any app that first got `create_sessions`, because the sessions table now exists (`install_generator.rb:25-29`). The template is idempotent, so it is harmless, but an agent following the example gets an unexpected migration. Line 33 states the table check without that consequence. — `AGENTS.md:33`, `AGENTS.md:60` →
+- [ ] Nit: The example is introduced as "from the push subscriptions migration", but `CHANGELOG.md` has no push subscriptions entry. The migration is real; the changelog text is constructed. Call it an illustration, to meet the intent's "nothing is invented" constraint. — `AGENTS.md:51` →
+- [ ] Nit: All upgrade steps pile up under one `## Unreleased` entry, and apps pin SHAs. An app on SHA X cannot tell which steps are new to it. One sentence would close the gap: read `git diff <pinned-sha>..<new-sha> -- CHANGELOG.md` for the new steps. — `AGENTS.md:38` →
+- [ ] Nit: The `Appkit.config` item reads "a new, renamed or removed option that an app must set". An app does not set a removed option; it must stop setting it, because `attr_accessor` is gone and the call raises `NoMethodError`. — `AGENTS.md:43` →
+- [ ] Nit: Domain omits that host apps must define `Current` with `user` and `session` attributes. The engine references `Current` directly, not through `Appkit.config` (`authentication.rb`, `authorization.rb`, `theme_helper.rb`, two controllers). — `AGENTS.md:9` →
+- [ ] Nit: Some sentences exceed the playbook's 20-word STE limit, which plan step 6 says was checked. Examples: the "It provides …" sentence (about 39 words), the credentials/co-gem/layout item (about 29 words) and the renamed-or-removed item (about 23 words). — `AGENTS.md:5`, `AGENTS.md:45`, `AGENTS.md:46` →
+- [ ] Nit: "Any `bundle exec` or `bin/rails` command rewrites the self-reference" holds only when HEAD's short SHA differs from the locked one. That is true after every commit, so it is close enough, but "whenever HEAD moved since the last lock" is exact. — `AGENTS.md:26` →
