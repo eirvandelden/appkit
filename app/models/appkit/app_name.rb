@@ -22,7 +22,7 @@ module Appkit
 
       def configured_name
         name = configured.respond_to?(:call) ? configured.call : configured
-        name.to_s.presence
+        name.presence&.to_s
       end
   end
 end

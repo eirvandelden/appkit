@@ -55,6 +55,10 @@ module Appkit
       assert_equal "My Recipe Book", app_name(-> { "" }).to_s
     end
 
+    test "treats a callable returning false as unset" do
+      assert_equal "My Recipe Book", app_name(-> { false }).to_s
+    end
+
     test "returns a string when a callable gives a symbol" do
       assert_equal "Recipes", app_name(-> { :Recipes }).to_s
     end
