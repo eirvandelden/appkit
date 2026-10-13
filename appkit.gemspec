@@ -31,4 +31,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler-audit"
   spec.add_development_dependency "solid_queue"
   spec.add_development_dependency "solid_cache"
+  spec.add_development_dependency "erb_lint"
 end
