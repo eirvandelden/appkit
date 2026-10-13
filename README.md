@@ -44,10 +44,18 @@ gem "appkit", github: "eirvandelden/appkit"
 gem "mvpa-css", github: "eirvandelden/mvpa.css"
 ```
 
-Host apps should add this one-line directive to their own `ApplicationController` — it's not part of the engine itself:
+Then install the gem, copy the migrations, error pages and CI caller, and migrate:
+
+1. Run `bundle install`.
+2. Run `bin/rails generate appkit:install`. It also adds `include Appkit::Authentication` to your `ApplicationController` when it is missing.
+3. Run `bin/rails db:migrate`.
+
+Most engine controllers inherit your `ApplicationController` and call `allow_unauthenticated_access` or `require_unauthenticated_access` as class methods. `Appkit::Authentication` defines both, plus the default `require_authentication` filter, so your `ApplicationController` must include it:
 
 ```ruby
 class ApplicationController < ActionController::Base
+  include Appkit::Authentication
+
   # Only allow modern browsers supporting webp images, web push, badges,
   # import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
