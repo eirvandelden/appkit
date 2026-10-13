@@ -1,6 +1,8 @@
 # Plan: appkit follow-up nits from readme-app-name-callable
 
-From `intent.md` (2026-10-13). Status: accepted.
+From `intent.md` (2026-10-13). Status: draft.
+
+Revision needed: `intent.md` was amended on 2026-10-13 (commit `8c30f85`). Nit 5 now keeps the commit SHA in the gem version, untracks and ignores `Gemfile.lock`, and makes CI (`ci.yml`, `rails-ci.yml`) and the local hooks work without a lockfile, as the accepted plan on branch `stable-gem-version` (`docs/changes/stable-gem-version/plan.md`) describes. Rework nit 5, the `### Changed` CHANGELOG line, the commit order, the lockfile steps and the Proof list to match, and run a new critique round.
 
 ## Context
 
