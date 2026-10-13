@@ -1,5 +1,5 @@
 <nav>
-  <h2><%= Appkit.config.app_name.call %></h2>
+  <h2><%= Appkit.config.app_display_name %></h2>
   <ul>
     <li><%= link_to t("appkit.navigation.home"), root_path, "aria-current": (current_page?(root_path) ? "page" : nil) %></li>
     <%= yield %>

@@ -23,5 +23,9 @@ module Appkit
       # by direct token replay instead of the cookie.
       @session_expiry = 1.year
     end
+
+    def app_display_name
+      AppName.new(app_name).to_s
+    end
   end
 end

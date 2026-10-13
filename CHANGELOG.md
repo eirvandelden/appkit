@@ -17,3 +17,6 @@
   `PreferencesController`/view with an optional `config.timezone_attribute`
   gate, a reusable `_flashes` partial, and `en`/`nl`/`it` locale files
   covering sessions/first_run/preferences (Task 3).
+
+### Fixed
+- `app_name` accepts a string or a callable, as the README shows, instead of crashing the sign-in page, first-run page, nav, login page title and PWA manifest with `NoMethodError`. A blank or unset name falls back to the host application module name, and a top-level `app_name` locale key gives a translated name per locale. The PWA manifest now follows the request locale. To do that, the manifest and the service worker now inherit the host's `ApplicationController`, so every host `before_action` runs on them, including a Rails 8 host's `allow_browser versions: :modern`; check that none of them redirects or blocks these two endpoints. Both endpoints now send `Cache-Control: max-age=0, private, must-revalidate` instead of `no-cache`, so a CDN or proxy no longer caches them.
