@@ -6,7 +6,7 @@ module Appkit
       get manifest_url
 
       assert_response :success
-      assert_equal "no-cache", response.headers["Cache-Control"]
+      assert_equal "max-age=0, private, must-revalidate", response.headers["Cache-Control"]
 
       manifest = JSON.parse(response.body)
 
@@ -26,6 +26,17 @@ module Appkit
       assert_equal "Receptenboek", JSON.parse(response.body)["name"]
     ensure
       I18n.backend.reload!
+    end
+
+    test "PWA responses that carry a session cookie stay private, out of shared caches" do
+      sign_in_as users(:alice)
+
+      [ manifest_url, service_worker_url ].each do |url|
+        get url
+
+        assert_includes response.headers["Set-Cookie"].to_s, "session_token="
+        assert_equal "max-age=0, private, must-revalidate", response.headers["Cache-Control"]
+      end
     end
 
     test "manifest emits an icon entry per configured icon path with inferred sizes" do
@@ -58,7 +69,7 @@ module Appkit
       get service_worker_url
 
       assert_response :success
-      assert_equal "no-cache", response.headers["Cache-Control"]
+      assert_equal "max-age=0, private, must-revalidate", response.headers["Cache-Control"]
       assert_no_match %r{/assets/[\w-]+\.(css|js)}, response.body
     end
 

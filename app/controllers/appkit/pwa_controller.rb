@@ -4,12 +4,12 @@ module Appkit
     skip_forgery_protection
 
     def manifest
-      response.headers["Cache-Control"] = "no-cache"
+      expires_in 0, must_revalidate: true
       render template: "appkit/pwa/manifest", formats: :json, layout: false
     end
 
     def service_worker
-      response.headers["Cache-Control"] = "no-cache"
+      expires_in 0, must_revalidate: true
       render template: "appkit/pwa/service_worker", formats: :js, layout: false,
              content_type: "application/javascript"
     end
