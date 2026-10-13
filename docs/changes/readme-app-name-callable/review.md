@@ -46,3 +46,9 @@ Security: no findings. The HTML views escape the name with `<%= %>`. The manifes
 Compliance: every acceptance criterion maps to the same tests as in round 1. Every test that `plan.md`'s Proof names exists, including the renamed configuration test. No existing test was weakened, skipped or deleted.
 
 - [ ] Nit: The round 1 coercion fix calls `to_s` before `presence`, so `false` is no longer blank. A callable that returns `false`, or `config.app_name = false`, now shows "false" instead of the module name. Before ba45875 it fell back. The intent counts a blank configured name as unset, and `false` is blank in Rails. `name.presence&.to_s` keeps the Symbol fix and the fallback for `false`. — `app/models/appkit/app_name.rb:25` →
+
+## Round 4 — 2026-10-13T08:24Z — 7e0a343 (codex)
+
+`codex review --base origin/main`. Codex ran the full suite: 123 runs, 378 assertions, 0 failures, 0 errors.
+
+No findings.
