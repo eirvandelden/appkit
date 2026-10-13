@@ -9,7 +9,7 @@ module Appkit
     end
 
     def to_s
-      translated || configured_name || host_module_name.titleize
+      translated || configured_name || host_module_name.to_s.titleize
     end
 
     private

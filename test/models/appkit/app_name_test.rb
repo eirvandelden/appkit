@@ -67,6 +67,10 @@ module Appkit
       assert_equal "My Recipe Book", app_name(nil).to_s
     end
 
+    test "shows a blank name instead of raising when the host application has no module" do
+      assert_equal "", AppName.new(nil, host_module_name: nil).to_s
+    end
+
     private
       def app_name(configured)
         AppName.new(configured, host_module_name: "MyRecipeBook")
