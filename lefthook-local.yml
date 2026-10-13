@@ -33,8 +33,6 @@ pre-push:
       skip: true
     eslint:
       skip: true
-    minitest:
-      skip: true
     rspec:
       skip: true
     # There is no bin/brakeman binstub at gem root, and CI already runs both

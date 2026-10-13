@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
 APP_PATH = File.expand_path("../test/dummy/config/application", __dir__)
+ENGINE_ROOT = File.expand_path("..", __dir__)
 require_relative "../test/dummy/config/boot"
 require "rails/commands"
