@@ -18,6 +18,16 @@ module Appkit
       assert_equal "#f5f9fa", manifest["background_color"]
     end
 
+    test "manifest name uses the app_name translation for the request locale" do
+      I18n.backend.store_translations(:nl, app_name: "Receptenboek")
+
+      get manifest_url(locale: "nl")
+
+      assert_equal "Receptenboek", JSON.parse(response.body)["name"]
+    ensure
+      I18n.backend.reload!
+    end
+
     test "manifest emits an icon entry per configured icon path with inferred sizes" do
       get manifest_url
 

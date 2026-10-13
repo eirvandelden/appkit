@@ -1,5 +1,6 @@
 module Appkit
-  class PwaController < ActionController::Base
+  class PwaController < ::ApplicationController
+    allow_unauthenticated_access
     skip_forgery_protection
 
     def manifest
