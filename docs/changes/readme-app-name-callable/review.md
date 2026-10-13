@@ -52,3 +52,18 @@ Compliance: every acceptance criterion maps to the same tests as in round 1. Eve
 `codex review --base origin/main`. Codex ran the full suite: 123 runs, 378 assertions, 0 failures, 0 errors.
 
 No findings.
+
+## Round 5 — 2026-10-13T08:25Z — bd84daf
+
+No `REVIEW.md` or `REVIEW.local.md` at the repository root; the default Bugs, Security and Compliance passes apply. Diff: `origin/main...bd84daf`, no uncommitted changes. This round re-reads the whole diff and the round 3 fix.
+
+Checks: `bundle exec rake test` 124 runs, 379 assertions, 0 failures, 0 errors, 0 skips. `bundle exec rubocop` 85 files, no offenses. `bundle exec bundle-audit check` no vulnerabilities. `bundle exec brakeman` reports the same Medium warning in `lib/appkit/version.rb`, a file this branch does not touch.
+
+Bugs: the round 3 fix holds. `name.presence&.to_s` makes `false` fall back to the module name and still turns a Symbol into a String; "treats a callable returning false as unset" covers it.
+
+Security: one Important finding below. A scratch integration test (not committed) fetched the PWA endpoints as a signed-in user. Signed out, the manifest has `Cache-Control: no-cache` and no `Set-Cookie`. Signed in, both the manifest and the service worker now return `Cache-Control: no-cache` and a `Set-Cookie: session_token=…` header. A normal page returns `max-age=0, private, must-revalidate`.
+
+Compliance: every acceptance criterion maps to the same tests as in rounds 1 and 3. Every test that `plan.md`'s Proof names exists. No existing test was weakened, skipped or deleted.
+
+- [ ] Important: `PwaController` now runs `allow_unauthenticated_access`, so `restore_authentication` re-issues the signed `session_token` cookie on every manifest and service-worker fetch by a signed-in user. The controller replaces Rails' default `private` cache directive with a bare `no-cache`, so a shared cache (CDN or proxy) may store the response with its `Set-Cookie`. The manifest ETag is the same for every user in one locale. A revalidation then gets a 304, and the cache can serve the stored `session_token` cookie to the next visitor, who becomes signed in as the first user. On `main` these endpoints never set a cookie. The plan's Risks list the session activity update and the missing `Vary`, but not the cookie in a publicly cacheable response. Mark both responses `private`, or keep the host locale without restoring the session cookie. — `app/controllers/appkit/pwa_controller.rb:3` →
+- [ ] Nit: The fallback calls `host_module_name.titleize`. A host whose application class is not inside a module gets `nil` from `module_parent_name`, and then every page that names the app raises `NoMethodError`. Rails generators always nest the class in a module, so this is rare. `host_module_name.to_s.titleize` would give a blank name instead of a crash. — `app/models/appkit/app_name.rb:12` →
