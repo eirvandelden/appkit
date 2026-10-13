@@ -93,3 +93,17 @@ Compliance: every acceptance criterion maps to the same tests as in rounds 1, 3 
 `codex review --base origin/main`. Codex confirmed the PWA responses stay private when they set a session cookie.
 
 No findings.
+
+## Round 9 — 2026-10-13T08:40Z — 0fe8e36
+
+No `REVIEW.md` or `REVIEW.local.md` at the repository root; the default Bugs, Security and Compliance passes apply. Diff: `origin/main...0fe8e36`, no uncommitted changes. This round re-reads the whole diff and the round 7 fix.
+
+Checks: `bundle exec rake test` 126 runs, 386 assertions, 0 failures, 0 errors, 0 skips. `bundle exec rubocop` 85 files, no offenses. `bundle exec bundle-audit check` no vulnerabilities. `bundle exec brakeman` reports the same Medium warning in `lib/appkit/version.rb`, a file this branch does not touch. `bundle exec` rewrote the `appkit` version in `Gemfile.lock` again; this round restored the file.
+
+Bugs: no findings. The round 7 fix holds. The `### Fixed` entry now names the two upgrade effects: every host `before_action` runs on the manifest and the service worker, including a Rails 8 host's `allow_browser versions: :modern`, and both endpoints send `max-age=0, private, must-revalidate` instead of `no-cache`. Both statements match `app/controllers/appkit/pwa_controller.rb` and the PWA controller tests. The entry is one line, as the playbook's markdown rule asks.
+
+Security: no findings. The PWA responses that re-issue the `session_token` cookie stay `private`. The HTML views escape the name with `<%= %>`. The manifest escapes it with `to_json`.
+
+Compliance: every acceptance criterion maps to the same tests as in rounds 1, 3, 5 and 7. Every test that `plan.md`'s Proof names exists. No existing test was weakened, skipped or deleted.
+
+No findings.
