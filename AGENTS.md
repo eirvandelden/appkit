@@ -2,7 +2,7 @@
 
 ## What this is
 
-A non-isolated Rails engine (`Appkit::Engine`, no `isolate_namespace`) that several personal Rails apps share. It provides session-based authentication: login, a FirstRun bootstrap, and session transfer with a QR magic link. It also provides a PWA manifest, a service worker with web push, theme and preferences, `VersionHeaders` and `Authorization`. Further parts are okcomputer health checks, static error pages and a reusable CI workflow. Apps install it with `gem "appkit", github: "eirvandelden/appkit"` and pin a git SHA, because the project uses SHAs instead of semver (`CHANGELOG.md`). It requires Rails (railties) >= 8.0 (`appkit.gemspec`).
+A non-isolated Rails engine (`Appkit::Engine`, no `isolate_namespace`) that several personal Rails apps share. It provides session-based authentication: login, a FirstRun bootstrap, and session transfer with a QR magic link. It also provides a PWA manifest, a service worker with web push, theme and preferences, `VersionHeaders` and `Authorization`. Further parts are okcomputer health checks, static error pages and a reusable CI workflow. Apps install it with `gem "appkit", github: "eirvandelden/appkit"` and pin a git SHA, because the project uses SHAs instead of semver (`CHANGELOG.md`). It requires Rails (railties) `~> 8.1` (`appkit.gemspec`).
 
 ## Domain
 
