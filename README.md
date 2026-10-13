@@ -211,6 +211,12 @@ OkComputer.require_authentication(Rails.application.credentials.dig(:health_chec
                                    Rails.application.credentials.dig(:health_check, :password))
 ```
 
+## Development
+
+appkit does not commit its `Gemfile.lock`. The gem version names its commit (`0.1.0.pre.git.<sha>`), and a committed lockfile can never name its own commit. Host apps read only the dependencies in `appkit.gemspec`, never appkit's lockfile.
+
+A fresh clone and every CI run resolve the newest gems that `appkit.gemspec` and `Gemfile` allow, so two runs on one commit can use different gem versions. An existing local `Gemfile.lock` stays untracked and keeps its versions; `bundle update` moves it to newer gems.
+
 ## Continuous Integration
 
 This repo's own `.github/workflows/ci.yml` tests the engine against
