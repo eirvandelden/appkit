@@ -32,3 +32,17 @@ Every test that `plan.md`'s Proof names exists, except one renamed test (Nit bel
 `codex review --base origin/main`. Codex ran the focused model, integration and PWA tests: all green.
 
 No findings.
+
+## Round 3 — 2026-10-13T08:20Z — 7e0a343
+
+No `REVIEW.md` or `REVIEW.local.md` at the repository root; the default Bugs, Security and Compliance passes apply. Diff: `origin/main...7e0a343`, no uncommitted changes. This round re-reads the whole diff and the three round 1 fixes.
+
+Checks: `bundle exec rake test` 123 runs, 0 failures, 0 errors, 0 skips. `bundle exec rubocop` 85 files, no offenses. `bundle exec bundle-audit check` no vulnerabilities. `bundle exec brakeman` reports the same Medium warning in `lib/appkit/version.rb`, a file this branch does not touch. The fallbacks unit test also passes when it runs alone, so it does not depend on test order.
+
+Bugs: no Important findings. The round 1 fixes hold: the Proof test name now matches, `assert_name_on_every_page` has no unused keyword, and a Symbol from a callable now gives a String.
+
+Security: no findings. The HTML views escape the name with `<%= %>`. The manifest escapes it with `to_json`.
+
+Compliance: every acceptance criterion maps to the same tests as in round 1. Every test that `plan.md`'s Proof names exists, including the renamed configuration test. No existing test was weakened, skipped or deleted.
+
+- [ ] Nit: The round 1 coercion fix calls `to_s` before `presence`, so `false` is no longer blank. A callable that returns `false`, or `config.app_name = false`, now shows "false" instead of the module name. Before ba45875 it fell back. The intent counts a blank configured name as unset, and `false` is blank in Rails. `name.presence&.to_s` keeps the Symbol fix and the fallback for `false`. — `app/models/appkit/app_name.rb:25` →
