@@ -13,7 +13,7 @@ module Appkit
       assert_equal "My App", configuration.app_display_name
     end
 
-    test "app_name keeps returning a callable unchanged" do
+    test "keeps the raw app_name reader unchanged for a callable" do
       callable = -> { "My App" }
       configuration = Configuration.new
       configuration.app_name = callable
