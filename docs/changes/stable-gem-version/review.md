@@ -43,7 +43,7 @@ Checks run on `4c57978`: `bundle exec rake test` 105 runs, 0 failures. RuboCop: 
 
 ## Round 3 — 2026-10-08T08:12Z — 54282c7
 
-- [ ] Nit: The plan does not record the `no_auto_install: true` key that `29c9711` added to `lefthook-local.yml`. The "Files that change" entry and the Design decisions leave it out. Line 77 still names the `--no-auto-install` flag as the only guard against a sync into the global `core.hooksPath`. Add the key to line 44 and add one Design decisions line, so the plan describes the config that ships. — `docs/changes/stable-gem-version/plan.md:44` →
+- [ ] Nit: The plan does not record the `no_auto_install: true` key that `29c9711` added to `lefthook-local.yml`. The "Files that change" entry and the Design decisions leave it out. Line 77 still names the `--no-auto-install` flag as the only guard against a sync into the global `core.hooksPath`. Add the key to line 44 and add one Design decisions line, so the plan describes the config that ships. — `docs/changes/stable-gem-version/plan.md:44` → fixed (Record the no_auto_install setting in the plan)
 
 Compliance, acceptance criteria from `intent.md`:
 

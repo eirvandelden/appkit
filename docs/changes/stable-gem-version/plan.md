@@ -16,6 +16,7 @@ From `intent.md` (2026-10-07). Status: accepted.
 - CI's `scan_ruby` runs `bin/bundler-audit check --update` instead of `bundle exec bundler-audit check --update`, so CI and the hook read the same `config/bundler-audit.yml`.
 - The pre-push `bundle-audit` hook is un-skipped in `lefthook-local.yml`. Its glob becomes `Gemfile` and `appkit.gemspec`, because most of appkit's dependencies live in the gemspec. The existing comment there is narrowed to brakeman only.
 - The lefthook `migrations` → `bundle` step is overridden in `lefthook-local.yml` to always run `bundle install`, with glob `Gemfile` and `appkit.gemspec`. The shared command runs `rv ci` whenever a `Gemfile.lock` exists, and here that file is untracked and can be stale: `rv ci` would install the stale set and miss what `Gemfile` or the gemspec now need. `bundle install` keeps the local versions and adds what is missing. Before this change, gemspec changes also changed `Gemfile.lock`, which matched `Gemfile*`. Now they change no `Gemfile*` file, so the gemspec must be in the glob.
+- `lefthook-local.yml` sets `no_auto_install: true`, as the dotfiles' own `lefthook.yml` does. `core.hooksPath` is the global `~/.config/git/hooks`, so without it any `lefthook run` in appkit syncs lefthook's generated hooks there and replaces the stowed hooks. Found in review round 2 (2026-10-08).
 - Pulling this change deletes an existing checkout's lockfile (see Risks), so its next `bundle install` resolves the newest allowed gems. From then on, the local lockfile stays untracked and keeps its gem versions until someone runs `bundle update`. Fresh clones and CI get the newest gems. Etienne accepted this (2026-10-07). The README says so.
 - `rails-ci.yml` does not change. It runs inside host apps, which commit their own `Gemfile.lock`; it never reads appkit's. Etienne confirmed (2026-10-07).
 
@@ -41,7 +42,7 @@ Conflicts flagged against the intent:
 - `test/appkit_test.rb` — "version is present" becomes "version names the checked-out commit".
 - `bin/bundler-audit` — new binstub, mode 755.
 - `config/bundler-audit.yml` — new; Rails template comment, `ignore: []`.
-- `lefthook-local.yml` — override `migrations.commands.bundle` (`run: bundle install`, gemspec in glob); un-skip `pre-push.commands.bundle-audit` with the wider glob; narrow the comment to brakeman.
+- `lefthook-local.yml` — set `no_auto_install: true`; override `migrations.commands.bundle` (`run: bundle install`, gemspec in glob); un-skip `pre-push.commands.bundle-audit` with the wider glob; narrow the comment to brakeman.
 - `.github/workflows/ci.yml` — per job: Ruby-only setup-rv, `bundle lock` with the hash output, gem cache, `rv ci`; RuboCop cache key; `bin/bundler-audit`. One short comment above `jobs:` says why.
 - `README.md` — new `## Development` section, before `## Continuous Integration`.
 
@@ -74,7 +75,7 @@ lefthook run pre-push --no-auto-install --command bundle-audit -f
 bin/bundler-audit check --update
 ```
 
-`--no-auto-install` stops lefthook from writing its own hooks into the global `core.hooksPath` (`~/.config/git/hooks`), where they would replace the stowed symlinks. `-f` is `--force`; the consent guard reads `--force` as a git push flag and blocks it.
+`--no-auto-install` stops lefthook from writing its own hooks into the global `core.hooksPath` (`~/.config/git/hooks`), where they would replace the stowed symlinks. `no_auto_install: true` in `lefthook-local.yml` does the same for every run; the flag also covers a clone made before that key existed. `-f` is `--force`; the consent guard reads `--force` as a git push flag and blocks it.
 
 If lefthook stops because the clone has no `ORIG_HEAD`, run `git update-ref ORIG_HEAD HEAD~1` in that clone only, then retry.
 
