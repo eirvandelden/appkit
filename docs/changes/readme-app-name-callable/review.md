@@ -24,7 +24,7 @@ Compliance, acceptance criteria against tests:
 Every test that `plan.md`'s Proof names exists, except one renamed test (Nit below). No existing test was weakened, skipped or deleted. The dummy initializer moved from a callable to a string; the callable path keeps its integration and configuration tests.
 
 - [ ] Nit: The configuration test is named "app_name keeps returning a callable unchanged"; `plan.md`'s Proof names it "keeps the raw app_name reader unchanged for a callable". The behaviour is the same, but a reader who greps the Proof name finds nothing. — `test/appkit/configuration_test.rb:16` →
-- [ ] Nit: `AppName#to_s` returns whatever the configured value or callable gives when it is present. A callable that returns a Symbol or an Integer makes `to_s` return a non-String, which breaks the `to_s` contract that string interpolation relies on. `configured_name` can coerce with `.to_s` before `.presence`. — `app/models/appkit/app_name.rb:25` →
+- [ ] Nit: `AppName#to_s` returns whatever the configured value or callable gives when it is present. A callable that returns a Symbol or an Integer makes `to_s` return a non-String, which breaks the `to_s` contract that string interpolation relies on. `configured_name` can coerce with `.to_s` before `.presence`. — `app/models/appkit/app_name.rb:25` → fixed (fix: return a string app name when a callable gives a non-string)
 - [ ] Nit: `assert_name_on_every_page` takes a `locale:` keyword that no caller passes, because the Dutch test uses the narrower helpers directly. Drop the keyword and pass `"en"` straight through. — `test/integration/app_name_test.rb:54` →
 
 ## Round 2 — 2026-10-13T08:20Z — ea94de5 (codex)

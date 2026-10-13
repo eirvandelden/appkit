@@ -55,6 +55,10 @@ module Appkit
       assert_equal "My Recipe Book", app_name(-> { "" }).to_s
     end
 
+    test "returns a string when a callable gives a symbol" do
+      assert_equal "Recipes", app_name(-> { :Recipes }).to_s
+    end
+
     test "falls back to the host module name split into words when nothing is configured" do
       assert_equal "My Recipe Book", app_name(nil).to_s
     end
