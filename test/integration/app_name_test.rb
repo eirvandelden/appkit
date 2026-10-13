@@ -51,10 +51,10 @@ class AppNameTest < ActionDispatch::IntegrationTest
   end
 
   private
-    def assert_name_on_every_page(name, locale: "en")
-      assert_name_on_signed_out_pages name, locale: locale
-      assert_name_in_nav name, locale: locale
-      assert_name_on_first_run_page name, locale: locale
+    def assert_name_on_every_page(name)
+      assert_name_on_signed_out_pages name, locale: "en"
+      assert_name_in_nav name, locale: "en"
+      assert_name_on_first_run_page name, locale: "en"
     end
 
     def assert_name_on_signed_out_pages(name, locale:)
