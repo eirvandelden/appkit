@@ -1,37 +1,16 @@
 # Appkit
 
-A non-isolated Rails engine bundling session-based authentication, PWA
-installability with web push notifications, and theme/preferences
-management for host Rails applications.
+A non-isolated Rails engine bundling session-based authentication, PWA installability with web push notifications, and theme/preferences management for host Rails applications.
 
-Appkit requires [`mvpa-css`](https://github.com/eirvandelden/mvpa.css) as
-a co-gem for its themed UI components. `mvpa-css` is not declared in
-`appkit.gemspec` — gemspecs cannot declare git-sourced dependencies, so
-it is declared in this repo's `Gemfile` instead. Consuming apps must add
-`mvpa-css` to their own `Gemfile` as well.
+Appkit requires [`mvpa-css`](https://github.com/eirvandelden/mvpa.css) as a co-gem for its themed UI components. `mvpa-css` is not declared in `appkit.gemspec` — gemspecs cannot declare git-sourced dependencies, so it is declared in this repo's `Gemfile` instead. Consuming apps must add `mvpa-css` to their own `Gemfile` as well.
 
-Appkit depends directly on [`importmap-rails`](https://github.com/rails/importmap-rails)
-(declared in `appkit.gemspec`, unlike `mvpa-css` — no action needed in
-consuming apps). The engine's own `config/importmap.rb` pins
-`appkit/pwa.js`, `appkit/controllers/push_controller.js`,
-`appkit/controllers/theme_controller.js`, and
-`appkit/controllers/auto_submit_controller.js` via the importmap DSL, and
-`lib/appkit/engine.rb` adds that file to the host app's
-`config.importmap.paths` automatically. The host's own layouts must still
-render `<%= javascript_importmap_tags %>` (including the `login` layout —
-a missing tag there silently breaks the auto-submit magic-link flow, since
-no JS runs on that page at all).
+Appkit depends directly on [`importmap-rails`](https://github.com/rails/importmap-rails) (declared in `appkit.gemspec`, unlike `mvpa-css` — no action needed in consuming apps). The engine's own `config/importmap.rb` pins `appkit/pwa.js`, `appkit/controllers/push_controller.js`, `appkit/controllers/theme_controller.js`, and `appkit/controllers/auto_submit_controller.js` via the importmap DSL, and `lib/appkit/engine.rb` adds that file to the host app's `config.importmap.paths` automatically. The host's own layouts must still render `<%= javascript_importmap_tags %>` (including the `login` layout — a missing tag there silently breaks the auto-submit magic-link flow, since no JS runs on that page at all).
 
-The engine is deliberately **not** `isolate_namespace`d: host apps' URL
-helpers (`root_url`, etc.) need to work from inside engine controllers
-and views.
+The engine is deliberately **not** `isolate_namespace`d: host apps' URL helpers (`root_url`, etc.) need to work from inside engine controllers and views.
 
 ### JavaScript controllers
 
-`eagerLoadControllersFrom` only autoloads Stimulus controllers from the
-host app's own `controllers/` importmap namespace — it does **not** pick
-up appkit's `appkit/controllers/*` pins automatically. Host apps must
-register each one explicitly in their `app/javascript/controllers/index.js`:
+`eagerLoadControllersFrom` only autoloads Stimulus controllers from the host app's own `controllers/` importmap namespace — it does **not** pick up appkit's `appkit/controllers/*` pins automatically. Host apps must register each one explicitly in their `app/javascript/controllers/index.js`:
 
 ```js
 import PushController from "appkit/controllers/push_controller"
@@ -44,14 +23,11 @@ import AutoSubmitController from "appkit/controllers/auto_submit_controller"
 application.register("auto-submit", AutoSubmitController)
 ```
 
-Skipping `auto-submit` breaks the session-transfer (magic-link) flow
-silently: the transfer `show` page renders but never submits, so the
-user gets stuck on the intermediate page instead of being logged in.
+Skipping `auto-submit` breaks the session-transfer (magic-link) flow silently: the transfer `show` page renders but never submits, so the user gets stuck on the intermediate page instead of being logged in.
 
 ### Login page branding
 
-The login layout colors its heading with `--color-accent`. Host apps set
-this once, e.g. in a `themes/brand.css`:
+The login layout colors its heading with `--color-accent`. Host apps set this once, e.g. in a `themes/brand.css`:
 
 ```css
 :root {
@@ -59,8 +35,7 @@ this once, e.g. in a `themes/brand.css`:
 }
 ```
 
-If a host app forgets to set it, the login page falls back to magenta
-rather than rendering unstyled.
+If a host app forgets to set it, the login page falls back to magenta rather than rendering unstyled.
 
 ## Installation
 
@@ -69,8 +44,7 @@ gem "appkit", github: "eirvandelden/appkit"
 gem "mvpa-css", github: "eirvandelden/mvpa.css"
 ```
 
-Host apps should add this one-line directive to their own
-`ApplicationController` — it's not part of the engine itself:
+Host apps should add this one-line directive to their own `ApplicationController` — it's not part of the engine itself:
 
 ```ruby
 class ApplicationController < ActionController::Base
@@ -80,22 +54,15 @@ class ApplicationController < ActionController::Base
 end
 ```
 
-See "Configuration" and "Web Push setup" below for the remaining
-per-app setup steps.
+See "Configuration" and "Web Push setup" below for the remaining per-app setup steps.
 
 ## Status
 
-Phase 0 is complete: session-based authentication (login, FirstRun
-bootstrap, session transfer/QR handoff), PWA installability with web
-push notifications, theme/preferences management, VersionHeaders,
-Authorization, static error pages, and CI (engine + reusable app
-workflow) are all implemented.
+Phase 0 is complete: session-based authentication (login, FirstRun bootstrap, session transfer/QR handoff), PWA installability with web push notifications, theme/preferences management, VersionHeaders, Authorization, static error pages, and CI (engine + reusable app workflow) are all implemented.
 
 ## Configuration
 
-Host apps configure Appkit via `Appkit.config` (see
-`lib/appkit/configuration.rb` for the source of truth), typically in a
-`config/initializers/appkit.rb`:
+Host apps configure Appkit via `Appkit.config` (see `lib/appkit/configuration.rb` for the source of truth), typically in a `config/initializers/appkit.rb`:
 
 ```ruby
 Appkit.configure do |config|
@@ -120,13 +87,7 @@ end
 
 ## Session hygiene
 
-The signed session cookie stops renewing once a browser drops it, but a
-stolen token replayed directly against the server never goes through the
-cookie at all — nothing expires it. `Appkit::SessionExpiryJob` closes that
-gap by destroying any session whose `last_active_at` is older than
-`config.session_expiry`. It isn't scheduled automatically (the engine doesn't
-own the host's recurring-job config) — add it yourself, e.g. in
-`config/recurring.yml`:
+The signed session cookie stops renewing once a browser drops it, but a stolen token replayed directly against the server never goes through the cookie at all — nothing expires it. `Appkit::SessionExpiryJob` closes that gap by destroying any session whose `last_active_at` is older than `config.session_expiry`. It isn't scheduled automatically (the engine doesn't own the host's recurring-job config) — add it yourself, e.g. in `config/recurring.yml`:
 
 ```yaml
 production:
@@ -137,15 +98,13 @@ production:
 
 ## Web Push setup
 
-Push notifications use the `web-push` gem with VAPID keys. Generate a
-key pair with the bundled rake task:
+Push notifications use the `web-push` gem with VAPID keys. Generate a key pair with the bundled rake task:
 
 ```
 bin/rails appkit:vapid_keys
 ```
 
-This prints a public/private key pair and a `credentials.yml.enc`
-snippet to paste in (`bin/rails credentials:edit`):
+This prints a public/private key pair and a `credentials.yml.enc` snippet to paste in (`bin/rails credentials:edit`):
 
 ```yaml
 web_push:
@@ -154,16 +113,11 @@ web_push:
   subject: mailto:you@example.com
 ```
 
-`Appkit::PushNotificationJob` reads these via
-`Rails.application.credentials.dig(:web_push, :subject/:vapid_public_key/:vapid_private_key)`
-at delivery time.
+`Appkit::PushNotificationJob` reads these via `Rails.application.credentials.dig(:web_push, :subject/:vapid_public_key/:vapid_private_key)` at delivery time.
 
 ## Version headers
 
-`Appkit::VersionHeaders` sets `X-Version`/`X-Rev` response headers from
-`Rails.application.config.app_version`/`config.git_revision`. Host apps
-must set both themselves; they are not provided by the engine. See
-`test/dummy/config/application.rb` for the pattern:
+`Appkit::VersionHeaders` sets `X-Version`/`X-Rev` response headers from `Rails.application.config.app_version`/`config.git_revision`. Host apps must set both themselves; they are not provided by the engine. See `test/dummy/config/application.rb` for the pattern:
 
 ```ruby
 module MyApp
@@ -176,25 +130,16 @@ end
 
 ## Health checks
 
-Appkit mounts [`okcomputer`](https://github.com/sportngin/okcomputer) so an
-uptime monitor (e.g. Uptime Kuma) can poll a check that's representative of
-real app health, not just a bare 200 OK. By default it registers:
+Appkit mounts [`okcomputer`](https://github.com/sportngin/okcomputer) so an uptime monitor (e.g. Uptime Kuma) can poll a check that's representative of real app health, not just a bare 200 OK. By default it registers:
 
 - `"default"` — trivial "app is running" check (from the gem itself).
-- `"database"` — real DB connectivity (from the gem itself, auto-registered
-  whenever `ActiveRecord` is defined).
-- `"cache"` — only when `Rails.cache` is a `SolidCache::Store`; skipped for
-  other cache backends.
-- `"queue"` — only when `Rails.application.config.active_job.queue_adapter`
-  is `:solid_queue`; verifies at least one `SolidQueue::Process` has
-  heartbeated recently (worker liveness), not queue depth/backlog.
+- `"database"` — real DB connectivity (from the gem itself, auto-registered whenever `ActiveRecord` is defined).
+- `"cache"` — only when `Rails.cache` is a `SolidCache::Store`; skipped for other cache backends.
+- `"queue"` — only when `Rails.application.config.active_job.queue_adapter` is `:solid_queue`; verifies at least one `SolidQueue::Process` has heartbeated recently (worker liveness), not queue depth/backlog.
 
-Point your uptime monitor at `<health_check_path>/all`, **not** the bare
-root — the root path only runs the trivial `"default"` check, while `/all`
-runs every registered check and returns `500` if any fail.
+Point your uptime monitor at `<health_check_path>/all`, **not** the bare root — the root path only runs the trivial `"default"` check, while `/all` runs every registered check and returns `500` if any fail.
 
-Configure the mount path (default `"healthz"`, chosen to avoid colliding with
-Rails' own `/up` health check route):
+Configure the mount path (default `"healthz"`, chosen to avoid colliding with Rails' own `/up` health check route):
 
 ```ruby
 Appkit.configure do |config|
@@ -202,9 +147,7 @@ Appkit.configure do |config|
 end
 ```
 
-To protect the endpoint with HTTP Basic auth, call `OkComputer.require_authentication`
-directly from your own initializer (Appkit does not wrap this, since Uptime
-Kuma polling usually doesn't need auth):
+To protect the endpoint with HTTP Basic auth, call `OkComputer.require_authentication` directly from your own initializer (Appkit does not wrap this, since Uptime Kuma polling usually doesn't need auth):
 
 ```ruby
 OkComputer.require_authentication(Rails.application.credentials.dig(:health_check, :username),
@@ -219,15 +162,9 @@ A fresh clone and every CI run resolve the newest gems that `appkit.gemspec` and
 
 ## Continuous Integration
 
-This repo's own `.github/workflows/ci.yml` tests the engine against
-`test/dummy` (`bundle exec rake test`), lints with RuboCop, and scans for
-security issues with Brakeman/bundler-audit.
+This repo's own `.github/workflows/ci.yml` tests the engine against `test/dummy` (`bundle exec rake test`), lints with RuboCop, and scans for security issues with Brakeman/bundler-audit.
 
-Consuming apps get CI via `.github/workflows/rails-ci.yml`, a reusable
-`workflow_call` workflow with `scan_ruby`, `scan_js`, `lint`, `test`, and
-`system-test` jobs. Each app's own CI becomes a thin ~6-line caller (see
-`lib/generators/appkit/install/templates/github/workflows/ci.yml.tt`,
-copied in by `bin/rails generate appkit:install`):
+Consuming apps get CI via `.github/workflows/rails-ci.yml`, a reusable `workflow_call` workflow with `scan_ruby`, `scan_js`, `lint`, `test`, and `system-test` jobs. Each app's own CI becomes a thin ~6-line caller (see `lib/generators/appkit/install/templates/github/workflows/ci.yml.tt`, copied in by `bin/rails generate appkit:install`):
 
 ```yaml
 name: CI
@@ -242,13 +179,8 @@ jobs:
       run_system_tests: true
 ```
 
-Cross-repo reusable workflows require this repo to stay **public** — a
-private repo would need each consuming app's Settings → Actions → Access
-to explicitly allow `eirvandelden/appkit`, plus credentials for `bundle
-install` to fetch the git-sourced gem.
+Cross-repo reusable workflows require this repo to stay **public** — a private repo would need each consuming app's Settings → Actions → Access to explicitly allow `eirvandelden/appkit`, plus credentials for `bundle install` to fetch the git-sourced gem.
 
 ## Third-party notices
 
-Some of appkit's auth code is adapted from Basecamp's
-[Writebook](https://github.com/basecamp/writebook) (MIT license). See
-`THIRD_PARTY_NOTICES.md` for details.
+Some of appkit's auth code is adapted from Basecamp's [Writebook](https://github.com/basecamp/writebook) (MIT license). See `THIRD_PARTY_NOTICES.md` for details.

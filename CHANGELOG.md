@@ -6,17 +6,9 @@
 
 ### Added
 - Engine skeleton and dummy-app test harness (Task 0). No auth/PWA/theme features yet.
-- Session-based authentication: login/logout, session cookie, configurable
-  `email_attribute`/`user_scope` (Task 1).
-- FirstRun bootstrap, session transfer + QR magic-link handoff,
-  `VersionHeaders`, `Authorization`, static error pages via the install
-  generator, and `Authenticatable#deactivate!` (Task 1b). Portions adapted
-  from Basecamp's Writebook (MIT) — see `THIRD_PARTY_NOTICES.md`.
-- Theme/preferences: `UserTheming` concern (`color_scheme`/`light_theme`/
-  `dark_theme` enums), `ThemeHelper`, Stimulus `theme_controller.js`,
-  `PreferencesController`/view with an optional `config.timezone_attribute`
-  gate, a reusable `_flashes` partial, and `en`/`nl`/`it` locale files
-  covering sessions/first_run/preferences (Task 3).
+- Session-based authentication: login/logout, session cookie, configurable `email_attribute`/`user_scope` (Task 1).
+- FirstRun bootstrap, session transfer + QR magic-link handoff, `VersionHeaders`, `Authorization`, static error pages via the install generator, and `Authenticatable#deactivate!` (Task 1b). Portions adapted from Basecamp's Writebook (MIT) — see `THIRD_PARTY_NOTICES.md`.
+- Theme/preferences: `UserTheming` concern (`color_scheme`/`light_theme`/`dark_theme` enums), `ThemeHelper`, Stimulus `theme_controller.js`, `PreferencesController`/view with an optional `config.timezone_attribute` gate, a reusable `_flashes` partial, and `en`/`nl`/`it` locale files covering sessions/first_run/preferences (Task 3).
 
 ### Changed
 - appkit now requires Rails 8.1: the gemspec floors are railties `~> 8.1`, turbo-rails `~> 2.0`, importmap-rails `~> 2.2`, web-push `~> 3.1`, rqrcode `~> 3.2` and okcomputer `~> 1.20`, so apps on Rails 8.0 can no longer install appkit.
