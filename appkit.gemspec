@@ -16,14 +16,14 @@ Gem::Specification.new do |spec|
     Dir["{app,config,lib}/**/*", "LICENSE.md", "THIRD_PARTY_NOTICES.md", "README.md", "CHANGELOG.md"]
   end
 
-  spec.add_dependency "railties", ">= 8.0"
-  spec.add_dependency "web-push", "~> 3.0"
-  spec.add_dependency "turbo-rails", ">= 2.0"
-  spec.add_dependency "rqrcode", "~> 3.0"
-  spec.add_dependency "okcomputer", "~> 1.19"
-  spec.add_dependency "importmap-rails", ">= 1.0"
+  spec.add_dependency "railties", "~> 8.1"
+  spec.add_dependency "web-push", "~> 3.1"
+  spec.add_dependency "turbo-rails", "~> 2.0"
+  spec.add_dependency "rqrcode", "~> 3.2"
+  spec.add_dependency "okcomputer", "~> 1.20"
+  spec.add_dependency "importmap-rails", "~> 2.2"
 
-  spec.add_development_dependency "rails", ">= 8.0"
+  spec.add_development_dependency "rails", "~> 8.1"
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "bcrypt"
   spec.add_development_dependency "propshaft"
