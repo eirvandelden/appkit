@@ -1,12 +1,12 @@
 # Plan: appkit follow-up nits from readme-app-name-callable
 
-From `intent.md` (2026-10-13, amended in commit `8c30f85`). Status: accepted.
+From `intent.md` (2026-10-13, amended in commit `8c30f85`, now `828c467` after the rebase; decisions recorded 2026-10-13, see Coordinator decisions). Status: accepted.
 
 ## Context
 
 appkit is a non-isolated Rails engine. Host apps install it with `gem "appkit", github: "eirvandelden/appkit"`. `test/dummy` is the host app the Minitest suite runs against. This change fixes six unrelated nits on branch `appkit-follow-up-nits`, one commit (or a few small commits) per nit, so each nit can be reverted alone. Facts below were checked on `8ffa328` and `45d788b` in scratch clones.
 
-PR #14 merged into `main` (`4415186`) after the intent was written. It adds `AGENTS.md` and `CLAUDE.md`. Its "Upgrade instructions" section is now the rule for `### Upgrading`. This branch is still based on `0bc4f57` and must be rebased before work starts (Order of work step 0).
+PR #14 merged into `main` (`4415186`) after the intent was written. It adds `AGENTS.md` and `CLAUDE.md`. Its "Upgrade instructions" section is now the rule for `### Upgrading`. The coordinator rebased this branch onto `origin/main` (`4415186`) on 2026-10-13, so Order of work step 0 is done; run it again only if `main` moves.
 
 Gem installs: agents install gems with `bi` (playbook rule 11); a guard refuses `bundle install`. `bi` runs `bundle lock`, then `rv ci`, then `bin/rails app:update:bin`. That last step writes an untracked `test/dummy/bin/` in this repository (checked on `45d788b`, before and after the nit 3 change). Where a step below needs a clean `git status`, install with `bundle lock && rv ci` instead, which is `bi` without the binstub step.
 
@@ -136,8 +136,9 @@ Run the narrowest test first. Use `bin/rails test <file>` once nit 3 has landed;
 16. Nit 6. Move the #15 host step into a new `### Upgrading` at the end of `## Unreleased`. Commit.
 17. Nit 1. Write the generator tests (names under Proof); run `bin/rails test test/generators/appkit/install_generator_test.rb`; watch the inject tests fail. Implement the generator step. Run the file, then `bin/rails test`. Edit the README Installation section and add the `### Fixed` and `### Upgrading` lines (one line each). Commit.
 18. Full checks: `bin/rails test`, `bundle exec rake test`, `bundle exec rubocop`, `bundle exec erb_lint --lint-all`, `yamllint lefthook-local.yml .erb_lint.yml .github/workflows/ci.yml config/bundler-audit.yml`, both Brakeman scans from `ci.yml` (`bundle exec brakeman -p test/dummy --no-pager --ignore-config config/brakeman.ignore`, `bundle exec brakeman -p . --force-scan --no-pager --ignore-config config/brakeman.gem.ignore`), `bin/bundler-audit check --update`. Then `git status --porcelain` prints nothing.
-19. Re-read the full diff against `origin/main`; every hunk serves one of the six nits.
-20. After `finish` opens the pull request: `gh pr checks --watch`; `scan_ruby`, `lint` and `test` are green. The pull request description names the `AGENTS.md` lines this change makes stale (see Risks).
+19. `AGENTS.md`: update the stale lines (14–15 test commands, now `bin/rails test` and `bin/rails test <file>`; 17 the bundler-audit command, now `bin/bundler-audit check --update`; 27 the version drift note, now that `Gemfile.lock` is untracked and ignored; 33 the skipped hooks, now that ERB lint and the per-file test hook run). Keep every other line. Only write what the earlier steps made true. Commit alone.
+20. Re-read the full diff against `origin/main`; every hunk serves one of the six nits or the `AGENTS.md` update.
+21. After `finish` opens the pull request: `gh pr checks --watch`; `scan_ruby`, `lint` and `test` are green. CI is green.
 
 ## Risks
 
@@ -152,7 +153,7 @@ Run the narrowest test first. Use `bin/rails test <file>` once nit 3 has landed;
 - `bi` writes an untracked `test/dummy/bin/` (pre-existing). The `git status` checks above delete it first. Ignoring it in `.gitignore` is a separate change.
 - `bin/rails generate` now writes into the engine root instead of `test/dummy`. A contributor who relied on the old target must pass paths by hand.
 - erb_lint 0.9.0 prints a `parser/ruby33` warning on Ruby 4.0.5. It is noise from the `parser` gem, not an offense; do not silence it with config.
-- `AGENTS.md` (now on main) describes the `Gemfile.lock` drift, the `bin/rails test` failure, the `bundle exec bundler-audit` command and the skipped ERB and test hooks. This change makes those lines stale. The intent keeps `AGENTS.md` out of this change and asks only that the pull request description name them.
+- `AGENTS.md` (now on main) describes the `Gemfile.lock` drift, the `bin/rails test` failure, the `bundle exec bundler-audit` command and the skipped ERB and test hooks. Step 19 updates those lines in this change.
 - The unmerged `stable-gem-version` branch is superseded. Its plan differs in two points: it un-skips the bundle-audit hook, and its bundle step runs `bundle install`.
 - Unwrapping touches most README lines, so open branches that edit the README get rebase conflicts.
 - Rejected: a stable `VERSION = "0.1.0"` (the amended intent keeps the SHA); hashing the whole resolved lockfile for the CI cache key (misses on every commit); calling setup-rv twice to reuse its cache logic (installs rv twice, depends on its internals); changing `rails-ci.yml` (host apps keep their lockfiles); `bi` as the lefthook bundle command (not in the repository, and it writes `test/dummy/bin/`).
@@ -161,7 +162,7 @@ Run the narrowest test first. Use `bin/rails test <file>` once nit 3 has landed;
 
 - `.github/workflows/rails-ci.yml`, and every `ci.yml` change beyond gem resolution, its cache keys and `bin/bundler-audit`; running erb_lint in CI.
 - Migrations and system tooling.
-- `AGENTS.md` and `CLAUDE.md`.
+- `CLAUDE.md`, and `AGENTS.md` lines this change does not make stale.
 - Unwrapping markdown other than `CHANGELOG.md` and `README.md`.
 - Re-enabling the stylelint, browserslist, eslint, rspec, brakeman and bundle-audit hooks.
 - Closing or editing the `stable-gem-version` branch.
@@ -181,10 +182,11 @@ Run the narrowest test first. Use `bin/rails test <file>` once nit 3 has landed;
 - After a commit, installing gems and `bundle exec rake test` leave `git status` clean → `test/lockfile_test.rb` "Gemfile.lock is not tracked by git" and "git ignores Gemfile.lock"; check: Order of work step 10.
 - In a checkout of commit `abc1234`, the appkit version is `0.1.0.pre.git.abc1234` → `test/appkit_test.rb` "version names the checked-out commit".
 - `Gemfile.lock` is not in git, and a new one is ignored → `test/lockfile_test.rb` "Gemfile.lock is not tracked by git", "git ignores Gemfile.lock".
-- On a push, CI installs gems and runs the tests, RuboCop, Brakeman and bundler-audit → check: the `CI` workflow run on the pull request, `scan_ruby`, `lint` and `test` green (Order of work step 20).
+- On a push, CI installs gems and runs the tests, RuboCop, Brakeman and bundler-audit → check: the `CI` workflow run on the pull request, `scan_ruby`, `lint` and `test` green (Order of work step 21).
 - After a fresh clone, the lefthook bundle step installs gems and `bin/bundler-audit` runs → check: Order of work step 10 exits 0 at every line.
 - The README says that appkit does not commit its `Gemfile.lock`, and why → check: read `README.md` `## Development` in the diff.
 - Two appkit commits with different SHAs produce different service worker cache names → `test/appkit/revision_test.rb` "two Bundler revisions give two different values" (Dockerized and other git-installed hosts); `test/appkit_test.rb` "version names the checked-out commit" with `test/appkit/revision_test.rb` "falls back to Appkit::VERSION when the source has no revision" (a git checkout); `test/controllers/appkit/pwa_controller_test.rb` "service worker cache name includes the appkit revision".
+- `AGENTS.md` no longer says that `Gemfile.lock` drifts, that `bin/rails test` fails, or that ERB and per-file test hooks are skipped, and its commands match the new setup → check: read `AGENTS.md` in the diff (Order of work step 19), and run each command it now names.
 - `## Unreleased` has one `### Upgrading` after `### Added`, `### Changed` and `### Fixed`, one instruction per step, and `### Fixed` holds no upgrade step → check: read `CHANGELOG.md` in the diff.
 
 Per changed file, the unit tests expected:
@@ -194,12 +196,20 @@ Per changed file, the unit tests expected:
 - `lib/appkit/revision.rb`: `Revision#to_s` "returns the Bundler git revision when the spec has one", "two Bundler revisions give two different values", "falls back to Appkit::VERSION when the source has no revision", "falls back to Appkit::VERSION when there is no spec".
 - `app/views/appkit/pwa/service_worker.js.erb`: `Appkit::PwaControllerTest` "service worker cache name includes the appkit revision".
 - `lib/generators/appkit/install/install_generator.rb`: "adds include Appkit::Authentication to an ApplicationController that lacks it", "running the generator twice leaves one include Appkit::Authentication", "leaves an ApplicationController that already includes Appkit::Authentication unchanged", "skips the include when the host has no ApplicationController", "adds the include when run with --skip".
-- `bin/rails`, `bin/bundler-audit`, `config/bundler-audit.yml`, `.github/workflows/ci.yml`, `lefthook-local.yml`, `.erb_lint.yml`, `appkit.gemspec`, the three views, `README.md`, `CHANGELOG.md`: no unit test; proven by the checks above. A `bin/bundler-audit` test would hit the network and fail on any new advisory.
+- `bin/rails`, `bin/bundler-audit`, `config/bundler-audit.yml`, `.github/workflows/ci.yml`, `lefthook-local.yml`, `.erb_lint.yml`, `appkit.gemspec`, the three views, `README.md`, `CHANGELOG.md`, `AGENTS.md`: no unit test; proven by the checks above. A `bin/bundler-audit` test would hit the network and fail on any new advisory.
 
 Test setup: Minitest, no fixtures needed. `Revision` tests inject fake spec objects; no stubs. The lockfile and version tests shell out to `git -C Appkit::Engine.root`; CI's `actions/checkout` gives a git checkout. Generator tests write `app/controllers/application_controller.rb` into the generator's destination with `File.write` before `run_generator`. Minitest 6 ships without `minitest/mock`; use no stubs.
 
 ---
 Domain skills applied: rails-architecture (no service object; the revision lives on a small PORO), object-oriented-design (dependency injection for `Revision`), rails-testing (Minitest, test first), ruby-style (guard clauses), dependencies (erb_lint approved in intent; no other gem change; installs with `bi` or `bundle lock && rv ci`, never a bare `bundle update`), new-repo-setup (lefthook: never `lefthook install`, `--no-auto-install` on `lefthook run`).
+
+## Coordinator decisions (2026-10-13)
+
+Etienne settled the three decisions this plan's report raised:
+
+- Gem refresh: fresh clones and CI install the newest allowed gems; an existing checkout keeps its untracked lockfile. The intent wording now says so. No refresh step.
+- `AGENTS.md`: update the stale lines in this change (step 19), instead of naming them in the pull request description.
+- `Appkit::Revision`: keep it in this change, as its own commit with a `### Fixed` line.
 
 ## Critique
 
