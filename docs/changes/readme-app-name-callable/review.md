@@ -107,3 +107,9 @@ Security: no findings. The PWA responses that re-issue the `session_token` cooki
 Compliance: every acceptance criterion maps to the same tests as in rounds 1, 3, 5 and 7. Every test that `plan.md`'s Proof names exists. No existing test was weakened, skipped or deleted.
 
 No findings.
+
+## Round 10 — 2026-10-13T08:41Z — 0fe8e36 (codex)
+
+`codex review --base origin/main`. Codex found the name resolved the same way across the views and the PWA manifest, with tests for the fallback, translation and cache behaviour.
+
+No findings.
