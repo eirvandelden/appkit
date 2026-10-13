@@ -1,5 +1,5 @@
 const CACHE_NAME = 'appkit-<%= Appkit.revision %>';
-const PRECACHE_URLS = <%= raw((["/"] + Appkit.config.sw_extra_cache_paths).to_json) %>;
+const PRECACHE_URLS = <%= raw(([ "/" ] + Appkit.config.sw_extra_cache_paths).to_json) %>;
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

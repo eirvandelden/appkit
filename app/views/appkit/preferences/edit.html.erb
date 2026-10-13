@@ -19,7 +19,7 @@
       <% if locale_attribute_shown? %>
         <%= form.label Appkit.config.locale_attribute, t(".locale") %>
         <%= form.select Appkit.config.locale_attribute,
-            I18n.available_locales.map { |l| [t("locales.#{l}", default: l.to_s), l] } %>
+            I18n.available_locales.map { |l| [ t("locales.#{l}", default: l.to_s), l ] } %>
       <% end %>
 
       <% if timezone_attribute_shown? %>
@@ -33,16 +33,16 @@
 
       <label for="user_color_scheme"><%= t(".color_scheme") %></label>
       <%= form.select :color_scheme,
-          Appkit.config.user_class.call.color_schemes.keys.map { |k| [t("appkit.themes.color_schemes.#{k}"), k] } %>
+          Appkit.config.user_class.call.color_schemes.keys.map { |k| [ t("appkit.themes.color_schemes.#{k}"), k ] } %>
       <small><%= t(".color_scheme_hint") %></small>
 
       <label for="user_light_theme"><%= t(".light_theme") %></label>
       <%= form.select :light_theme,
-          Appkit.config.user_class.call.light_themes.keys.map { |k| [t("appkit.themes.#{k}"), k] } %>
+          Appkit.config.user_class.call.light_themes.keys.map { |k| [ t("appkit.themes.#{k}"), k ] } %>
 
       <label for="user_dark_theme"><%= t(".dark_theme") %></label>
       <%= form.select :dark_theme,
-          Appkit.config.user_class.call.dark_themes.keys.map { |k| [t("appkit.themes.#{k}"), k] } %>
+          Appkit.config.user_class.call.dark_themes.keys.map { |k| [ t("appkit.themes.#{k}"), k ] } %>
     </fieldset>
 
     <%= form.submit t(".submit") %>
