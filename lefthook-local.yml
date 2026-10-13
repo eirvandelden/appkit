@@ -18,8 +18,10 @@ pre-commit:
       skip: true
     browserslist:
       skip: true
+    # bundle exec: the RuboCop linter inherits rubocop-eirvandelden, a
+    # git-sourced gem that only Bundler can load.
     erb_lint:
-      skip: true
+      run: bundle exec erb_lint {staged_files}
     eslint:
       skip: true
 
@@ -30,7 +32,7 @@ pre-push:
     browserslist:
       skip: true
     erb_lint:
-      skip: true
+      run: bundle exec erb_lint {push_files}
     eslint:
       skip: true
     rspec:
