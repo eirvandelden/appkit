@@ -73,3 +73,17 @@ Compliance: every acceptance criterion maps to the same tests as in rounds 1 and
 `codex review --base origin/main`. Codex ran the full suite: 124 runs, 379 assertions, 0 failures, 0 errors. This round predates the round 5 fixes.
 
 No findings.
+
+## Round 7 — 2026-10-13T08:37Z — a565e3b
+
+No `REVIEW.md` or `REVIEW.local.md` at the repository root; the default Bugs, Security and Compliance passes apply. Diff: `origin/main...a565e3b`, no uncommitted changes. This round re-reads the whole diff and the two round 5 fixes.
+
+Checks: `bundle exec rake test` 126 runs, 386 assertions, 0 failures, 0 errors, 0 skips. `bundle exec rubocop` 85 files, no offenses. `bundle exec bundle-audit check` no vulnerabilities. `bundle exec brakeman` reports the same Medium warning in `lib/appkit/version.rb`, a file this branch does not touch. Running `bundle exec` rewrites the `appkit` version in `Gemfile.lock` to the current SHA; that is existing behaviour of `lib/appkit/version.rb`, and this round restored the file.
+
+Bugs: no Important findings. The round 5 fixes hold. `expires_in 0, must_revalidate: true` gives `max-age=0, private, must-revalidate` on the manifest and the service worker, signed in or signed out. That is the same revalidation as the old `no-cache` for a browser. "PWA responses that carry a session cookie stay private, out of shared caches" signs in, asserts the `session_token` cookie is present, and asserts `private` on both endpoints. `host_module_name.to_s.titleize` gives `""` for a `nil` module, and "shows a blank name instead of raising when the host application has no module" covers it.
+
+Security: no findings. A shared cache must not store a `private` response, so the re-issued `session_token` cookie cannot reach another visitor. `private` also makes the plan's accepted risk moot: a shared cache can no longer serve one locale's manifest to another. The HTML views escape the name with `<%= %>`. The manifest escapes it with `to_json`.
+
+Compliance: every acceptance criterion maps to the same tests as in rounds 1, 3 and 5. Every test that `plan.md`'s Proof names exists. Two existing assertions in `test/controllers/appkit/pwa_controller_test.rb` changed from `no-cache` to `max-age=0, private, must-revalidate`. They still assert one exact header value, so they are not weaker, and the round 5 Important fix needs the change. No existing test was skipped or deleted.
+
+- [ ] Nit: The CHANGELOG entry says only that the manifest follows the request locale. Two other changes affect host apps on upgrade. First, the manifest and the service worker now inherit the host's `::ApplicationController`, so every host `before_action` runs on them; a Rails 8 host's generated `allow_browser versions: :modern` now applies to them too. Second, both endpoints now send `Cache-Control: max-age=0, private, must-revalidate` instead of `no-cache`, so a CDN no longer caches them. One sentence per change in the `### Fixed` entry tells the host what to check. — `CHANGELOG.md:22` →
