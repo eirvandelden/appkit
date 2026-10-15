@@ -48,3 +48,7 @@ Security: no new input reaches a shell or a query. `bin/bundler-audit` and the `
 Checks run on `195f935`: `bin/rails test` (137 runs, 403 assertions, green), `bundle exec rubocop` (88 files, no offenses), `bundle exec erb_lint --lint-all` (12 files, no errors), both Brakeman scans (0 warnings), `bin/bundler-audit check --update` (no vulnerabilities). `git status --porcelain` stayed empty after the runs.
 
 Compliance: unchanged from round 1. Every acceptance criterion has its test or check, and every test named in `plan.md` `## Proof` exists. CI green on a push stays missing until the pull request exists, because `ci.yml` runs on `pull_request` and on pushes to `main` only. No existing test was weakened, skipped or deleted.
+
+## Round 4 — 2026-10-15T12:38:53Z — 195f935 (codex)
+
+No findings. `codex review --base origin/main`: "The changes introduce no actionable regressions against the specified base. The test suite passed: 137 runs, 403 assertions, with no failures or errors."
