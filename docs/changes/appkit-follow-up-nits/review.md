@@ -31,3 +31,20 @@ Every test named in `plan.md` `## Proof` exists. No existing test was weakened, 
 ## Round 2 — 2026-10-15T12:31:22Z — 9ba05c5 (codex)
 
 No findings. `codex review --base origin/main`: "I found no actionable regressions in the changes relative to the specified merge base."
+
+## Round 3 — 2026-10-15T12:39:04Z — 195f935
+
+No findings.
+
+Re-review of the round 1 fixes:
+
+- `CHANGELOG.md:26` Upgrading step 4 now tells apps to add the include by hand and names the `align_sessions_for_appkit` side effect. This matches `install_generator.rb:28-29`: `create_sessions_migration` picks `align_sessions.rb.tt` whenever a `sessions` table exists, and that is a new file name, so `--skip` does not stop it. `plan.md` (Nit 6) still names the `--skip` form of this step; the intent only asks for the generator step to be recorded, so the change still meets it.
+- `test/appkit_test.rb:5` and `test/lockfile_test.rb:14` now call git with an argument array through `IO.popen`. No shell is involved.
+
+Bugs: `Appkit::Revision` reads `source.revision` only when the source responds to it. Checked in this bundle: `Bundler::Source::Git` has `revision`; `Path`, `Gemspec` and `Rubygems` do not, so path, gemspec and released-gem installs fall back to `Appkit::VERSION`. The CI cache hash drops only the `appkit (` lines under `PATH` and `CHECKSUMS`. The generator guard uses `destination_root`, and `inject_into_class` resolves the same relative path. Nothing found.
+
+Security: no new input reaches a shell or a query. `bin/bundler-audit` and the `ci.yml` steps add no secret and no untrusted interpolation. Both Brakeman scans report no warnings.
+
+Checks run on `195f935`: `bin/rails test` (137 runs, 403 assertions, green), `bundle exec rubocop` (88 files, no offenses), `bundle exec erb_lint --lint-all` (12 files, no errors), both Brakeman scans (0 warnings), `bin/bundler-audit check --update` (no vulnerabilities). `git status --porcelain` stayed empty after the runs.
+
+Compliance: unchanged from round 1. Every acceptance criterion has its test or check, and every test named in `plan.md` `## Proof` exists. CI green on a push stays missing until the pull request exists, because `ci.yml` runs on `pull_request` and on pushes to `main` only. No existing test was weakened, skipped or deleted.
