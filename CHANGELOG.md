@@ -23,4 +23,4 @@
 1. Upgrade the app to Rails 8.1 before you move its appkit pin to this SHA. Bundler does not resolve appkit next to Rails 8.0.
 2. If the app calls `rails-ci.yml` from a `pull_request_target` or `workflow_run` trigger, move that call to `pull_request`. Otherwise checkout v7 fails on fork pull requests.
 3. Check that no `before_action` in your `ApplicationController` redirects or blocks `GET /manifest` or `GET /service-worker`; both now inherit it.
-4. Run `bin/rails generate appkit:install --skip` to add `include Appkit::Authentication` to `ApplicationController` when it is missing.
+4. If your `ApplicationController` does not include `Appkit::Authentication`, add `include Appkit::Authentication` to it by hand. Do not re-run `bin/rails generate appkit:install` for this: in an app that has a `sessions` table, it also creates an `align_sessions_for_appkit` migration.
