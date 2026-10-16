@@ -1,5 +1,10 @@
 it:
   appkit:
+    delete_confirmation:
+      open: "Elimina…"
+      confirm: "Elimina"
+      cancel: "Annulla"
+      irreversible: "Questa azione non può essere annullata."
     flash:
       notifications: "Notifiche"
     sessions:

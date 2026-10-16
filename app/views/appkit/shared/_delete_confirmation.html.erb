@@ -1,0 +1,10 @@
+<dialog id="<%= id %>" aria-labelledby="<%= id %>-title">
+  <h2 id="<%= id %>-title"><%= title %></h2>
+  <p><%= t("appkit.delete_confirmation.irreversible") %></p>
+  <footer>
+    <form method="dialog">
+      <button autofocus><%= t("appkit.delete_confirmation.cancel") %></button>
+    </form>
+    <%= button_to t("appkit.delete_confirmation.confirm"), url, method: :delete, form: { data: { turbo_frame: "_top" } } %>
+  </footer>
+</dialog>

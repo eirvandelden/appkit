@@ -1,5 +1,10 @@
 nl:
   appkit:
+    delete_confirmation:
+      open: "Verwijderen…"
+      confirm: "Verwijderen"
+      cancel: "Annuleren"
+      irreversible: "Dit kan niet ongedaan worden gemaakt."
     flash:
       notifications: "Meldingen"
     sessions:

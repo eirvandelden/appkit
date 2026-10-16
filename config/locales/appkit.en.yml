@@ -1,5 +1,10 @@
 en:
   appkit:
+    delete_confirmation:
+      open: "Delete…"
+      confirm: "Delete"
+      cancel: "Cancel"
+      irreversible: "This cannot be undone."
     flash:
       notifications: "Notifications"
     sessions:
