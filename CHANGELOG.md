@@ -31,3 +31,4 @@
 1. Upgrade the app to Rails 8.1 before you move its appkit pin to this SHA. Bundler does not resolve appkit next to Rails 8.0.
 2. If the app calls `rails-ci.yml` from a `pull_request_target` or `workflow_run` trigger, move that call to `pull_request`. Otherwise checkout v7 fails on fork pull requests.
 3. Register the new controller in `app/javascript/controllers/index.js`: `import InvokerController from "appkit/controllers/invoker_controller"` and `application.register("invoker", InvokerController)`. Without it, the `Delete…` opener does nothing in browsers without Invoker Commands.
+4. Run `bundle update mvpa-css` in the app. The delete confirmation dialog and the shared confirm dialog lay out `Cancel | Delete` side by side only with mvpa-css 77697d4 (mvpa.css PR #41) or later.

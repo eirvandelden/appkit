@@ -65,6 +65,7 @@ The host app translates the title (appkit ships en, nl, it).
 Include `Appkit::DeleteConfirmationHelper` in a host helper if the app does not include all helpers.
 The `invoker` controller opens the dialog in browsers without Invoker Commands.
 `Cancel` is filled and autofocused, so Return and Esc delete nothing; `Delete` is red and rightmost.
+The side-by-side `Cancel | Delete` layout needs mvpa-css 77697d4 (mvpa.css PR #41) or later; run `bundle update mvpa-css`.
 
 ### Login page branding
 
