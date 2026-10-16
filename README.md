@@ -61,11 +61,11 @@ On an edit page, render the opener inside the form and the dialog outside it (fo
 <%= render "appkit/shared/delete_confirmation", id: "delete-record", url: record_path(@record), title: t(".delete_title", name: @record.name) %>
 ```
 
-The host app translates the title (appkit ships en, nl, it).
-Include `Appkit::DeleteConfirmationHelper` in a host helper if the app does not include all helpers.
-The `invoker` controller opens the dialog in browsers without Invoker Commands.
-`Cancel` is filled and autofocused, so Return and Esc delete nothing; `Delete` is red and rightmost.
-The side-by-side `Cancel | Delete` layout needs mvpa-css 77697d4 (mvpa.css PR #41) or later; run `bundle update mvpa-css`.
+- The host app translates the title (appkit ships en, nl, it).
+- Include `Appkit::DeleteConfirmationHelper` in a host helper if the app does not include all helpers.
+- The `invoker` controller opens the dialog in browsers without Invoker Commands.
+- `Cancel` is filled and autofocused, so Return and Esc delete nothing; `Delete` is red and rightmost.
+- The side-by-side `Cancel | Delete` layout needs mvpa-css 77697d4 (mvpa.css PR #41) or later; run `bundle update mvpa-css`.
 
 ### Login page branding
 
