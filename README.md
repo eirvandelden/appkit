@@ -42,11 +42,28 @@ application.register("theme", ThemeController)
 
 import AutoSubmitController from "appkit/controllers/auto_submit_controller"
 application.register("auto-submit", AutoSubmitController)
+
+import InvokerController from "appkit/controllers/invoker_controller"
+application.register("invoker", InvokerController)
 ```
 
 Skipping `auto-submit` breaks the session-transfer (magic-link) flow
 silently: the transfer `show` page renders but never submits, so the
 user gets stuck on the intermediate page instead of being logged in.
+
+### Delete confirmation
+
+On an edit page, render the opener inside the form and the dialog outside it (forms cannot nest):
+
+```erb
+<%= delete_confirmation_opener "delete-record" %>
+...
+<%= render "appkit/shared/delete_confirmation", id: "delete-record", url: record_path(@record), title: "Delete #{@record.name}?" %>
+```
+
+Include `Appkit::DeleteConfirmationHelper` in a host helper if the app does not include all helpers.
+The `invoker` controller opens the dialog in browsers without Invoker Commands.
+`Cancel` is filled and autofocused, so Return and Esc delete nothing; `Delete` is red and rightmost.
 
 ### Login page branding
 
