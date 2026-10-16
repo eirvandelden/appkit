@@ -16,6 +16,9 @@ module Appkit
         502.html
       ].freeze
 
+      APPLICATION_CONTROLLER = "app/controllers/application_controller.rb"
+      AUTHENTICATION_INCLUDE = /^\s*include\s+Appkit::Authentication\b/
+
       def self.next_migration_number(dirname)
         next_number = current_migration_number(dirname) + 1
         ActiveRecord::Migration.next_migration_number(next_number)
@@ -33,6 +36,13 @@ module Appkit
         migration_template "create_appkit_push_subscriptions.rb.tt", "db/migrate/create_appkit_push_subscriptions.rb"
       end
 
+      def add_authentication_to_application_controller
+        return unless File.exist?(application_controller_file)
+        return if File.read(application_controller_file).match?(AUTHENTICATION_INCLUDE)
+
+        inject_into_class APPLICATION_CONTROLLER, "ApplicationController", "  include Appkit::Authentication\n"
+      end
+
       def copy_error_pages
         ERROR_PAGES.each { |page| copy_file "public/#{page}", "public/#{page}" }
       end
@@ -46,6 +56,10 @@ module Appkit
           ActiveRecord::Base.connection.table_exists?(:sessions)
         rescue ActiveRecord::NoDatabaseError, ActiveRecord::ConnectionNotEstablished
           false
+        end
+
+        def application_controller_file
+          File.join(destination_root, APPLICATION_CONTROLLER)
         end
     end
   end

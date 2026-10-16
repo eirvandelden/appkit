@@ -82,10 +82,10 @@ module Appkit
       assert_match(/addEventListener\(['"]notificationclick['"]/, response.body)
     end
 
-    test "service worker cache name includes the engine version" do
+    test "service worker cache name includes the appkit revision" do
       get service_worker_url
 
-      assert_match Appkit::VERSION, response.body
+      assert_includes response.body, "const CACHE_NAME = 'appkit-#{Appkit.revision}'"
     end
   end
 end

@@ -11,10 +11,10 @@ Host apps own the `User` and `Session` models. Some engine code reaches them thr
 ## Commands
 
 - Install: `bundle install`. The Ruby version comes from `.ruby-version` via `rv`.
-- Test: `bundle exec rake test` (Minitest, `test/**/*_test.rb`, against `test/dummy`).
-- One test file: `bundle exec ruby -Itest test/models/appkit/push_subscription_test.rb`. `bin/rails test <file>` fails here with `cannot load such file -- test_helper`.
-- Lint: `bundle exec rubocop`.
-- Security: `bundle exec brakeman -p test/dummy --no-pager --ignore-config config/brakeman.ignore`, then `bundle exec brakeman -p . --force-scan --no-pager --ignore-config config/brakeman.gem.ignore`, then `bundle exec bundler-audit check --update`.
+- Test: `bin/rails test` or `bundle exec rake test` (Minitest, `test/**/*_test.rb`, against `test/dummy`).
+- One test file: `bin/rails test test/models/appkit/push_subscription_test.rb`. `bin/rails test` prints `Unrecognized command "db:test:prepare"` first. The tests still run.
+- Lint: `bundle exec rubocop`, and `bundle exec erb_lint --lint-all` for the ERB views.
+- Security: `bundle exec brakeman -p test/dummy --no-pager --ignore-config config/brakeman.ignore`, then `bundle exec brakeman -p . --force-scan --no-pager --ignore-config config/brakeman.gem.ignore`, then `bin/bundler-audit check --update`.
 - VAPID keys: a host app runs `bin/rails appkit:vapid_keys` (`lib/tasks/appkit.rake`). It generates a web push key pair and prints both keys and a `credentials.yml.enc` snippet. The task does not run in this repository: `bin/rails -T` here lists only the tasks from the gem `Rakefile`. The output holds the private key, so do not run it in a shared log.
 - CI: `.github/workflows/ci.yml` runs the same scans, RuboCop and tests.
 
@@ -24,13 +24,13 @@ Host apps own the `User` and `Session` models. Some engine code reaches them thr
 - `mvpa-css` is a git co-gem declared in `Gemfile`, not in `appkit.gemspec`. Apps add it to their own `Gemfile`.
 - Apps register appkit's Stimulus controllers by hand in their own `controllers/index.js`. A missing `auto-submit` registration silently breaks the magic-link flow (README).
 - The engine's own `login` layout renders `javascript_importmap_tags`. An app that overrides that layout must keep the tag, or the magic-link flow breaks.
-- `lib/appkit/version.rb` appends the short git SHA to the version. Once HEAD has moved since `Gemfile.lock` was written, any `bundle exec` or `bin/rails` command rewrites the `appkit (0.1.0.pre.git.<sha>)` self-reference in it. Do not commit that rewrite with an unrelated change.
+- `lib/appkit/version.rb` appends the short git SHA to the version, so appkit does not commit `Gemfile.lock` (it is in `.gitignore`). A fresh clone and CI resolve the newest allowed gems. An existing checkout keeps its own lockfile until `bundle update`. The service worker cache name reads `Appkit.revision` (`lib/appkit/revision.rb`), which uses the full SHA from a host's Bundler git source, so it also rotates when a Docker build deletes the gem's `.git` directory.
 - `test/dummy/db/schema.rb` is hand-written, and `test/test_helper.rb` loads it on every run. A new migration template needs the matching schema edit there.
 - `test/test_helper.rb` clears `Rails.cache` before each test, because the `sessions#create` rate limiter counts attempts in the cache.
 - `Appkit::SessionExpiryJob` keeps its name although it breaks `Obsession/Rails/ServiceName`. Apps schedule it by name in `config/recurring.yml` (`.rubocop_todo.yml`).
 - Apps call `.github/workflows/rails-ci.yml` at `@main`, not at their pinned SHA. A change there reaches every app's CI at merge. Add a new input only as optional, with a default, so no app's CI breaks. The workflow also uses app files: the binstubs `bin/brakeman`, `bin/bundler-audit`, `bin/importmap`, `bin/rubocop` and `bin/rails`. Never make it need a new binstub, file or secret that apps may not have. The repository must stay public (README).
 - Brakeman runs twice with two ignore files: `config/brakeman.ignore` for the dummy app and `config/brakeman.gem.ignore` for the gem root (`ci.yml`).
-- `lefthook-local.yml` skips the CSS, JS and ERB hooks, the per-file test hooks and the Brakeman and bundler-audit pre-push hooks. CI runs the tests, RuboCop, Brakeman and bundler-audit. No CSS, JS or ERB lint runs anywhere, so check those files by hand.
+- `lefthook-local.yml` skips the CSS and JS hooks and the Brakeman and bundler-audit pre-push hooks. The ERB lint (`bundle exec erb_lint`) and the per-file test hook run. CI runs the tests, RuboCop, Brakeman and bundler-audit, not erb_lint. No CSS or JS lint runs anywhere, so check those files by hand.
 - Re-running `bin/rails generate appkit:install` in an app that already ran it needs `--skip`. Without it, an existing migration with changed content raises a conflict. The generator picks `align_sessions_for_appkit` over `create_sessions` whenever a `sessions` table exists.
 - Use `rv` for Ruby. Do not use mise, asdf, rbenv or rvm.
 

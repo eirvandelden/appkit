@@ -2,14 +2,26 @@
 # Local lefthook configuration for the appkit gem
 # Extends the global lefthook.yml from dotfiles
 
+# appkit does not commit Gemfile.lock, so a stale local one must be completed
+# before it is installed: bundle lock keeps locked versions, rv ci installs them.
+migrations:
+  commands:
+    bundle:
+      glob:
+        - Gemfile
+        - appkit.gemspec
+      run: bundle lock && rv ci
+
 pre-commit:
   commands:
     stylelint:
       skip: true
     browserslist:
       skip: true
+    # bundle exec: the RuboCop linter inherits rubocop-eirvandelden, a
+    # git-sourced gem that only Bundler can load.
     erb_lint:
-      skip: true
+      run: bundle exec erb_lint {staged_files}
     eslint:
       skip: true
 
@@ -20,17 +32,16 @@ pre-push:
     browserslist:
       skip: true
     erb_lint:
-      skip: true
+      run: bundle exec erb_lint {push_files}
     eslint:
-      skip: true
-    minitest:
       skip: true
     rspec:
       skip: true
-    # No bin/brakeman or bin/bundler-audit binstubs at gem root, and CI already
-    # runs both correctly (dummy-app + gem-root scans, proper --ignore-config
+    # There is no bin/brakeman binstub at gem root, and CI already runs both
+    # scans correctly (dummy-app + gem-root scans, proper --ignore-config
     # flags) — a bare pre-push run here would just duplicate CI without that
-    # wiring and block on already-handled false positives.
+    # wiring and block on already-handled false positives. CI also runs
+    # bundler-audit.
     brakeman:
       skip: true
     bundle-audit:

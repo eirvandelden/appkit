@@ -53,7 +53,55 @@ module Appkit
         end
       end
 
+      test "adds include Appkit::Authentication to an ApplicationController that lacks it" do
+        write_application_controller
+
+        run_generator
+
+        assert_file "app/controllers/application_controller.rb", /^  include Appkit::Authentication$/
+      end
+
+      test "running the generator twice leaves one include Appkit::Authentication" do
+        write_application_controller
+
+        2.times { run_generator }
+
+        assert_equal 1, application_controller.scan("include Appkit::Authentication").size
+      end
+
+      test "leaves an ApplicationController that already includes Appkit::Authentication unchanged" do
+        write_application_controller "class ApplicationController < ActionController::Base\n    include  Appkit::Authentication\nend\n"
+
+        assert_no_changes -> { application_controller } do
+          run_generator
+        end
+      end
+
+      test "skips the include when the host has no ApplicationController" do
+        run_generator
+
+        assert_no_file "app/controllers/application_controller.rb"
+      end
+
+      test "adds the include when run with --skip" do
+        write_application_controller
+
+        run_generator %w[--skip]
+
+        assert_file "app/controllers/application_controller.rb", /^  include Appkit::Authentication$/
+      end
+
       private
+        def write_application_controller(content = "class ApplicationController < ActionController::Base\nend\n")
+          path = File.join(destination_root, "app/controllers/application_controller.rb")
+          FileUtils.mkdir_p File.dirname(path)
+          File.write path, content
+        end
+
+        def application_controller
+          File.read File.join(destination_root, "app/controllers/application_controller.rb")
+        end
+
         def without_sessions_table
           connection = ActiveRecord::Base.connection
           original = connection.method(:table_exists?)
