@@ -16,7 +16,7 @@ module Appkit
     end
 
     test "opener label is translated with an ellipsis" do
-      assert_dom_equal I18n.t("appkit.delete_confirmation.open"),
+      assert_equal I18n.t("appkit.delete_confirmation.open"),
         Nokogiri::HTML.fragment(delete_confirmation_opener("x")).at_css("button").text
       assert_equal "Delete…", I18n.t("appkit.delete_confirmation.open", locale: :en)
       assert_equal "Verwijderen…", I18n.t("appkit.delete_confirmation.open", locale: :nl)
