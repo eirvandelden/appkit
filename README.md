@@ -58,9 +58,10 @@ On an edit page, render the opener inside the form and the dialog outside it (fo
 ```erb
 <%= delete_confirmation_opener "delete-record" %>
 ...
-<%= render "appkit/shared/delete_confirmation", id: "delete-record", url: record_path(@record), title: "Delete #{@record.name}?" %>
+<%= render "appkit/shared/delete_confirmation", id: "delete-record", url: record_path(@record), title: t(".delete_title", name: @record.name) %>
 ```
 
+The host app translates the title (appkit ships en, nl, it).
 Include `Appkit::DeleteConfirmationHelper` in a host helper if the app does not include all helpers.
 The `invoker` controller opens the dialog in browsers without Invoker Commands.
 `Cancel` is filled and autofocused, so Return and Esc delete nothing; `Delete` is red and rightmost.
