@@ -86,6 +86,9 @@ jobs:
         with:
           node-version: 24
 
+      - name: Install JavaScript packages
+        run: if [ -f package-lock.json ]; then npm ci; fi
+
       - name: Set up Ruby
         uses: spinel-coop/setup-rv@main
         with:
