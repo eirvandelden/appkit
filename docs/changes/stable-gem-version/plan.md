@@ -1,118 +1,81 @@
-# Plan: Stop tracking appkit's own Gemfile.lock
+# Plan: Finish the untracked-lockfile follow-ups in CI and lefthook
 
-From `intent.md` (2026-10-07). Status: accepted.
+From `intent.md` (2026-10-16). Status: accepted.
 
 ## Context
 
-`lib/appkit/version.rb` builds the appkit version from the checked-out commit (`0.1.0.pre.git.<short sha>`). The committed `Gemfile.lock` records that version, so it always names the commit before the one it is in, and every `bundle` run changes it. A file cannot name its own commit. The intent chose: the version keeps naming the commit, and appkit stops committing its lockfile. Host apps read only `appkit.gemspec`, so they see no change. Local runs and CI resolve the newest gems that `appkit.gemspec` and `Gemfile` allow.
+PR #18 (`d837929`) stopped tracking appkit's `Gemfile.lock`. This branch keeps four follow-ups that `main` lacks: a read-only CI token, short gem cache lines in `ci.yml`, `no_auto_install: true` in `lefthook-local.yml`, and a running pre-push `bundle-audit` hook. The branch is based on `origin/main` (`e47907f`). Its non-docs diff against `main` touches only `.github/workflows/ci.yml` and `lefthook-local.yml`, and those hunks already implement the first four in-scope items. The one item left is `AGENTS.md`, which still says the bundler-audit pre-push hook is skipped.
+
+State checked on 2026-10-19 at `49db101`:
+
+- `ci.yml` has `permissions: contents: read` and the `gems` step writes `hash`, `cache-prefix` and `cache-key`; the cache steps use the last two.
+- `yamllint .github/workflows/ci.yml` reports only `1:1 document-start` and `107:121 line-length (163)`, the RuboCop cache key that the intent leaves out of scope. Both are on `main` too.
+- `lefthook dump` shows top-level `no_auto_install: true`, and `pre-push.bundle-audit` with `glob: ['{Gemfile,appkit.gemspec}']`, no `skip`, `run: bin/bundler-audit --config config/bundler-audit.yml`.
+- `bin/bundler-audit` and `config/bundler-audit.yml` are tracked on `main`.
+- `~/.config/git/hooks/*` are all symlinks into `~/Developer/dotfiles/git/.config/git/hooks/`.
+- `AGENTS.md:37` says "skips … the Brakeman and bundler-audit pre-push hooks".
+- `ci.yml` runs on `pull_request` and on push to `main` only, so a branch push alone runs no CI. No pull request exists for `stable-gem-version`.
 
 ## Design decisions
 
-- Untrack, do not delete: `git rm --cached Gemfile.lock` and add `/Gemfile.lock` to `.gitignore`. A local lockfile stays on disk, untracked and ignored.
-- CI resolves, then installs with rv, with a gem cache. setup-rv's `install-gems: true` runs `rv ci`, and `rv ci` needs a `Gemfile.lock`. So each job in `ci.yml` runs: setup-rv with `ruby-version` only (step `id: ruby`); `bundle lock` (step `id: gems`) to write a fresh lockfile; `actions/cache@v5` on `vendor/bundle`; `BUNDLE_PATH=vendor/bundle rv ci`, then `echo "BUNDLE_PATH=vendor/bundle" >> "$GITHUB_ENV"`. This mirrors setup-rv's own `action.sh`. Etienne chose this over a plain `bundle install` (2026-10-07).
-- The gem cache key leaves out the appkit lines. The generated lockfile names the commit (`appkit (0.1.0.pre.git.<sha>)`, under PATH and CHECKSUMS), so a plain `hashFiles('Gemfile.lock')` key would miss on every commit and save a new cache entry every run. The `gems` step computes `hash=$(grep -v '^ *appkit (' Gemfile.lock | sha256sum | cut -d' ' -f1)` and writes three outputs to `$GITHUB_OUTPUT`: `hash`, `cache-prefix` (`gems-$RUNNER_OS-$RUNNER_ARCH-ruby-<setup-rv's ruby-version>-`) and `cache-key` (the prefix plus the hash). The cache step uses `cache-key` as its key and `cache-prefix` as its restore-key, which keeps those lines under yamllint's 120 characters. The key then changes only when a gem version changes.
-- The RuboCop cache key in the `lint` job uses the same hash: `DEPENDENCIES_HASH: ${{ hashFiles('**/.rubocop.yml') }}-${{ steps.gems.outputs.hash }}`. This keeps today's meaning (config plus gem versions) without the per-commit appkit line.
-- `bin/bundler-audit` is added (Etienne's choice, 2026-10-07). It follows the Rails 8.1 template (`railties-8.1.4/lib/rails/generators/rails/app/templates/bin/bundler-audit.tt`), but requires `../test/dummy/config/boot` as `bin/rails` does, because the engine root has no `config/boot.rb`. File mode 755. `config/bundler-audit.yml` is added with the Rails template comment and `ignore: []`.
-- CI's `scan_ruby` runs `bin/bundler-audit check --update` instead of `bundle exec bundler-audit check --update`, so CI and the hook read the same `config/bundler-audit.yml`.
-- The pre-push `bundle-audit` hook is un-skipped in `lefthook-local.yml`. Its glob becomes `Gemfile` and `appkit.gemspec`, because most of appkit's dependencies live in the gemspec. The existing comment there is narrowed to brakeman only.
-- The lefthook `migrations` → `bundle` step is overridden in `lefthook-local.yml` to always run `bundle install`, with glob `Gemfile` and `appkit.gemspec`. The shared command runs `rv ci` whenever a `Gemfile.lock` exists, and here that file is untracked and can be stale: `rv ci` would install the stale set and miss what `Gemfile` or the gemspec now need. `bundle install` keeps the local versions and adds what is missing. Before this change, gemspec changes also changed `Gemfile.lock`, which matched `Gemfile*`. Now they change no `Gemfile*` file, so the gemspec must be in the glob.
-- `lefthook-local.yml` sets `no_auto_install: true`, as the dotfiles' own `lefthook.yml` does. `core.hooksPath` is the global `~/.config/git/hooks`, so without it any `lefthook run` in appkit syncs lefthook's generated hooks there and replaces the stowed hooks. Found in review round 2 (2026-10-08).
-- Pulling this change deletes an existing checkout's lockfile (see Risks), so its next `bundle install` resolves the newest allowed gems. From then on, the local lockfile stays untracked and keeps its gem versions until someone runs `bundle update`. Fresh clones and CI get the newest gems. Etienne accepted this (2026-10-07). The README says so.
-- `rails-ci.yml` does not change. It runs inside host apps, which commit their own `Gemfile.lock`; it never reads appkit's. Etienne confirmed (2026-10-07).
-
-Conflicts flagged against the intent:
-
-- The intent lists `rails-ci.yml` in scope. It needs no change, for the reason above.
-- The intent assumes `bin/bundler-audit` exists. It does not; this plan adds it.
-- The intent's outcome says local runs install the newest gems. That holds for a fresh clone only. Playbook rule 11 also forbids agents to run a bare `bundle update` without instruction.
-- `lefthook-local.yml` skipped bundle-audit because "CI already runs it". Re-enabling it reverses that earlier choice, on Etienne's instruction.
+- Keep the committed `ci.yml` and `lefthook-local.yml` hunks as they are. They match the intent; this plan only re-verifies them.
+- `AGENTS.md:37` becomes: `lefthook-local.yml` skips the CSS and JS hooks and the Brakeman pre-push hook. The bundler-audit pre-push hook runs `bin/bundler-audit` when `Gemfile` or `appkit.gemspec` changes. On a machine without the advisory database, run `bin/bundler-audit update` once first, because the download can fail inside a git hook. The rest of the line (ERB lint, per-file test hook, CI scope, CSS/JS by hand) stays unchanged. The third sentence records the intent's flagged concern where a developer meets it.
+- Edit `AGENTS.md` only. `CLAUDE.md` is a tracked symlink to it; `agents.md` is the same file on the case-insensitive file system.
+- No `CHANGELOG.md` entry and no `### Upgrading`: `ci.yml` and `lefthook-local.yml` are appkit-only, and AGENTS.md lists "changes to the engine's own `.github/workflows/ci.yml`" as needing none.
+- `docs/changes/stable-gem-version/review.md` holds rounds 1–3 against the pre-narrowing scope. Leave it; the next `review` run appends a new round.
 
 ## Integration points
 
-- GitHub Actions: `spinel-coop/setup-rv@main` (outputs `ruby-version`), `actions/cache@v5`, `rv ci`, Bundler 4 `bundle lock`.
-- Lefthook 2.1.11, through the global `core.hooksPath` (`~/.config/git/hooks`), which runs the repo's own `lefthook.yml` merged with `lefthook-local.yml`.
-- bundler-audit 0.9.3 and the ruby-advisory-db.
-- `lib/appkit/version.rb` (read only; no change).
+- GitHub Actions token permissions, `actions/cache@v6`, `spinel-coop/setup-rv@main` (`ruby-version` output).
+- Lefthook 2.2.2 through the global `core.hooksPath` (`~/.config/git/hooks`), merging `lefthook.yml` and `lefthook-local.yml`.
+- bundler-audit through `bin/bundler-audit` and `config/bundler-audit.yml`.
 
 ## Files that change
 
-- `.gitignore` — add `/Gemfile.lock`.
-- `Gemfile.lock` — removed from the index (`git rm --cached`); stays on disk.
-- `test/lockfile_test.rb` — new; proves the lockfile is untracked and ignored.
-- `test/appkit_test.rb` — "version is present" becomes "version names the checked-out commit".
-- `bin/bundler-audit` — new binstub, mode 755.
-- `config/bundler-audit.yml` — new; Rails template comment, `ignore: []`.
-- `lefthook-local.yml` — set `no_auto_install: true`; override `migrations.commands.bundle` (`run: bundle install`, gemspec in glob); un-skip `pre-push.commands.bundle-audit` with the wider glob; narrow the comment to brakeman.
-- `.github/workflows/ci.yml` — per job: Ruby-only setup-rv, `bundle lock` with the hash output, gem cache, `rv ci`; RuboCop cache key; `bin/bundler-audit`. One short comment above `jobs:` says why.
-- `README.md` — new `## Development` section, before `## Continuous Integration`.
+- `AGENTS.md` — line 37, as in Design decisions.
+
+Already changed on this branch, re-verified only: `.github/workflows/ci.yml`, `lefthook-local.yml`.
 
 ## Order of work
 
-Each step is one commit. Run `bin/rails test <file>` for the narrowest check first.
-
-1. Write `test/lockfile_test.rb` with "Gemfile.lock is not tracked by git" (`git -C <engine root> ls-files Gemfile.lock` prints nothing) and "git ignores Gemfile.lock" (`git -C <engine root> check-ignore Gemfile.lock` prints the path). Run it. Watch both fail: the file is tracked, and `check-ignore` never reports a tracked file.
-2. Add `/Gemfile.lock` to `.gitignore`. Run `git rm --cached Gemfile.lock`. Run the test: green. Commit with the test. Then check by hand: `bundle install && git status --porcelain` prints nothing.
-3. Replace "version is present" in `test/appkit_test.rb` with "version names the checked-out commit": `assert_equal "#{Appkit::BASE_VERSION}.pre.git.#{short sha}", Appkit::VERSION`, the sha from `git -C <engine root> rev-parse --short HEAD`. It passes at once: it pins existing behaviour. Commit.
-4. Add `bin/bundler-audit` and `config/bundler-audit.yml`. Run `bin/bundler-audit check --update` and `bin/bundler-audit --config config/bundler-audit.yml` (the hook's form): both exit 0. Run RuboCop on `bin/bundler-audit`. Commit.
-5. Edit `lefthook-local.yml`. Run `lefthook dump` and check the merged `migrations.bundle` and `pre-push.bundle-audit` entries (run, glob, no skip). Run `yamllint`. Commit.
-6. Edit `.github/workflows/ci.yml`. Run `yamllint` (warnings only, as today). Commit.
-7. Add the README `## Development` section. One line per paragraph. Content: appkit does not commit `Gemfile.lock`; why (the version names the commit, so a committed lockfile can never match its own commit; host apps read only `appkit.gemspec`); `bundle install` and CI resolve the newest gems that `appkit.gemspec` and `Gemfile` allow, so two runs on one commit can use different versions; a local lockfile stays untracked, and `bundle update` moves it to newer gems. Commit.
-8. Fresh-clone check (Verification below).
-9. Full checks in the worktree: `bundle exec rake test`, `bundle exec rubocop`, both Brakeman scans from `ci.yml`, `bin/bundler-audit check --update`.
-10. Push, open the PR from the repo template if one exists, and watch CI: `gh pr checks --watch`.
-
-## Verification
-
-Fresh-clone check, in a throwaway clone under the session scratchpad:
-
-```sh
-git clone --branch stable-gem-version <worktree path> <scratch>/appkit-clone
-cd <scratch>/appkit-clone
-test ! -e Gemfile.lock
-lefthook run migrations --no-auto-install --command bundle -f
-git status --porcelain            # prints nothing; Gemfile.lock now exists, ignored
-lefthook run pre-push --no-auto-install --command bundle-audit -f
-bin/bundler-audit check --update
-```
-
-`--no-auto-install` stops lefthook from writing its own hooks into the global `core.hooksPath` (`~/.config/git/hooks`), where they would replace the stowed symlinks. `no_auto_install: true` in `lefthook-local.yml` does the same for every run; the flag also covers a clone made before that key existed. `-f` is `--force`; the consent guard reads `--force` as a git push flag and blocks it.
-
-If lefthook stops because the clone has no `ORIG_HEAD`, run `git update-ref ORIG_HEAD HEAD~1` in that clone only, then retry.
+1. Run the AGENTS.md check from Proof. Watch it fail: `AGENTS.md:37` still names the bundler-audit hook as skipped.
+2. Edit `AGENTS.md:37`. One line, as the file has it. Run the check: green. Commit (`Say that the bundler-audit pre-push hook runs`).
+3. Run the yamllint check from Proof: no `line-length` warning on the gem cache lines (only line 107 remains).
+4. Run the two `lefthook dump` checks from Proof.
+5. Run the hook-symlink check from Proof: record `ls -l ~/.config/git/hooks`, run `lefthook run pre-commit -f` in the worktree with nothing staged, then confirm every entry is still a symlink into the dotfiles. Do not pass `--no-auto-install`: the point is that the config key alone prevents the sync. Run it against the real global hooks, not a scratch clone (Etienne's choice, 2026-10-19).
+6. Run the full local checks: `bundle exec rake test`, `bundle exec rubocop`, `bundle exec erb_lint --lint-all`, both Brakeman scans from `ci.yml`, `bin/bundler-audit check --update`.
+7. Push the branch (`git push origin HEAD`). The CI criterion is proven when `deliver` opens the draft pull request and `gh pr checks --watch` shows `scan_ruby`, `lint` and `test` green.
 
 ## Risks
 
-- A new gem release can turn CI red on an unchanged commit. The intent accepts this.
-- `actions/cache` jobs share one key; the second and third job to finish log "cache already exists". This is harmless; setup-rv behaves the same.
-- Pulling this change into an existing checkout deletes its local `Gemfile.lock`, because git removes a file that stops being tracked. The post-merge bundle step does not write it again: that pull changes neither `Gemfile` nor `appkit.gemspec`, so the glob `{Gemfile,appkit.gemspec}` skips the step. The lockfile returns on the next `bundle install` or `bundle exec`.
-- Open branches that still change `Gemfile.lock` get a modify/delete conflict when they rebase onto main. Resolve it with `git rm --cached Gemfile.lock`.
-- `config/bundler-audit.yml` ships in the gem, because `spec.files` takes all of `config/**`. It is inert there, as `config/brakeman.ignore` already is.
-- The pre-push hook runs `bin/bundler-audit` without `--update`. On a machine without the advisory database, bundler-audit downloads it with git inside the hook, where git exports `GIT_DIR`; that download can fail. Run `bin/bundler-audit update` once by hand. This machine has the database.
-- Rejected: a plain `bundle install` in CI (Etienne preferred the cached rv path); hashing the whole generated lockfile for the cache key (misses on every commit); calling setup-rv twice to reuse its cache logic (installs rv twice, depends on its internals); changing `rails-ci.yml` (host apps must stay locked).
+- `lefthook run pre-commit -f` in step 5 with a missing or stale `no_auto_install` would rewrite the global hooks. The key is confirmed in `lefthook dump` in step 4 first. If the hooks still change, stop and report; restoring them is out of scope (rule 12).
+- The pre-push hook downloads the advisory database where it is missing and can fail inside the hook (`GIT_DIR` is exported). Accepted in the intent; the AGENTS.md line says how to avoid it.
+- `permissions: contents: read` could starve a step that needs more. Checked in review round 2: `actions/cache` uses the runtime token and `rubocop -f github` writes annotations to stdout. The PR's CI run confirms it.
+- Rejected: shortening the RuboCop cache key line too (out of scope per the intent); a Minitest test that parses `AGENTS.md` or the YAML files (it would pin prose and config, not behaviour).
 
 ## Out of scope
 
+- Everything PR #18 delivered.
 - `rails-ci.yml` and the install generator's CI template.
-- Syncing appkit's older `lefthook.yml` copy with the dotfiles one (binstub-free bundle-audit, brakeman guard, `post-rewrite`, migration globs). Propose as a separate branch.
-- A CHANGELOG entry, an `AGENTS.md` for appkit, publishing to RubyGems, the dotfiles worktree sweep bug.
+- The RuboCop cache `key` line (`ci.yml:107`, 163 characters).
+- Restoring global hooks that an earlier run replaced.
+- Rewording the pre-narrowing commit messages.
 
 ## Proof
 
-- After a commit, `bundle install` leaves `git status` clean → `test/lockfile_test.rb` "Gemfile.lock is not tracked by git" and "git ignores Gemfile.lock"; by hand, `bundle install && git status --porcelain` prints nothing (step 2 and the fresh-clone check).
-- In a checkout of commit `abc1234`, the version is `0.1.0.pre.git.abc1234` → `test/appkit_test.rb` "version names the checked-out commit".
-- On a push, CI installs gems and runs tests, RuboCop, Brakeman and bundler-audit → the `CI` workflow run on the PR: `scan_ruby`, `lint` and `test` green (`gh pr checks --watch`).
-- After a fresh clone, the lefthook bundle step installs gems and `bin/bundler-audit` runs → the fresh-clone check under Verification exits 0 at every line.
-- The README says appkit does not commit its `Gemfile.lock`, and why → `README.md` `## Development`; checked by reading the diff.
+- `ci.yml` declares `permissions: contents: read`, and the PR's CI run passes → check: `grep -A1 '^permissions:' .github/workflows/ci.yml` prints `contents: read`; `gh pr checks --watch` on the draft PR shows `scan_ruby`, `lint`, `test` green.
+- No `line-length` warning on the gem cache lines → check: `yamllint .github/workflows/ci.yml | grep line-length` prints only the line-107 warning.
+- `no_auto_install: true`, and the global hooks stay symlinks after a run → check: `lefthook dump | grep '^no_auto_install: true'`; then step 5: `find ~/.config/git/hooks -mindepth 1 ! -type l` prints nothing before and after `lefthook run pre-commit -f`.
+- `pre-push.bundle-audit` runs without `skip`, glob `{Gemfile,appkit.gemspec}` → check: `lefthook dump | sed -n '/^    bundle-audit:/,/^    [a-z_]*:$/p'` shows the glob and no `skip:` line.
+- `AGENTS.md` no longer says the bundler-audit hook is skipped → check: `! grep -n 'Brakeman and bundler-audit pre-push hooks' AGENTS.md && grep -n 'bundler-audit pre-push hook runs' AGENTS.md`.
 
 Per changed file, the unit tests expected:
 
-- `.gitignore`, `Gemfile.lock`: `LockfileTest` "Gemfile.lock is not tracked by git", "git ignores Gemfile.lock".
-- `test/appkit_test.rb`: `AppkitTest` "version names the checked-out commit".
-- `bin/bundler-audit`, `config/bundler-audit.yml`: no unit test; a test would hit the network and fail on any new advisory. Proven by CI's `scan_ruby` step and the fresh-clone check.
-- `lefthook.yml`, `lefthook-local.yml`: no unit test; proven by `lefthook dump` and the fresh-clone check.
-- `.github/workflows/ci.yml`: proven by the PR's CI run.
-- `README.md`: none.
+- `AGENTS.md`: none; documentation, proven by the grep check.
+- `.github/workflows/ci.yml`: none; proven by yamllint and the PR's CI run.
+- `lefthook-local.yml`: none; proven by `lefthook dump` and the hook-symlink check.
 
-Test setup: none. Both tests shell out to `git -C Appkit::Engine.root`; CI's `actions/checkout` gives a git checkout.
+Test setup: none. No Ruby code changes, so `bundle exec rake test` must stay at its current count with 0 failures.
 
 ---
-Domain skills applied: dependencies (no bare `bundle update`, gem.coop source), new-repo-setup (lefthook rules: never `lefthook install`, never disable hooks).
+Domain skills applied: dependencies (no gem changes), new-repo-setup (lefthook: never `lefthook install`, never disable hooks).
