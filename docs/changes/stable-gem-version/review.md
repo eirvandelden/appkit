@@ -21,7 +21,7 @@ Checks run on `e39d8c1`: `bundle exec rake test` 105 runs, 0 failures. The two c
 
 ## Round 2 — 2026-10-08T08:01Z — 4c57978
 
-- [ ] Important: The global hooks `~/.config/git/hooks/{pre-commit,pre-push,post-merge}` are still lefthook-generated files, not the stow symlinks. Round 1's finding was closed by a plan text fix only. The hooks were re-synced again at 2026-10-08 09:53 CEST, the minute `fa5675a` was committed. The cause: appkit's lefthook config lacks the dotfiles' `no_auto_install: true`. So any `lefthook run` in appkit re-syncs the global hooks. That includes the generated hooks themselves and the nested `lefthook run migrations` at `lefthook.yml:221`. The generated hooks also drop `set_global_config`. So a repo without its own `lefthook.yml` runs no hooks at all. In a scratch repo, `lefthook run pre-commit` printed "No config files … have been found" and exited 0. That silently disables `no-push-to-main`, the linters and Brakeman there. Add `no_auto_install: true` to `lefthook-local.yml`, which this branch already edits. Use a separate branch if that counts as the out-of-scope lefthook sync. Restoring the three symlinks needs Etienne (rule 12). — `lefthook-local.yml:4` → fixed (Stop lefthook in appkit from replacing the global git hooks). Restoring the three stowed symlinks is left to Etienne (rule 12)
+- [ ] Important: The global hooks `~/.config/git/hooks/{pre-commit,pre-push,post-merge}` are still lefthook-generated files, not the stow symlinks. Round 1's finding was closed by a plan text fix only. The hooks were re-synced again at 2026-10-08 09:53 CEST, the minute `fa5675a` was committed. The cause: appkit's lefthook config lacks the dotfiles' `no_auto_install: true`. So any `lefthook run` in appkit re-syncs the global hooks. That includes the generated hooks themselves and the nested `lefthook run migrations` at `lefthook.yml:221`. The generated hooks also drop `set_global_config`. So a repo without its own `lefthook.yml` runs no hooks at all. In a scratch repo, `lefthook run pre-commit` printed "No config files … have been found" and exited 0. That silently disables `no-push-to-main`, the linters and Brakeman there. Add `no_auto_install: true` to `lefthook-local.yml`, which this branch already edits. Use a separate branch if that counts as the out-of-scope lefthook sync. Restoring the three symlinks needs Etienne (rule 12). — `lefthook-local.yml:4` → fixed (Stop lefthook in appkit from replacing the global git hooks)
 - [ ] Nit: Design decisions still say an existing checkout keeps its untracked lockfile and its gem versions. The corrected Risks line says that pulling this change deletes that lockfile. After that pull, the next `bundle install` resolves the newest allowed gems. Align line 19 with line 85. — `docs/changes/stable-gem-version/plan.md:19` → fixed (Align the plan's lockfile decision with its Risks)
 - [ ] Nit: The three new cache-key lines are 130 characters long, so yamllint warns `line-length` at lines 36, 78 and 123. Playbook rule 2 says to fix all linter issues in touched files. For example, the `gems` step can write the whole key to `$GITHUB_OUTPUT`. — `.github/workflows/ci.yml:36` → fixed (Build the gem cache key in the resolve step)
 
@@ -64,3 +64,51 @@ Outside the diff, still open: `~/.config/git/hooks/{pre-commit,pre-push,post-mer
 Security: no new finding. `permissions: contents: read` is in place. The `gems` step gets the Ruby version through `env`, not through `${{ }}` inside `run`, so the step has no expression injection.
 
 Checks run on `54282c7`: `bundle exec rake test` 105 runs, 0 failures. RuboCop: 83 files, no offenses. Both Brakeman scans from `ci.yml`: no warnings. `bin/bundler-audit check`: no vulnerabilities (local advisory database, not updated). yamllint: warnings only, none new.
+
+## Round 4 — 2026-10-19T08:52Z — 3f71d42
+
+No findings.
+
+Still open from round 2: the Important finding at `lefthook-local.yml:4` has a sentence after its `fixed (...)` note ("Restoring the three stowed symlinks is left to Etienne (rule 12)"). `review_file.rb` closes a slot only when it is exactly `fixed (<subject>)` or `dismissed: <reason>`, so `commit-review` counts it as open. The fix itself landed, and the symlinks are restored. Closing that slot is for `code-review`, not this reviewer.
+
+The repository has no `REVIEW.md` or `REVIEW.local.md`, so this round ran the reviewer's default Bugs, Security and Compliance passes.
+
+Bugs: none. The three `gems` steps build the same key as `main`: `RUNNER_OS` and `RUNNER_ARCH` hold the values of `runner.os` and `runner.arch`, and `RUBY_RELEASE` is the `ruby-version` output. The restore prefix is the key without the hash. GitHub's default `bash -eo pipefail` shell stops the step when `bundle lock` fails. The hook's `bin/bundler-audit --config config/bundler-audit.yml` exits 0 with "No vulnerabilities found"; the binstub adds no second `--config`, because `ARGV` is not empty and holds no `check`.
+
+Security: none. `permissions: contents: read` is at the top level, so every job gets it. The `gems` step reads the Ruby version through `env`, not through `${{ }}` inside `run`, so it has no expression injection.
+
+Compliance, acceptance criteria from `intent.md`:
+
+- `ci.yml` declares `permissions: contents: read`, and the PR's CI run passes → the grep check prints `contents: read`. The CI run is pending: no pull request exists, and plan step 7 proves it when `deliver` opens the draft.
+- yamllint reports no `line-length` warning for the gem cache lines → yamllint reports only `1:1 document-start` and `107:121 line-length (163)`, the RuboCop key that the intent leaves out of scope. Both are on `main` too.
+- `lefthook dump` shows `no_auto_install: true`, and the global hooks stay symlinks → the dump shows the key at the top level. All seven entries in `~/.config/git/hooks` are symlinks into the dotfiles, dated 2026-10-16 15:04, before the implementation commit `3f71d42`. This round did not run `lefthook run` itself.
+- `pre-push.bundle-audit` has no `skip`, with glob `{Gemfile,appkit.gemspec}` → the dump shows that glob and no `skip:` line.
+- `AGENTS.md` no longer says the bundler-audit pre-push hook is skipped → the old phrase is gone, and `AGENTS.md:37` says the hook runs.
+
+Proof list: the plan names no tests, only checks; all of them pass as above. No existing test was weakened, skipped or deleted. No `CHANGELOG.md` entry is needed: the diff touches only appkit's own CI and lefthook files.
+
+Checks run on `3f71d42`: `bundle exec rake test` 143 runs, 0 failures. RuboCop: 89 files, no offenses. `erb_lint --lint-all`: no errors. Both Brakeman scans from `ci.yml`: no warnings. `bin/bundler-audit check`: no vulnerabilities (local advisory database, not updated).
+
+## Round 5 — 2026-10-19T09:06Z — 3f71d42
+
+No findings.
+
+Round 4's "Still open" note is out of date. The uncommitted `review.md` now ends the round 2 Important finding at `lefthook-local.yml:4` with `fixed (Stop lefthook in appkit from replacing the global git hooks)` and nothing after it. `review_file.rb` counts no open finding in this file.
+
+The repository has no `REVIEW.md` or `REVIEW.local.md`, so this round ran the reviewer's default Bugs, Security and Compliance passes. The code is unchanged since round 4: `origin/main` is still `e47907f` and `HEAD` is still `3f71d42`.
+
+Bugs: none. Round 4's analysis of the `gems` steps holds. The single-line `restore-keys` value is a valid one-prefix list for `actions/cache`.
+
+Security: none. `permissions: contents: read` is at the top level. The `gems` step reads the Ruby version through `env`, not through `${{ }}` inside `run`.
+
+Compliance, acceptance criteria from `intent.md`:
+
+- `ci.yml` declares `permissions: contents: read`, and the PR's CI run passes → the grep check prints `contents: read`. The CI run is pending: no pull request exists, and plan step 7 proves it when `deliver` opens the draft.
+- yamllint reports no `line-length` warning for the gem cache lines → yamllint reports only `1:1 document-start` and `107:121 line-length (163)`. Both are on `main` too, and the intent leaves line 107 out of scope.
+- `lefthook dump` shows `no_auto_install: true`, and the global hooks stay symlinks after a `lefthook run` → the dump shows the key at line 16. The stowed hooks pass `--no-auto-install` themselves, so a commit does not exercise the key; the nested `lefthook run migrations` does. This round ran the check in a scratch clone of `3f71d42`, not against the real hooks. The clone had its own `core.hooksPath` with plain copies of the three hooks and a stale `lefthook.checksum`. `lefthook run pre-commit -f` left the hook files byte-identical and the checksum stale. A control run with the key removed printed "Skipping hook sync", so lefthook did try to sync without it. `find ~/.config/git/hooks -mindepth 1 ! -type l` printed nothing before and after.
+- `pre-push.bundle-audit` has no `skip`, with glob `{Gemfile,appkit.gemspec}` → the dump shows that glob, `run: bin/bundler-audit --config config/bundler-audit.yml` and no `skip:` line.
+- `AGENTS.md` no longer says the bundler-audit pre-push hook is skipped → the old phrase is gone, and `AGENTS.md:37` says the hook runs.
+
+Proof list: the plan names checks, not tests; all pass as above. No existing test was weakened, skipped or deleted. No `CHANGELOG.md` entry is needed: the diff touches only appkit's own CI, lefthook and agent files.
+
+Checks run on `3f71d42`: `bundle exec rake test` 143 runs, 0 failures. RuboCop: 89 files, no offenses. `erb_lint --lint-all`: no errors. Both Brakeman scans from `ci.yml`: no warnings. `bin/bundler-audit check`: no vulnerabilities (local advisory database, not updated).
