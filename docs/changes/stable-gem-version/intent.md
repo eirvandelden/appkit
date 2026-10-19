@@ -1,50 +1,57 @@
-# Intent: Stop tracking appkit's own Gemfile.lock
+# Intent: Finish the untracked-lockfile follow-ups in CI and lefthook
 
 Author: Etienne van Delden de la Haije. Status: accepted. Type: chore.
 
 ## Problem
 
-The appkit version number comes from the git commit that is checked out when the gemspec loads (`lib/appkit/version.rb`). Every new commit gives a new version. So the appkit line in the committed `Gemfile.lock` changes on each `bundle` run, and it always names the commit before the one it is in. A file cannot name the hash of its own commit, so the committed lockfile can never agree with its commit. This was seen while reviewing PR #12 (Rails 8.1.4) and also happens on `main`.
+This change first set out to stop tracking appkit's own `Gemfile.lock`. PR #18 (merged as `d837929`) delivered that outcome: `Gemfile.lock` is ignored, CI resolves gems with `bundle lock`, `bin/bundler-audit` exists, and a test pins that the version names the checked-out commit. Etienne chose on 2026-10-16 to narrow this change to the four items that this branch has and `main` does not:
 
-Host apps never read appkit's `Gemfile.lock`; they read only the dependencies in `appkit.gemspec`. The lockfile serves appkit's own development: tests, linters and security checks, locally and in CI.
+- `.github/workflows/ci.yml` has no `permissions:` block. The repository default token is read-only today, but a change to that setting would give every CI job write access.
+- The gem cache `key` and `restore-keys` lines in `ci.yml` are about 130 characters long, so yamllint warns `line-length` on them.
+- `lefthook-local.yml` does not set `no_auto_install: true`. `core.hooksPath` is the global `~/.config/git/hooks`, and `lefthook.yml` runs a nested `lefthook run migrations` without `--no-auto-install`. So a hook run in appkit can replace the stowed global hooks with generated files.
+- The pre-push `bundle-audit` hook is skipped, so a gem with a known advisory reaches the remote before CI reports it.
 
 ## Proposed outcome
 
-Every commit keeps its own version, and that version names the commit. appkit no longer keeps a `Gemfile.lock` in git. Running `bundle` never leaves a lockfile change to commit. Local runs and CI install the newest gem versions that `appkit.gemspec` and `Gemfile` allow, and still pass.
+CI jobs get a read-only token whatever the repository default is. The gem cache lines in `ci.yml` stay under 120 characters, and the cache keys keep their meaning. No lefthook run in appkit rewrites the global git hooks. A push that follows a change to `Gemfile` or `appkit.gemspec` runs `bin/bundler-audit` first.
 
 ## Affected users and systems
 
-- appkit development, locally and in CI: tests, RuboCop, Brakeman and bundler-audit run against freshly resolved gems instead of a pinned set.
-- Host apps that use appkit: no change. Their own lockfile records the appkit commit and a version that names it.
+- appkit's own CI (`.github/workflows/ci.yml`).
+- appkit development on Etienne's machine: lefthook and the global git hooks.
+- Host apps: no change. `rails-ci.yml` does not change.
 
 ## Constraints
 
-- Changing `.github/workflows/ci.yml` and `.github/workflows/rails-ci.yml` is part of this change. It was approved by choosing "CI works without it" as in scope.
+- Changing `.github/workflows/ci.yml` is part of this change. Etienne approved it when he accepted the first version of this intent, and again by choosing "Narrow and deliver" on 2026-10-16.
+- Keep `main`'s newer choices: `actions/checkout@v7`, `actions/cache@v6`, and the `bundle lock && rv ci` bundle step.
 
 ## In scope
 
-- Remove `Gemfile.lock` from git and ignore it.
-- CI works without a committed lockfile, including the places in `ci.yml` and `rails-ci.yml` that rely on it.
-- Local hooks work without a committed lockfile: the lefthook bundle step and `bin/bundler-audit`.
-- The README explains that appkit does not commit its lockfile, and why.
+- `permissions: contents: read` at the top of `ci.yml`.
+- The `gems` step writes `cache-key` and `cache-prefix` outputs, and the cache steps use them.
+- `no_auto_install: true` in `lefthook-local.yml`.
+- The pre-push `bundle-audit` hook runs when `Gemfile` or `appkit.gemspec` changes.
+- `AGENTS.md` says that the bundler-audit pre-push hook runs.
 
 ## Out of scope
 
-- Publishing appkit to RubyGems.
-- The dotfiles worktree sweep bug that deleted the earlier `intent.md`.
+- Everything that PR #18 delivered.
+- `rails-ci.yml` and the install generator's CI template.
+- Restoring global hooks that an earlier run already replaced.
 
 ## Acceptance criteria
 
-- After a commit, `bundle install` leaves `git status` clean.
-- In a checkout of commit `abc1234`, the appkit version is `0.1.0.pre.git.abc1234`.
-- On a push, CI installs gems and runs the tests, RuboCop, Brakeman and bundler-audit successfully.
-- After a fresh clone, the lefthook bundle step installs gems and `bin/bundler-audit` runs.
-- The README says that appkit does not commit its `Gemfile.lock`, and why.
+- `ci.yml` declares `permissions: contents: read`, and the PR's CI run passes: `scan_ruby`, `lint` and `test`.
+- yamllint reports no `line-length` warning for the gem cache lines in `ci.yml`. The RuboCop cache `key` line is 163 characters on `main` too and stays out of scope.
+- `lefthook dump` in appkit shows `no_auto_install: true`. After a `lefthook run` in appkit, the files in `~/.config/git/hooks` are still symlinks into the dotfiles.
+- `lefthook dump` shows `pre-push.bundle-audit` without `skip`, with glob `{Gemfile,appkit.gemspec}`.
+- `AGENTS.md` no longer says that the bundler-audit pre-push hook is skipped.
 
 ## Flagged concerns
 
-- The version names the commit, and a committed lockfile must match its commit. Both cannot hold, because a file cannot name its own commit. Chosen side: the version keeps naming the commit, and appkit stops committing its lockfile.
-- Without a lockfile, two runs on the same commit can test against different gem versions. Chosen side: accept this. Tests and CI run against the newest gems that are allowed.
+- The bundler-audit pre-push hook downloads the advisory database on a machine that lacks it. That download runs inside a git hook, where git exports `GIT_DIR`, and can fail. Chosen side: accept it; run `bin/bundler-audit update` once by hand.
+- Commit messages from before the narrowing describe work that PR #18 already merged; the rebase dropped those hunks.
 
 ## Open questions
 
