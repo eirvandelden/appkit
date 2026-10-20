@@ -21,4 +21,5 @@ task :steep do
   git_env = ENV.keys.grep(/\AGIT_/).index_with(nil)
   sh git_env, "bundle exec rbs collection update"
   sh "bundle exec steep check"
+  sh "bundle exec steep check --steepfile test/types/Steepfile"
 end

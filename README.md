@@ -176,9 +176,30 @@ The inline `#:` comments in `app/` and `lib/` are the source of those types. `si
 
 - `bundle exec rake rbs:generate` regenerates `sig/` from the inline signatures.
 - `bundle exec rake rbs:check` regenerates `sig/` and fails when it differs from what git holds.
-- `bundle exec rake steep` type-checks `app/` and `lib/` against `sig/`.
+- `bundle exec rake steep` type-checks `app/` and `lib/` against `sig/`, then `test/types/` as a host app.
 
 CI runs the last two in the `types` job. Lefthook runs `rbs:check` before a commit and `steep` before a push.
+
+RBS does not extend a class with a concern's `ClassMethods` when the class includes the concern. A host that type-checks its own `ApplicationController`, `User` and `Session` declares the `extend` next to each `include` in its signatures, or with `# @rbs!` in the class:
+
+```rbs
+class ApplicationController < ActionController::Base
+  include Appkit::Authentication
+  extend Appkit::Authentication::ClassMethods
+end
+
+class User < ApplicationRecord
+  include Appkit::Transferable
+  extend Appkit::Transferable::ClassMethods
+end
+
+class Session < ApplicationRecord
+  include Appkit::SessionBehavior
+  extend Appkit::SessionBehavior::ClassMethods
+end
+```
+
+`test/types/` checks these declarations as a host would: `host.rbs` holds them, and `host_probe.rb` calls appkit's class methods and configuration.
 
 Types for what the host app owns, such as `User`, `Session` and `Current`, are `untyped`. Where Steep cannot type a Rails macro or a host constant, the line carries a `# steep:ignore` marker with its reason on the line above.
 

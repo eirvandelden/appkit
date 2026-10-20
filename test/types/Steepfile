@@ -1,0 +1,8 @@
+# A host app's view of appkit: the shipped sig/ plus a host's own signatures.
+# A separate Steepfile, so the host's classes do not leak into appkit's own check.
+target :host do
+  collection_config "../../rbs_collection.yaml"
+  signature "../../sig", "host.rbs"
+
+  check "host_probe.rb"
+end
