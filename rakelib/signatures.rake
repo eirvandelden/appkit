@@ -8,6 +8,15 @@ GENERATE_SIG = [
   "bundle exec rbs-inline --opt-out --output=sig app lib"
 ].freeze
 
+module GeneratedSignatures
+  def self.copy(from:, to:)
+    Dir.glob("**/*.rbs", base: from).each do |path|
+      FileUtils.mkdir_p(File.dirname(File.join(to, path)))
+      FileUtils.cp(File.join(from, path), File.join(to, path))
+    end
+  end
+end
+
 namespace :rbs do
   desc "Regenerate sig/ from the inline #: signatures"
   task :generate do
@@ -31,8 +40,10 @@ namespace :rbs do
       GENERATE_SIG.each { |command| sh command, chdir: dir }
       next if system("diff", "-ru", "sig.staged", "sig", chdir: dir)
 
-      Rake::Task["rbs:generate"].invoke
-      abort "The staged sig/ is stale. sig/ is regenerated; stage it and commit again."
+      # Copy what the staged files generate, so a partial commit can pass once this is staged.
+      sh "find sig -name '*.rbs' -delete"
+      GeneratedSignatures.copy(from: File.join(dir, "sig"), to: "sig")
+      abort "The staged sig/ is stale. sig/ now holds what the staged files generate; stage it and commit again."
     end
   end
 end

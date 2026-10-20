@@ -130,6 +130,37 @@ class SignaturesTest < ActiveSupport::TestCase
     end
   end
 
+  test "rbs:check_staged recovers a partial commit with the staged signatures" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      commit_generated_sig(dir)
+
+      write_fixture_link(dir, "Integer")
+      git(dir, "add", "app/models/appkit/qr_code_link.rb")
+      write_fixture_link(dir, "Symbol")
+      rake(dir, "rbs:check_staged")
+
+      assert_includes dir.join("sig/models/appkit/qr_code_link.rbs").read, "def signed: () -> Integer"
+
+      git(dir, "add", "sig")
+      output, status = rake(dir, "rbs:check_staged")
+
+      assert_predicate status, :success?, output
+    end
+  end
+
+  test "rbs:check_staged recovers a staged deletion" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      commit_generated_sig(dir)
+
+      git(dir, "rm", "-q", "app/models/appkit/qr_code_link.rb")
+      rake(dir, "rbs:check_staged")
+
+      assert_not dir.join("sig/models/appkit/qr_code_link.rbs").exist?
+    end
+  end
+
   test "rbs:check_staged passes when the staged sig matches the staged signatures" do
     in_signature_copy do |dir|
       write_fixture_link(dir, "String")

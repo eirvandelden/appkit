@@ -176,7 +176,7 @@ The inline `#:` comments in `app/` and `lib/` are the source of those types. `si
 
 - `bundle exec rake rbs:generate` regenerates `sig/` from the inline signatures.
 - `bundle exec rake rbs:check` regenerates `sig/` and fails when it differs from what git holds.
-- `bundle exec rake rbs:check_staged` does the same for the staged files only, and regenerates `sig/` when the staged copy is stale.
+- `bundle exec rake rbs:check_staged` does the same for the staged files only, and, when the staged copy is stale, writes what the staged files generate into `sig/` to stage.
 - `bundle exec rake steep` type-checks `app/` and `lib/` against `sig/`, then `test/types/` as a host app.
 
 CI runs the last two in the `types` job. Lefthook runs `rbs:check_staged` before a commit and `steep` before a push.
