@@ -27,6 +27,10 @@ pre-commit:
       run: bundle exec erb_lint {staged_files}
     eslint:
       skip: true
+    # No glob: deleting a Ruby file, or editing the Gemfile or the rake task,
+    # also changes what sig/ must contain. Leaves the regenerated sig/ unstaged.
+    rbs:
+      run: bundle exec rake rbs:check
 
 pre-push:
   commands:
@@ -48,3 +52,6 @@ pre-push:
       skip: true
     bundle-audit:
       glob: "{Gemfile,appkit.gemspec}"
+    # No glob: a push that changes only the Steepfile or the Gemfile still needs the check.
+    steep:
+      run: bundle exec rake steep

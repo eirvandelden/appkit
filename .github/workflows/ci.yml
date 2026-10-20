@@ -111,6 +111,44 @@ jobs:
       - name: Lint code for consistent style
         run: bundle exec rubocop -f github
 
+  types:
+    runs-on: ubuntu-slim
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Ruby
+        id: ruby
+        uses: spinel-coop/setup-rv@main
+        with:
+          ruby-version: current
+
+      - name: Resolve gems
+        id: gems
+        run: |
+          bundle lock
+          echo "hash=$(grep -v '^ *appkit (' Gemfile.lock | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache gems
+        uses: actions/cache@v6
+        with:
+          path: vendor/bundle
+          key: gems-${{ runner.os }}-${{ runner.arch }}-ruby-${{ steps.ruby.outputs.ruby-version }}-${{ steps.gems.outputs.hash }}
+          restore-keys: |
+            gems-${{ runner.os }}-${{ runner.arch }}-ruby-${{ steps.ruby.outputs.ruby-version }}-
+
+      - name: Install gems
+        run: |
+          BUNDLE_PATH=vendor/bundle rv ci
+          echo "BUNDLE_PATH=vendor/bundle" >> "$GITHUB_ENV"
+
+      - name: Check that sig/ matches the inline signatures
+        run: bundle exec rake rbs:check
+
+      - name: Type-check with Steep
+        run: bundle exec rake steep
+
   test:
     runs-on: ubuntu-latest
 
