@@ -1,0 +1,21 @@
+# Generated from lib/appkit/ok_computer/solid_queue_check.rb with RBS::Inline
+
+module Appkit
+  module OkComputer
+    # Verifies a Solid Queue worker is alive by requiring a recent process
+    # heartbeat. Deliberately does not check queue depth/backlog: a backed-up
+    # queue during a legitimate batch job isn't necessarily unhealthy, while a
+    # worker that stopped heartbeating is the load-bearing uptime signal.
+    # okcomputer ships no RBS, so its Check superclass cannot be typed.
+    # @rbs inherits ::Object
+    class SolidQueueCheck < ::Object
+      # : () -> void
+      def check: () -> void
+
+      private
+
+      # : () -> bool
+      def recent_heartbeat?: () -> bool
+    end
+  end
+end

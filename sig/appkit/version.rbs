@@ -1,0 +1,7 @@
+# Generated from lib/appkit/version.rb with RBS::Inline
+
+module Appkit
+  BASE_VERSION: String
+
+  VERSION: String
+end

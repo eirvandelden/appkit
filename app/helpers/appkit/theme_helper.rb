@@ -1,11 +1,17 @@
 module Appkit
+  # @rbs module-self ::ActionView::Base
   module ThemeHelper
+    #: () -> Hash[Symbol, untyped]
     def theme_attributes
-      return {} unless Current.user
+      # Current is owned by the host app, so the shipped signatures cannot name it.
+      return {} unless Current.user # steep:ignore UnknownConstant
 
-      color_scheme = Current.user.color_scheme
-      light = Current.user.light_theme
-      dark = Current.user.dark_theme
+      # Current is owned by the host app, so the shipped signatures cannot name it.
+      color_scheme = Current.user.color_scheme # steep:ignore UnknownConstant
+      # Current is owned by the host app, so the shipped signatures cannot name it.
+      light = Current.user.light_theme # steep:ignore UnknownConstant
+      # Current is owned by the host app, so the shipped signatures cannot name it.
+      dark = Current.user.dark_theme # steep:ignore UnknownConstant
 
       attrs = {
         "data-color-scheme": color_scheme,
@@ -23,6 +29,7 @@ module Appkit
       attrs
     end
 
+    #: () -> Hash[Symbol, untyped]
     def saved_theme_attributes
       theme_attributes.except(:"data-theme")
     end

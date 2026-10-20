@@ -1,0 +1,17 @@
+# A host app's own signatures, written the way the README tells hosts to write them.
+class ApplicationController < ActionController::Base
+  include Appkit::Authentication
+  extend Appkit::Authentication::ClassMethods
+end
+
+class User < ActiveRecord::Base
+  include Appkit::Authenticatable
+  include Appkit::Transferable
+  extend Appkit::Transferable::ClassMethods
+  include Appkit::UserTheming
+end
+
+class Session < ActiveRecord::Base
+  include Appkit::SessionBehavior
+  extend Appkit::SessionBehavior::ClassMethods
+end

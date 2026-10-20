@@ -1,0 +1,8 @@
+# Generated from app/models/concerns/appkit/user_theming.rb with RBS::Inline
+
+module Appkit
+  # @rbs module-self ::ActiveRecord::Base
+  module UserTheming : ::ActiveRecord::Base
+    extend ActiveSupport::Concern
+  end
+end

@@ -1,0 +1,28 @@
+# Generated from app/controllers/appkit/preferences_controller.rb with RBS::Inline
+
+module Appkit
+  # The host's ApplicationController, which includes Appkit::Authentication, is the real superclass.
+  # @rbs inherits ::ActionController::Base
+  class PreferencesController < ::ActionController::Base
+    include ::Appkit::Authentication
+
+    extend ::Appkit::Authentication::ClassMethods
+
+    # : () -> void
+    def edit: () -> void
+
+    # : () -> void
+    def update: () -> void
+
+    private
+
+    # : () -> ActionController::Parameters
+    def preference_params: () -> ActionController::Parameters
+
+    # : () -> bool?
+    def locale_attribute_shown?: () -> bool?
+
+    # : () -> bool?
+    def timezone_attribute_shown?: () -> bool?
+  end
+end

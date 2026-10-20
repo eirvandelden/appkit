@@ -1,0 +1,31 @@
+# Generated from app/controllers/appkit/sessions_controller.rb with RBS::Inline
+
+module Appkit
+  # The host's ApplicationController, which includes Appkit::Authentication, is the real superclass.
+  # @rbs inherits ::ActionController::Base
+  class SessionsController < ::ActionController::Base
+    include ::Appkit::Authentication
+
+    extend ::Appkit::Authentication::ClassMethods
+
+    # : () -> void
+    def new: () -> void
+
+    # : () -> void
+    def create: () -> void
+
+    # : () -> void
+    def destroy: () -> void
+
+    private
+
+    # : () -> void
+    def ensure_user_exists: () -> void
+
+    # : () -> untyped
+    def authenticate_user: () -> untyped
+
+    # : (Symbol) -> void
+    def render_rejection: (Symbol) -> void
+  end
+end

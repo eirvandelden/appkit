@@ -1,0 +1,24 @@
+# Generated from app/models/appkit/qr_code_link.rb with RBS::Inline
+
+module Appkit
+  class QrCodeLink
+    attr_reader url: String
+
+    # : (String) -> void
+    def initialize: (String) -> void
+
+    # : () -> String
+    def signed: () -> String
+
+    # : (String) -> QrCodeLink
+    def self.from_signed: (String) -> QrCodeLink
+
+    private
+
+    # : () -> ActiveSupport::MessageVerifier
+    def self.verifier: () -> ActiveSupport::MessageVerifier
+
+    # : () -> String
+    def self.secret: () -> String
+  end
+end

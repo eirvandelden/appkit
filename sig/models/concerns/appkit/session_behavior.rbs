@@ -1,0 +1,24 @@
+# Generated from app/models/concerns/appkit/session_behavior.rb with RBS::Inline
+
+module Appkit
+  # @rbs module-self ::ActiveRecord::Base
+  module SessionBehavior : ::ActiveRecord::Base
+    extend ActiveSupport::Concern
+
+    ACTIVITY_REFRESH_RATE: ActiveSupport::Duration
+
+    module ClassMethods
+      # : (user_agent: String?, ip_address: String?) -> untyped
+      def start!: (user_agent: String?, ip_address: String?) -> untyped
+
+      # A cookie only stops renewing once the browser drops it; a stolen token
+      # replayed directly against the server never does. This is the backstop:
+      # sessions idle past the configured expiry are destroyed regardless.
+      # : () -> untyped
+      def expire_stale!: () -> untyped
+    end
+
+    # : (user_agent: String?, ip_address: String?) -> untyped
+    def resume: (user_agent: String?, ip_address: String?) -> untyped
+  end
+end

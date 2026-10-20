@@ -18,6 +18,20 @@ class LefthookConfigTest < ActiveSupport::TestCase
     assert_equal "npm install", command["run"]
   end
 
+  test "pre-commit checks the staged sig/" do
+    command = local_config.dig("pre-commit", "commands", "rbs")
+
+    assert_equal "bundle exec rake rbs:check_staged", command["run"]
+    assert_nil command["glob"]
+  end
+
+  test "pre-push runs steep" do
+    command = local_config.dig("pre-push", "commands", "steep")
+
+    assert_equal "bundle exec rake steep", command["run"]
+    assert_nil command["glob"]
+  end
+
   private
     def commands
       config.values.grep(Hash).flat_map { |hook| hook.fetch("commands", {}).to_a }.to_h
@@ -25,6 +39,10 @@ class LefthookConfigTest < ActiveSupport::TestCase
 
     def runs_of(linter)
       config.values.grep(Hash).filter_map { |hook| hook.dig("commands", linter, "run") }
+    end
+
+    def local_config
+      @local_config ||= YAML.safe_load_file(Appkit::Engine.root.join("lefthook-local.yml"))
     end
 
     def config

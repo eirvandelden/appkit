@@ -1,0 +1,25 @@
+# Generated from app/controllers/appkit/first_runs_controller.rb with RBS::Inline
+
+module Appkit
+  # The host's ApplicationController, which includes Appkit::Authentication, is the real superclass.
+  # @rbs inherits ::ActionController::Base
+  class FirstRunsController < ::ActionController::Base
+    include ::Appkit::Authentication
+
+    extend ::Appkit::Authentication::ClassMethods
+
+    # : () -> void
+    def show: () -> void
+
+    # : () -> void
+    def create: () -> void
+
+    private
+
+    # : () -> void
+    def prevent_running_after_setup: () -> void
+
+    # : () -> ActionController::Parameters
+    def user_params: () -> ActionController::Parameters
+  end
+end

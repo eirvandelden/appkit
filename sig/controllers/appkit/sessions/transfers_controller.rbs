@@ -1,0 +1,19 @@
+# Generated from app/controllers/appkit/sessions/transfers_controller.rb with RBS::Inline
+
+module Appkit
+  module Sessions
+    # The host's ApplicationController, which includes Appkit::Authentication, is the real superclass.
+    # @rbs inherits ::ActionController::Base
+    class TransfersController < ::ActionController::Base
+      include ::Appkit::Authentication
+
+      extend ::Appkit::Authentication::ClassMethods
+
+      # : () -> void
+      def show: () -> void
+
+      # : () -> void
+      def update: () -> void
+    end
+  end
+end

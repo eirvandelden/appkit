@@ -1,0 +1,15 @@
+# Generated from app/models/appkit/push_subscription.rb with RBS::Inline
+
+module Appkit
+  class PushSubscription < ActiveRecord::Base
+    attr_accessor endpoint: String
+
+    attr_accessor p256dh_key: String
+
+    attr_accessor auth_key: String
+
+    attr_accessor user_agent: String?
+
+    attr_accessor user: untyped
+  end
+end

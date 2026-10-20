@@ -1,0 +1,8 @@
+# Generated from app/models/appkit/first_run.rb with RBS::Inline
+
+module Appkit
+  class FirstRun
+    # : (untyped) -> untyped
+    def self.create!: (untyped) -> untyped
+  end
+end

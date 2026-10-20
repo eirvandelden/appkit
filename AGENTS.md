@@ -16,7 +16,8 @@ Host apps own the `User` and `Session` models. Some engine code reaches them thr
 - Lint: `bundle exec rubocop`, and `bundle exec erb_lint --lint-all` for the ERB views.
 - Security: `bundle exec brakeman -p test/dummy --no-pager --ignore-config config/brakeman.ignore`, then `bundle exec brakeman -p . --force-scan --no-pager --ignore-config config/brakeman.gem.ignore`, then `bin/bundler-audit check --update`.
 - VAPID keys: a host app runs `bin/rails appkit:vapid_keys` (`lib/tasks/appkit.rake`). It generates a web push key pair and prints both keys and a `credentials.yml.enc` snippet. The task does not run in this repository: `bin/rails -T` here lists only the tasks from the gem `Rakefile`. The output holds the private key, so do not run it in a shared log.
-- CI: `.github/workflows/ci.yml` runs the same scans, RuboCop and tests.
+- Types: `bundle exec rake rbs:generate` regenerates `sig/` from the inline `#:` signatures. `bundle exec rake rbs:check` fails when `sig/` differs from them. `bundle exec rake steep` type-checks `app/` and `lib/`, then `test/types/` as a host app (README, `## Type signatures`).
+- CI: `.github/workflows/ci.yml` runs the same scans, RuboCop and tests. Its `types` job runs `rbs:check` and `steep`.
 
 ## Gotchas
 
@@ -37,6 +38,7 @@ Host apps own the `User` and `Session` models. Some engine code reaches them thr
 - `lefthook-local.yml` skips the CSS and JS hooks and the Brakeman pre-push hook. The bundler-audit pre-push hook runs `bin/bundler-audit` when `Gemfile` or `appkit.gemspec` changes. On a machine without the advisory database, run `bin/bundler-audit update` once first, because the download can fail inside a git hook. The ERB lint (`bundle exec erb_lint`) and the per-file test hook run. CI runs the tests, RuboCop, Brakeman and bundler-audit, not erb_lint. No CSS or JS lint runs anywhere, so check those files by hand.
 - Re-running `bin/rails generate appkit:install` in an app that already ran it needs `--skip`. Without it, an existing migration with changed content raises a conflict. The generator picks `align_sessions_for_appkit` over `create_sessions` whenever a `sessions` table exists.
 - Use `rv` for Ruby. Do not use mise, asdf, rbenv or rvm.
+- `sig/**/*.rbs` is generated from the inline `#:` signatures; never edit it by hand. Change the `#:` comment, then run `bundle exec rake rbs:generate`. `sig/manifest.yaml` is hand-written. The pre-commit hook runs `rbs:check_staged` and the pre-push hook runs `steep` (`lefthook-local.yml`).
 
 ## Upgrade instructions
 

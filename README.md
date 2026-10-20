@@ -168,9 +168,45 @@ appkit does not commit its `Gemfile.lock`. The gem version names its commit (`0.
 
 A fresh clone and every CI run resolve the newest gems that `appkit.gemspec` and `Gemfile` allow, so two runs on one commit can use different gem versions. An existing local `Gemfile.lock` stays untracked and keeps its versions; `bundle update` moves it to newer gems.
 
+## Type signatures
+
+appkit ships RBS signatures in `sig/`, so an app that type-checks with Steep resolves appkit's modules and classes without a stub. A host's `rbs collection` loads `sig/` from the installed gem.
+
+The inline `#:` comments in `app/` and `lib/` are the source of those types. `sig/**/*.rbs` is generated from them with `rbs-inline`; never edit it by hand. `sig/manifest.yaml` is the one hand-written file.
+
+- `bundle exec rake rbs:generate` regenerates `sig/` from the inline signatures.
+- `bundle exec rake rbs:check` regenerates `sig/` and fails when it differs from what git holds.
+- `bundle exec rake rbs:check_staged` does the same for the staged files only, and, when the staged copy is stale, writes what the staged files generate into `sig/` to stage.
+- `bundle exec rake steep` type-checks `app/` and `lib/` against `sig/`, then `test/types/` as a host app.
+
+CI runs `rbs:check` and `steep` in the `types` job. Lefthook runs `rbs:check_staged` before a commit and `steep` before a push.
+
+RBS does not extend a class with a concern's `ClassMethods` when the class includes the concern. A host that type-checks its own `ApplicationController`, `User` and `Session` declares the `extend` next to each `include` in its signatures, or with `# @rbs!` in the class:
+
+```rbs
+class ApplicationController < ActionController::Base
+  include Appkit::Authentication
+  extend Appkit::Authentication::ClassMethods
+end
+
+class User < ApplicationRecord
+  include Appkit::Transferable
+  extend Appkit::Transferable::ClassMethods
+end
+
+class Session < ApplicationRecord
+  include Appkit::SessionBehavior
+  extend Appkit::SessionBehavior::ClassMethods
+end
+```
+
+`test/types/` checks these declarations as a host would: `host.rbs` holds them, and `host_probe.rb` calls appkit's class methods and configuration.
+
+Types for what the host app owns, such as `User`, `Session` and `Current`, are `untyped`. Where Steep cannot type a Rails macro or a host constant, the line carries a `# steep:ignore` marker with its reason on the line above.
+
 ## Continuous Integration
 
-This repo's own `.github/workflows/ci.yml` tests the engine against `test/dummy` (`bundle exec rake test`), lints with RuboCop, and scans for security issues with Brakeman/bundler-audit.
+This repo's own `.github/workflows/ci.yml` tests the engine against `test/dummy` (`bundle exec rake test`), lints with RuboCop, checks `sig/` and runs Steep, and scans for security issues with Brakeman/bundler-audit.
 
 Consuming apps get CI via `.github/workflows/rails-ci.yml`, a reusable `workflow_call` workflow with `scan_ruby`, `scan_js`, `lint`, `test`, and `system-test` jobs. Each app's own CI becomes a thin ~6-line caller (see `lib/generators/appkit/install/templates/github/workflows/ci.yml.tt`, copied in by `bin/rails generate appkit:install`):
 

@@ -1,0 +1,13 @@
+# Generated from app/controllers/concerns/appkit/version_headers.rb with RBS::Inline
+
+module Appkit
+  # @rbs module-self ::ActionController::Base
+  module VersionHeaders : ::ActionController::Base
+    extend ActiveSupport::Concern
+
+    private
+
+    # : () -> void
+    def set_version_headers: () -> void
+  end
+end

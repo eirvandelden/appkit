@@ -1,0 +1,9 @@
+# Generated from app/helpers/appkit/forms_helper.rb with RBS::Inline
+
+module Appkit
+  # @rbs module-self ::ActionView::Base
+  module FormsHelper : ::ActionView::Base
+    # : (**untyped) { (untyped) -> untyped } -> untyped
+    def auto_submit_form_with: (**untyped) { (untyped) -> untyped } -> untyped
+  end
+end

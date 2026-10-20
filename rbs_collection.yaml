@@ -1,0 +1,17 @@
+# Types for the gems appkit uses, from ruby/gem_rbs_collection.
+sources:
+  - type: git
+    name: ruby/gem_rbs_collection
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    revision: main
+    repo_dir: gems
+
+path: .gem_rbs_collection
+
+gems:
+  # appkit itself is the code under check; loading it as a library would load sig/ twice.
+  - name: appkit
+    ignore: true
+  # Ignoring appkit also drops its runtime dependencies, so name the typed ones.
+  - name: rqrcode
+  - name: web-push
