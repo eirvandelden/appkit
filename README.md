@@ -168,9 +168,23 @@ appkit does not commit its `Gemfile.lock`. The gem version names its commit (`0.
 
 A fresh clone and every CI run resolve the newest gems that `appkit.gemspec` and `Gemfile` allow, so two runs on one commit can use different gem versions. An existing local `Gemfile.lock` stays untracked and keeps its versions; `bundle update` moves it to newer gems.
 
+## Type signatures
+
+appkit ships RBS signatures in `sig/`, so an app that type-checks with Steep resolves appkit's modules and classes without a stub. A host's `rbs collection` loads `sig/` from the installed gem.
+
+The inline `#:` comments in `app/` and `lib/` are the source of those types. `sig/**/*.rbs` is generated from them with `rbs-inline`; never edit it by hand. `sig/manifest.yaml` is the one hand-written file.
+
+- `bundle exec rake rbs:generate` regenerates `sig/` from the inline signatures.
+- `bundle exec rake rbs:check` regenerates `sig/` and fails when it differs from what git holds.
+- `bundle exec rake steep` type-checks `app/` and `lib/` against `sig/`.
+
+CI runs the last two in the `types` job. Lefthook runs `rbs:check` before a commit and `steep` before a push.
+
+Types for what the host app owns, such as `User`, `Session` and `Current`, are `untyped`. Where Steep cannot type a Rails macro or a host constant, the line carries a `# steep:ignore` marker with its reason on the line above.
+
 ## Continuous Integration
 
-This repo's own `.github/workflows/ci.yml` tests the engine against `test/dummy` (`bundle exec rake test`), lints with RuboCop, and scans for security issues with Brakeman/bundler-audit.
+This repo's own `.github/workflows/ci.yml` tests the engine against `test/dummy` (`bundle exec rake test`), lints with RuboCop, checks `sig/` and runs Steep, and scans for security issues with Brakeman/bundler-audit.
 
 Consuming apps get CI via `.github/workflows/rails-ci.yml`, a reusable `workflow_call` workflow with `scan_ruby`, `scan_js`, `lint`, `test`, and `system-test` jobs. Each app's own CI becomes a thin ~6-line caller (see `lib/generators/appkit/install/templates/github/workflows/ci.yml.tt`, copied in by `bin/rails generate appkit:install`):
 
