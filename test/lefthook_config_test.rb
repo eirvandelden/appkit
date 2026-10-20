@@ -18,10 +18,10 @@ class LefthookConfigTest < ActiveSupport::TestCase
     assert_equal "npm install", command["run"]
   end
 
-  test "pre-commit runs rbs:check on Ruby files" do
+  test "pre-commit checks the staged sig/" do
     command = local_config.dig("pre-commit", "commands", "rbs")
 
-    assert_equal "bundle exec rake rbs:check", command["run"]
+    assert_equal "bundle exec rake rbs:check_staged", command["run"]
     assert_nil command["glob"]
   end
 

@@ -28,9 +28,10 @@ pre-commit:
     eslint:
       skip: true
     # No glob: deleting a Ruby file, or editing the Gemfile or the rake task,
-    # also changes what sig/ must contain. Leaves the regenerated sig/ unstaged.
+    # also changes what sig/ must contain. Checks the staged files only, so
+    # unstaged work does not block a commit. Leaves the regenerated sig/ unstaged.
     rbs:
-      run: bundle exec rake rbs:check
+      run: bundle exec rake rbs:check_staged
 
 pre-push:
   commands:

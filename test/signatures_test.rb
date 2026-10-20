@@ -53,9 +53,94 @@ class SignaturesTest < ActiveSupport::TestCase
       commit_generated_sig(dir)
 
       write_fixture_link(dir, "Integer")
-      _output, status = rake(dir, "rbs:check")
+      output, status = rake(dir, "rbs:check")
 
       assert_not status.success?
+      assert_includes output, "sig/models/appkit/qr_code_link.rbs"
+    end
+  end
+
+  test "rbs:check fails when a committed signature has no source" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      commit_generated_sig(dir)
+
+      dir.join("app/models/appkit/qr_code_link.rb").delete
+      output, status = rake(dir, "rbs:check")
+
+      assert_not status.success?
+      assert_includes output, "sig/models/appkit/qr_code_link.rbs"
+    end
+  end
+
+  test "rbs:check fails when a new source has no committed signature" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      commit_generated_sig(dir)
+
+      dir.join("app/models/appkit/extra.rb").write(<<~RUBY)
+        module Appkit
+          #: () -> String
+          def self.extra = "extra"
+        end
+      RUBY
+      output, status = rake(dir, "rbs:check")
+
+      assert_not status.success?
+      assert_includes output, "sig/models/appkit/extra.rbs"
+    end
+  end
+
+  test "rbs:check leaves the index unchanged" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      commit_generated_sig(dir)
+
+      dir.join("app/models/appkit/qr_code_link.rb").delete
+      rake(dir, "rbs:check")
+
+      assert_equal "", git(dir, "diff", "--cached", "--name-only")
+    end
+  end
+
+  test "rbs:check_staged ignores an unstaged signature change" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      commit_generated_sig(dir)
+
+      write_fixture_link(dir, "Integer")
+      output, status = rake(dir, "rbs:check_staged")
+
+      assert_predicate status, :success?, output
+    end
+  end
+
+  test "rbs:check_staged fails on a staged signature change without its sig, and regenerates sig/" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      commit_generated_sig(dir)
+
+      write_fixture_link(dir, "Integer")
+      git(dir, "add", "app/models/appkit/qr_code_link.rb")
+      output, status = rake(dir, "rbs:check_staged")
+
+      assert_not status.success?
+      assert_includes output, "sig/models/appkit/qr_code_link.rbs"
+      assert_includes dir.join("sig/models/appkit/qr_code_link.rbs").read, "def signed: () -> Integer"
+    end
+  end
+
+  test "rbs:check_staged passes when the staged sig matches the staged signatures" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      commit_generated_sig(dir)
+
+      write_fixture_link(dir, "Integer")
+      rake(dir, "rbs:generate")
+      git(dir, "add", ".")
+      output, status = rake(dir, "rbs:check_staged")
+
+      assert_predicate status, :success?, output
     end
   end
 
@@ -91,6 +176,15 @@ class SignaturesTest < ActiveSupport::TestCase
   end
 
   private
+    def rake(dir, task)
+      Open3.capture2e(isolated_env, "bundle", "exec", "rake", task, chdir: dir.to_s)
+    end
+
+    # A git hook exports GIT_DIR, which would point git in the temp copy at the real repository.
+    def isolated_env
+      ENV.keys.grep(/\AGIT_/).index_with(nil).merge("BUNDLE_GEMFILE" => ROOT.join("Gemfile").to_s)
+    end
+
     def in_signature_copy
       Dir.mktmpdir("appkit-signatures") do |tmp|
         dir = Pathname(tmp)
@@ -117,16 +211,22 @@ class SignaturesTest < ActiveSupport::TestCase
     end
 
     def commit_generated_sig(dir)
-      rake(dir, "rbs:generate")
-      git = %w[git -c core.hooksPath=/dev/null -c user.name=Test -c user.email=test@example.com -c commit.gpgsign=false]
-      Open3.capture2e("git", "init", "-q", chdir: dir.to_s)
-      Open3.capture2e("git", "add", ".", chdir: dir.to_s)
-      Open3.capture2e(*git, "commit", "-q", "-m", "baseline", chdir: dir.to_s)
+      output, status = rake(dir, "rbs:generate")
+
+      assert_predicate status, :success?, output
+
+      git(dir, "init", "-q")
+      git(dir, "add", ".")
+      git(dir, "-c", "user.name=Test", "-c", "user.email=test@example.com", "-c", "commit.gpgsign=false",
+        "commit", "-q", "-m", "baseline")
     end
 
-    def rake(dir, task)
-      env = { "BUNDLE_GEMFILE" => ROOT.join("Gemfile").to_s }
-      Open3.capture2e(env, "bundle", "exec", "rake", task, chdir: dir.to_s)
+    def git(dir, *arguments)
+      output, status = Open3.capture2e(isolated_env, "git", "-c", "core.hooksPath=/dev/null", *arguments,
+        chdir: dir.to_s)
+
+      assert_predicate status, :success?, "git #{arguments.join(" ")} failed:\n#{output}"
+      output
     end
 
     def source_files

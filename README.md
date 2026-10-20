@@ -176,9 +176,10 @@ The inline `#:` comments in `app/` and `lib/` are the source of those types. `si
 
 - `bundle exec rake rbs:generate` regenerates `sig/` from the inline signatures.
 - `bundle exec rake rbs:check` regenerates `sig/` and fails when it differs from what git holds.
+- `bundle exec rake rbs:check_staged` does the same for the staged files only, and regenerates `sig/` when the staged copy is stale.
 - `bundle exec rake steep` type-checks `app/` and `lib/` against `sig/`, then `test/types/` as a host app.
 
-CI runs the last two in the `types` job. Lefthook runs `rbs:check` before a commit and `steep` before a push.
+CI runs the last two in the `types` job. Lefthook runs `rbs:check_staged` before a commit and `steep` before a push.
 
 RBS does not extend a class with a concern's `ClassMethods` when the class includes the concern. A host that type-checks its own `ApplicationController`, `User` and `Session` declares the `extend` next to each `include` in its signatures, or with `# @rbs!` in the class:
 
