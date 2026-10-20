@@ -12,3 +12,7 @@ gem "mvpa-css", github: "eirvandelden/mvpa.css"
 gem "rubocop-eirvandelden", github: "eirvandelden/rubocop-eirvandelden", require: false
 
 gem "lefthook", require: false
+
+# Type signatures: rbs-inline generates sig/ from the #: comments, steep checks it.
+gem "rbs-inline", "~> 0.14", require: false
+gem "steep", "~> 2.1", require: false
