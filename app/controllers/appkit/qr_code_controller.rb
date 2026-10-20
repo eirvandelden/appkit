@@ -8,7 +8,7 @@ module Appkit
 
     allow_unauthenticated_access
 
-    rescue_from ActiveSupport::MessageVerifier::InvalidSignature, with: -> { head :not_found }
+    rescue_from ActiveSupport::MessageVerifier::InvalidSignature, with: :respond_not_found
 
     #: () -> void
     def show
@@ -17,6 +17,13 @@ module Appkit
 
       expires_in 1.year, public: true
       render plain: svg, content_type: "image/svg+xml"
+    end
+
+    private
+
+    #: () -> void
+    def respond_not_found
+      head :not_found
     end
   end
 end

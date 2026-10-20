@@ -10,5 +10,10 @@ module Appkit
 
     # : () -> void
     def show: () -> void
+
+    private
+
+    # : () -> void
+    def respond_not_found: () -> void
   end
 end
