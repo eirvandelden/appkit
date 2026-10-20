@@ -2,10 +2,18 @@
 
 module Appkit
   module Sessions
-    class TransfersController < ApplicationController
-      def show: () -> untyped
+    # The host's ApplicationController, which includes Appkit::Authentication, is the real superclass.
+    # @rbs inherits ::ActionController::Base
+    class TransfersController < ::ActionController::Base
+      include ::Appkit::Authentication
 
-      def update: () -> untyped
+      extend ::Appkit::Authentication::ClassMethods
+
+      # : () -> void
+      def show: () -> void
+
+      # : () -> void
+      def update: () -> void
     end
   end
 end

@@ -2,18 +2,23 @@
 
 module Appkit
   class QrCodeLink
-    attr_reader url: untyped
+    attr_reader url: String
 
-    def initialize: (untyped url) -> untyped
+    # : (String) -> void
+    def initialize: (String) -> void
 
-    def signed: () -> untyped
+    # : () -> String
+    def signed: () -> String
 
-    def self.from_signed: (untyped signed) -> untyped
+    # : (String) -> QrCodeLink
+    def self.from_signed: (String) -> QrCodeLink
 
     private
 
-    def self.verifier: () -> untyped
+    # : () -> ActiveSupport::MessageVerifier
+    def self.verifier: () -> ActiveSupport::MessageVerifier
 
-    def self.secret: () -> untyped
+    # : () -> String
+    def self.secret: () -> String
   end
 end

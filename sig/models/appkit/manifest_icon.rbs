@@ -4,22 +4,29 @@ module Appkit
   # Infers manifest.json icon metadata from a configured icon path, e.g.
   # "/icon-mask-512.png" -> sizes "512x512", purpose "maskable".
   class ManifestIcon
-    attr_reader path: untyped
+    attr_reader path: String
 
-    def initialize: (untyped path) -> untyped
+    # : (String) -> void
+    def initialize: (String) -> void
 
-    def to_h: () -> untyped
+    # : () -> Hash[Symbol, String]
+    def to_h: () -> Hash[Symbol, String]
 
     private
 
-    def content_type: () -> untyped
+    # : () -> String
+    def content_type: () -> String
 
-    def sizes: () -> untyped
+    # : () -> String?
+    def sizes: () -> String?
 
-    def svg?: () -> untyped
+    # : () -> bool
+    def svg?: () -> bool
 
-    def purpose: () -> untyped
+    # : () -> String?
+    def purpose: () -> String?
 
-    def maskable?: () -> untyped
+    # : () -> bool
+    def maskable?: () -> bool
   end
 end

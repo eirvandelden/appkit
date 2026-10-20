@@ -1,9 +1,17 @@
 # Generated from app/controllers/appkit/pwa_controller.rb with RBS::Inline
 
 module Appkit
-  class PwaController < ::ApplicationController
-    def manifest: () -> untyped
+  # The host's ApplicationController, which includes Appkit::Authentication, is the real superclass.
+  # @rbs inherits ::ActionController::Base
+  class PwaController < ::ActionController::Base
+    include ::Appkit::Authentication
 
-    def service_worker: () -> untyped
+    extend ::Appkit::Authentication::ClassMethods
+
+    # : () -> void
+    def manifest: () -> void
+
+    # : () -> void
+    def service_worker: () -> void
   end
 end

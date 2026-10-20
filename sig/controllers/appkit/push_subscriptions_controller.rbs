@@ -1,13 +1,22 @@
 # Generated from app/controllers/appkit/push_subscriptions_controller.rb with RBS::Inline
 
 module Appkit
-  class PushSubscriptionsController < ApplicationController
-    def create: () -> untyped
+  # The host's ApplicationController, which includes Appkit::Authentication, is the real superclass.
+  # @rbs inherits ::ActionController::Base
+  class PushSubscriptionsController < ::ActionController::Base
+    include ::Appkit::Authentication
 
-    def destroy: () -> untyped
+    extend ::Appkit::Authentication::ClassMethods
+
+    # : () -> void
+    def create: () -> void
+
+    # : () -> void
+    def destroy: () -> void
 
     private
 
-    def push_subscription_params: () -> untyped
+    # : () -> ActionController::Parameters
+    def push_subscription_params: () -> ActionController::Parameters
   end
 end

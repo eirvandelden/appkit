@@ -6,12 +6,16 @@ module Appkit
     # heartbeat. Deliberately does not check queue depth/backlog: a backed-up
     # queue during a legitimate batch job isn't necessarily unhealthy, while a
     # worker that stopped heartbeating is the load-bearing uptime signal.
-    class SolidQueueCheck < ::OkComputer::Check
-      def check: () -> untyped
+    # okcomputer ships no RBS, so its Check superclass cannot be typed.
+    # @rbs inherits ::Object
+    class SolidQueueCheck < ::Object
+      # : () -> void
+      def check: () -> void
 
       private
 
-      def recent_heartbeat?: () -> untyped
+      # : () -> bool
+      def recent_heartbeat?: () -> bool
     end
   end
 end

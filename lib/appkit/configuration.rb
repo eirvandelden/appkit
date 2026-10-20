@@ -1,14 +1,26 @@
 module Appkit
   class Configuration
-    DEFAULT_ICONS = %w[/icon.svg /icon-192.png /icon-512.png /icon-mask-512.png].freeze
+    DEFAULT_ICONS = %w[/icon.svg /icon-192.png /icon-512.png /icon-mask-512.png].freeze #: Array[String]
 
-    attr_accessor :app_name, :email_attribute, :user_scope, :user_class, :first_run,
-                  :icons, :sw_extra_cache_paths, :brand_color, :timezone_attribute, :locale_attribute,
-                  :health_check_path, :session_expiry, :session_class
+    attr_accessor :app_name #: (String | ^() -> String)?
+    attr_accessor :email_attribute #: Symbol
+    attr_accessor :user_scope #: ^() -> untyped
+    attr_accessor :user_class #: ^() -> untyped
+    attr_accessor :session_class #: ^() -> untyped
+    attr_accessor :first_run #: ^(untyped) -> untyped
+    attr_accessor :icons #: Array[String]
+    attr_accessor :sw_extra_cache_paths #: Array[String]
+    attr_accessor :brand_color #: String?
+    attr_accessor :timezone_attribute #: Symbol?
+    attr_accessor :locale_attribute #: Symbol
+    attr_accessor :health_check_path #: String
+    attr_accessor :session_expiry #: ActiveSupport::Duration
 
+    #: () -> void
     def initialize
       @email_attribute = :email
-      @user_scope = -> { User.all }
+      # User is owned by the host app, so the shipped signatures cannot name it.
+      @user_scope = -> { User.all } # steep:ignore UnknownConstant
       @user_class = -> { "User".constantize }
       @session_class = -> { "Session".constantize }
       @first_run = ->(user_params) { user_class.call.create!(user_params.merge(role: :administrator)) }
@@ -24,6 +36,7 @@ module Appkit
       @session_expiry = 1.year
     end
 
+    #: () -> String
     def app_display_name
       AppName.new(app_name).to_s
     end

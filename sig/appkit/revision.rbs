@@ -4,8 +4,10 @@ module Appkit
   # Names the installed appkit commit. A Bundler git source knows its full SHA
   # without a .git directory, so this also works in Docker builds that delete it.
   class Revision
-    def initialize: (spec: untyped) -> untyped
+    # : (spec: Gem::BasicSpecification?) -> void
+    def initialize: (spec: Gem::BasicSpecification?) -> void
 
-    def to_s: () -> untyped
+    # : () -> String
+    def to_s: () -> String
   end
 end

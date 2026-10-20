@@ -4,13 +4,16 @@ module Appkit
     # engine's own dependency, always WebPush at runtime.
     class_attribute :gateway, default: WebPush
 
+    #: (untyped, untyped) -> void
     def perform(push_subscription, payload)
-      gateway.payload_send(**delivery_args(push_subscription, payload))
+      # class_attribute defines gateway at runtime.
+      gateway.payload_send(**delivery_args(push_subscription, payload)) # steep:ignore NoMethod
     rescue WebPush::ExpiredSubscription
       push_subscription.destroy
     end
 
     private
+      #: (untyped, untyped) -> Hash[Symbol, untyped]
       def delivery_args(push_subscription, payload)
         {
           message: JSON.generate(payload),
@@ -21,11 +24,15 @@ module Appkit
         }
       end
 
+      #: () -> Hash[Symbol, untyped]
       def vapid_credentials
         {
-          subject: Rails.application.credentials.dig(:web_push, :subject),
-          public_key: Rails.application.credentials.dig(:web_push, :vapid_public_key),
-          private_key: Rails.application.credentials.dig(:web_push, :vapid_private_key)
+          # The credentials RBS has no dig.
+          subject: Rails.application.credentials.dig(:web_push, :subject), # steep:ignore NoMethod
+          # The credentials RBS has no dig.
+          public_key: Rails.application.credentials.dig(:web_push, :vapid_public_key), # steep:ignore NoMethod
+          # The credentials RBS has no dig.
+          private_key: Rails.application.credentials.dig(:web_push, :vapid_private_key) # steep:ignore NoMethod
         }
       end
   end

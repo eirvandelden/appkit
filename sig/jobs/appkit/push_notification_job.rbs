@@ -2,12 +2,15 @@
 
 module Appkit
   class PushNotificationJob < ActiveJob::Base
-    def perform: (untyped push_subscription, untyped payload) -> untyped
+    # : (untyped, untyped) -> void
+    def perform: (untyped, untyped) -> void
 
     private
 
-    def delivery_args: (untyped push_subscription, untyped payload) -> untyped
+    # : (untyped, untyped) -> Hash[Symbol, untyped]
+    def delivery_args: (untyped, untyped) -> Hash[Symbol, untyped]
 
-    def vapid_credentials: () -> untyped
+    # : () -> Hash[Symbol, untyped]
+    def vapid_credentials: () -> Hash[Symbol, untyped]
   end
 end

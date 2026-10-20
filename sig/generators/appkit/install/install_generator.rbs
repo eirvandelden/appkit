@@ -5,29 +5,37 @@ module Appkit
     class InstallGenerator < Rails::Generators::Base
       include Rails::Generators::Migration
 
-      ERROR_PAGES: untyped
+      ERROR_PAGES: Array[String]
 
-      APPLICATION_CONTROLLER: ::String
+      APPLICATION_CONTROLLER: String
 
-      AUTHENTICATION_INCLUDE: ::Regexp
+      AUTHENTICATION_INCLUDE: Regexp
 
-      def self.next_migration_number: (untyped dirname) -> untyped
+      # : (String) -> String
+      def self.next_migration_number: (String) -> String
 
-      def create_sessions_migration: () -> untyped
+      # : () -> void
+      def create_sessions_migration: () -> void
 
-      def create_push_subscriptions_migration: () -> untyped
+      # : () -> void
+      def create_push_subscriptions_migration: () -> void
 
-      def add_authentication_to_application_controller: () -> untyped
+      # : () -> void
+      def add_authentication_to_application_controller: () -> void
 
-      def copy_error_pages: () -> untyped
+      # : () -> void
+      def copy_error_pages: () -> void
 
-      def copy_ci_workflow: () -> untyped
+      # : () -> void
+      def copy_ci_workflow: () -> void
 
       private
 
-      def sessions_table_exists?: () -> untyped
+      # : () -> bool
+      def sessions_table_exists?: () -> bool
 
-      def application_controller_file: () -> untyped
+      # : () -> String
+      def application_controller_file: () -> String
     end
   end
 end

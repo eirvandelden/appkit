@@ -1,43 +1,60 @@
 # Generated from app/controllers/concerns/appkit/authentication.rb with RBS::Inline
 
 module Appkit
-  module Authentication
+  # @rbs module-self ::ActionController::Base
+  module Authentication : ::ActionController::Base
     extend ActiveSupport::Concern
 
     include Appkit::Authentication::SessionLookup
 
-    SESSION_COOKIE_LIFETIME: untyped
+    SESSION_COOKIE_LIFETIME: ActiveSupport::Duration
 
-    def require_unauthenticated_access: (**untyped options) -> untyped
+    module ClassMethods
+      # : (**untyped) -> void
+      def require_unauthenticated_access: (**untyped) -> void
 
-    def allow_unauthenticated_access: (**untyped options) -> untyped
+      # : (**untyped) -> void
+      def allow_unauthenticated_access: (**untyped) -> void
+    end
 
     private
 
-    def signed_in?: () -> untyped
+    # : () -> bool
+    def signed_in?: () -> bool
 
+    # : () -> untyped
     def require_authentication: () -> untyped
 
+    # : () -> untyped
     def restore_authentication: () -> untyped
 
-    def request_authentication: () -> untyped
+    # : () -> void
+    def request_authentication: () -> void
 
-    def redirect_signed_in_user_to_root: () -> untyped
+    # : () -> void
+    def redirect_signed_in_user_to_root: () -> void
 
-    def start_new_session_for: (untyped user) -> untyped
+    # : (untyped) -> untyped
+    def start_new_session_for: (untyped) -> untyped
 
-    def resume_session: (untyped session) -> untyped
+    # : (untyped) -> untyped
+    def resume_session: (untyped) -> untyped
 
     # Fix vs JA: also tracks the session record on Current, not just the user.
-    def authenticated_as: (untyped session) -> untyped
+    # : (untyped) -> untyped
+    def authenticated_as: (untyped) -> untyped
 
-    def post_authenticating_url: () -> untyped
+    # : () -> String
+    def post_authenticating_url: () -> String
 
     # Fix vs JA: destroys the Session row so rows don't accumulate forever.
+    # : () -> untyped
     def reset_authentication: () -> untyped
 
-    def set_authenticated_by: (untyped method) -> untyped
+    # : (Symbol) -> ActiveSupport::StringInquirer
+    def set_authenticated_by: (Symbol) -> ActiveSupport::StringInquirer
 
-    def authenticated_by: () -> untyped
+    # : () -> ActiveSupport::StringInquirer
+    def authenticated_by: () -> ActiveSupport::StringInquirer
   end
 end

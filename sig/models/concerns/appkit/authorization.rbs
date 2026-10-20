@@ -1,11 +1,14 @@
 # Generated from app/models/concerns/appkit/authorization.rb with RBS::Inline
 
 module Appkit
-  module Authorization
+  # @rbs module-self ::ActionController::Base
+  module Authorization : ::ActionController::Base
     private
 
-    def ensure_can_administer: () -> untyped
+    # : () -> void
+    def ensure_can_administer: () -> void
 
-    def ensure_current_user: () -> untyped
+    # : () -> void
+    def ensure_current_user: () -> void
   end
 end

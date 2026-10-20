@@ -211,15 +211,19 @@ class SignaturesTest < ActiveSupport::TestCase
     end
 
     def ignore_problem(text, lines, line)
-      return "no diagnostic name" unless text.match?(/steep:ignore:start\s*\z|steep:ignore( [A-Z]\w+)+\s*\z/)
+      return "no diagnostic name" unless text.match?(/steep:ignore:start\s*\z|steep:ignore [A-Z]\w*(, [A-Z]\w*)*\s*\z/)
 
       "no reason comment above" unless reason_above?(lines, line)
     end
 
     def reason_above?(lines, line)
-      above = lines[line - 2].to_s
-      return reason_above?(lines, line - 1) if above.match?(IGNORE_LINE) && !above.match?(/\A\s*#/)
+      return true if comment_block_above(lines, line).any? { |text| plain_comment?(text) }
 
-      above.match?(/\A\s*#/) && !above.match?(SIGNATURE_LINE) && !above.match?(/\A\s*# steep:/)
+      above = lines[line - 2].to_s
+      above.match?(IGNORE_LINE) && !above.match?(/\A\s*#/) && reason_above?(lines, line - 1)
+    end
+
+    def plain_comment?(text)
+      text.match?(/\A\s*# \S/) && !text.match?(/\A\s*# (@rbs|steep:)/)
     end
 end

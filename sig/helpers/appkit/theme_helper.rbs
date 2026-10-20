@@ -1,9 +1,12 @@
 # Generated from app/helpers/appkit/theme_helper.rb with RBS::Inline
 
 module Appkit
-  module ThemeHelper
-    def theme_attributes: () -> untyped
+  # @rbs module-self ::ActionView::Base
+  module ThemeHelper : ::ActionView::Base
+    # : () -> Hash[Symbol, untyped]
+    def theme_attributes: () -> Hash[Symbol, untyped]
 
-    def saved_theme_attributes: () -> untyped
+    # : () -> Hash[Symbol, untyped]
+    def saved_theme_attributes: () -> Hash[Symbol, untyped]
   end
 end

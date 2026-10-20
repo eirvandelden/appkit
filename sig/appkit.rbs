@@ -1,9 +1,12 @@
 # Generated from lib/appkit.rb with RBS::Inline
 
 module Appkit
-  def self.config: () -> untyped
+  # : () -> Configuration
+  def self.config: () -> Configuration
 
-  def self.revision: () -> untyped
+  # : () -> String
+  def self.revision: () -> String
 
-  def self.configure: () -> untyped
+  # : () { (Configuration) -> void } -> void
+  def self.configure: () { (Configuration) -> void } -> void
 end

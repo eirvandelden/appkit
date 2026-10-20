@@ -7,11 +7,13 @@ module Appkit
     # SolidCache is optional: only wire this check when it's actually the
     # configured cache store, so host apps on a different cache backend
     # don't get a check that could never be meaningfully green.
-    def register_cache_check: () -> untyped
+    # : () -> void
+    def register_cache_check: () -> void
 
     # Solid Queue is optional too: only register worker-liveness monitoring
     # when it's the active_job adapter, since the check is meaningless (or
     # would error) against a different backend.
-    def register_queue_check: (untyped app) -> untyped
+    # : (untyped) -> void
+    def register_queue_check: (untyped) -> void
   end
 end

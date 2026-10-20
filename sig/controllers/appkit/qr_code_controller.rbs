@@ -1,7 +1,14 @@
 # Generated from app/controllers/appkit/qr_code_controller.rb with RBS::Inline
 
 module Appkit
-  class QrCodeController < ApplicationController
-    def show: () -> untyped
+  # The host's ApplicationController, which includes Appkit::Authentication, is the real superclass.
+  # @rbs inherits ::ActionController::Base
+  class QrCodeController < ::ActionController::Base
+    include ::Appkit::Authentication
+
+    extend ::Appkit::Authentication::ClassMethods
+
+    # : () -> void
+    def show: () -> void
   end
 end

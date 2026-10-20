@@ -5,18 +5,22 @@ module Appkit
   # top-level `app_name` translation, then the configured name (a string or a
   # callable), then the host application module name split into words.
   class AppName
-    def initialize: (untyped configured, ?host_module_name: untyped) -> untyped
+    # : (untyped, ?host_module_name: String?) -> void
+    def initialize: (untyped, ?host_module_name: String?) -> void
 
-    def to_s: () -> untyped
+    # : () -> String
+    def to_s: () -> String
 
     private
 
     attr_reader configured: untyped
 
-    attr_reader host_module_name: untyped
+    attr_reader host_module_name: String?
 
-    def translated: () -> untyped
+    # : () -> String?
+    def translated: () -> String?
 
-    def configured_name: () -> untyped
+    # : () -> String?
+    def configured_name: () -> String?
   end
 end

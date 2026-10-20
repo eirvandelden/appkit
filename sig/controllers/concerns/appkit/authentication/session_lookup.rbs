@@ -2,7 +2,9 @@
 
 module Appkit
   module Authentication
-    module SessionLookup
+    # @rbs module-self ::ActionController::Base
+    module SessionLookup : ::ActionController::Base
+      # : () -> untyped
       def find_session_by_cookie: () -> untyped
     end
   end
