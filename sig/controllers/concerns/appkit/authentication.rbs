@@ -1,0 +1,43 @@
+# Generated from app/controllers/concerns/appkit/authentication.rb with RBS::Inline
+
+module Appkit
+  module Authentication
+    extend ActiveSupport::Concern
+
+    include Appkit::Authentication::SessionLookup
+
+    SESSION_COOKIE_LIFETIME: untyped
+
+    def require_unauthenticated_access: (**untyped options) -> untyped
+
+    def allow_unauthenticated_access: (**untyped options) -> untyped
+
+    private
+
+    def signed_in?: () -> untyped
+
+    def require_authentication: () -> untyped
+
+    def restore_authentication: () -> untyped
+
+    def request_authentication: () -> untyped
+
+    def redirect_signed_in_user_to_root: () -> untyped
+
+    def start_new_session_for: (untyped user) -> untyped
+
+    def resume_session: (untyped session) -> untyped
+
+    # Fix vs JA: also tracks the session record on Current, not just the user.
+    def authenticated_as: (untyped session) -> untyped
+
+    def post_authenticating_url: () -> untyped
+
+    # Fix vs JA: destroys the Session row so rows don't accumulate forever.
+    def reset_authentication: () -> untyped
+
+    def set_authenticated_by: (untyped method) -> untyped
+
+    def authenticated_by: () -> untyped
+  end
+end

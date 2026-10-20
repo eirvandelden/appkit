@@ -1,0 +1,6 @@
+# Generated from app/models/appkit/push_subscription.rb with RBS::Inline
+
+module Appkit
+  class PushSubscription < ActiveRecord::Base
+  end
+end

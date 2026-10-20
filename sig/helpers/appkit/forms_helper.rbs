@@ -1,0 +1,7 @@
+# Generated from app/helpers/appkit/forms_helper.rb with RBS::Inline
+
+module Appkit
+  module FormsHelper
+    def auto_submit_form_with: (**untyped attributes) ?{ (?) -> untyped } -> untyped
+  end
+end

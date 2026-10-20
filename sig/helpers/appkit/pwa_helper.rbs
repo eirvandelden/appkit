@@ -1,0 +1,15 @@
+# Generated from app/helpers/appkit/pwa_helper.rb with RBS::Inline
+
+module Appkit
+  module PwaHelper
+    # iOS ignores manifest icons and doesn't support SVG touch icons, so pick
+    # the configured 192px PNG (or the largest non-maskable PNG as a fallback).
+    def apple_touch_icon_path: () -> untyped
+
+    def favicon_path: () -> untyped
+
+    private
+
+    def png_icon_paths: () -> untyped
+  end
+end

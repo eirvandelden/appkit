@@ -1,0 +1,15 @@
+# Generated from app/controllers/appkit/first_runs_controller.rb with RBS::Inline
+
+module Appkit
+  class FirstRunsController < ApplicationController
+    def show: () -> untyped
+
+    def create: () -> untyped
+
+    private
+
+    def prevent_running_after_setup: () -> untyped
+
+    def user_params: () -> untyped
+  end
+end

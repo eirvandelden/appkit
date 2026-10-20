@@ -10,3 +10,10 @@ test/dummy/log
 test/dummy/tmp
 test/dummy/storage
 /Gemfile.lock
+
+# Type signatures: sig/ ships with the gem, even where a global ignore file hides it.
+!sig/
+
+# rbs collection output; the lock is not committed, like Gemfile.lock.
+.gem_rbs_collection/
+/rbs_collection.lock.yaml

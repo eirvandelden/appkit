@@ -1,0 +1,13 @@
+# Generated from app/jobs/appkit/push_notification_job.rb with RBS::Inline
+
+module Appkit
+  class PushNotificationJob < ActiveJob::Base
+    def perform: (untyped push_subscription, untyped payload) -> untyped
+
+    private
+
+    def delivery_args: (untyped push_subscription, untyped payload) -> untyped
+
+    def vapid_credentials: () -> untyped
+  end
+end

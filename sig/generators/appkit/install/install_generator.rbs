@@ -1,0 +1,33 @@
+# Generated from lib/generators/appkit/install/install_generator.rb with RBS::Inline
+
+module Appkit
+  module Generators
+    class InstallGenerator < Rails::Generators::Base
+      include Rails::Generators::Migration
+
+      ERROR_PAGES: untyped
+
+      APPLICATION_CONTROLLER: ::String
+
+      AUTHENTICATION_INCLUDE: ::Regexp
+
+      def self.next_migration_number: (untyped dirname) -> untyped
+
+      def create_sessions_migration: () -> untyped
+
+      def create_push_subscriptions_migration: () -> untyped
+
+      def add_authentication_to_application_controller: () -> untyped
+
+      def copy_error_pages: () -> untyped
+
+      def copy_ci_workflow: () -> untyped
+
+      private
+
+      def sessions_table_exists?: () -> untyped
+
+      def application_controller_file: () -> untyped
+    end
+  end
+end

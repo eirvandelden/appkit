@@ -1,0 +1,19 @@
+# Generated from app/controllers/appkit/sessions_controller.rb with RBS::Inline
+
+module Appkit
+  class SessionsController < ApplicationController
+    def new: () -> untyped
+
+    def create: () -> untyped
+
+    def destroy: () -> untyped
+
+    private
+
+    def ensure_user_exists: () -> untyped
+
+    def authenticate_user: () -> untyped
+
+    def render_rejection: (untyped status) -> untyped
+  end
+end

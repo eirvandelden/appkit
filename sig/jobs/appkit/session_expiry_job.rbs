@@ -1,0 +1,7 @@
+# Generated from app/jobs/appkit/session_expiry_job.rb with RBS::Inline
+
+module Appkit
+  class SessionExpiryJob < ActiveJob::Base
+    def perform: () -> untyped
+  end
+end

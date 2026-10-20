@@ -1,0 +1,9 @@
+# Generated from app/controllers/concerns/appkit/authentication/session_lookup.rb with RBS::Inline
+
+module Appkit
+  module Authentication
+    module SessionLookup
+      def find_session_by_cookie: () -> untyped
+    end
+  end
+end

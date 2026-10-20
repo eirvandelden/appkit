@@ -1,0 +1,11 @@
+# Generated from app/controllers/concerns/appkit/version_headers.rb with RBS::Inline
+
+module Appkit
+  module VersionHeaders
+    extend ActiveSupport::Concern
+
+    private
+
+    def set_version_headers: () -> untyped
+  end
+end

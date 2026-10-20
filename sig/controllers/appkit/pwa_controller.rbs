@@ -1,0 +1,9 @@
+# Generated from app/controllers/appkit/pwa_controller.rb with RBS::Inline
+
+module Appkit
+  class PwaController < ::ApplicationController
+    def manifest: () -> untyped
+
+    def service_worker: () -> untyped
+  end
+end

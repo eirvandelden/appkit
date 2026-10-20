@@ -1,0 +1,13 @@
+# Generated from app/controllers/appkit/push_subscriptions_controller.rb with RBS::Inline
+
+module Appkit
+  class PushSubscriptionsController < ApplicationController
+    def create: () -> untyped
+
+    def destroy: () -> untyped
+
+    private
+
+    def push_subscription_params: () -> untyped
+  end
+end

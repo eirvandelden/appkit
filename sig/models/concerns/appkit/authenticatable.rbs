@@ -1,0 +1,15 @@
+# Generated from app/models/concerns/appkit/authenticatable.rb with RBS::Inline
+
+module Appkit
+  module Authenticatable
+    extend ActiveSupport::Concern
+
+    def deactivate!: () -> untyped
+
+    private
+
+    def deactivated_email_address: () -> untyped
+
+    def email_attribute_value: () -> untyped
+  end
+end

@@ -1,0 +1,11 @@
+# Generated from lib/appkit/revision.rb with RBS::Inline
+
+module Appkit
+  # Names the installed appkit commit. A Bundler git source knows its full SHA
+  # without a .git directory, so this also works in Docker builds that delete it.
+  class Revision
+    def initialize: (spec: untyped) -> untyped
+
+    def to_s: () -> untyped
+  end
+end

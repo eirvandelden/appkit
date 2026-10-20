@@ -1,0 +1,9 @@
+# Generated from lib/appkit.rb with RBS::Inline
+
+module Appkit
+  def self.config: () -> untyped
+
+  def self.revision: () -> untyped
+
+  def self.configure: () -> untyped
+end

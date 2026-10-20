@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.license       = "Nonstandard"
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    Dir["{app,config,lib}/**/*", "LICENSE.md", "THIRD_PARTY_NOTICES.md", "README.md", "CHANGELOG.md"]
+    Dir["{app,config,lib,sig}/**/*", "LICENSE.md", "THIRD_PARTY_NOTICES.md", "README.md", "CHANGELOG.md"]
   end
 
   spec.add_dependency "railties", "~> 8.1"

@@ -1,0 +1,17 @@
+# Generated from app/controllers/appkit/preferences_controller.rb with RBS::Inline
+
+module Appkit
+  class PreferencesController < ApplicationController
+    def edit: () -> untyped
+
+    def update: () -> untyped
+
+    private
+
+    def preference_params: () -> untyped
+
+    def locale_attribute_shown?: () -> untyped
+
+    def timezone_attribute_shown?: () -> untyped
+  end
+end

@@ -1,0 +1,37 @@
+# Generated from lib/appkit/configuration.rb with RBS::Inline
+
+module Appkit
+  class Configuration
+    DEFAULT_ICONS: untyped
+
+    attr_accessor app_name: untyped
+
+    attr_accessor email_attribute: untyped
+
+    attr_accessor user_scope: untyped
+
+    attr_accessor user_class: untyped
+
+    attr_accessor first_run: untyped
+
+    attr_accessor icons: untyped
+
+    attr_accessor sw_extra_cache_paths: untyped
+
+    attr_accessor brand_color: untyped
+
+    attr_accessor timezone_attribute: untyped
+
+    attr_accessor locale_attribute: untyped
+
+    attr_accessor health_check_path: untyped
+
+    attr_accessor session_expiry: untyped
+
+    attr_accessor session_class: untyped
+
+    def initialize: () -> untyped
+
+    def app_display_name: () -> untyped
+  end
+end

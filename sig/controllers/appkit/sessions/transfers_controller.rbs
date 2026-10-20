@@ -1,0 +1,11 @@
+# Generated from app/controllers/appkit/sessions/transfers_controller.rb with RBS::Inline
+
+module Appkit
+  module Sessions
+    class TransfersController < ApplicationController
+      def show: () -> untyped
+
+      def update: () -> untyped
+    end
+  end
+end

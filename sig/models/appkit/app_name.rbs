@@ -1,0 +1,22 @@
+# Generated from app/models/appkit/app_name.rb with RBS::Inline
+
+module Appkit
+  # Resolves the name shown to users, for the current locale: the host's
+  # top-level `app_name` translation, then the configured name (a string or a
+  # callable), then the host application module name split into words.
+  class AppName
+    def initialize: (untyped configured, ?host_module_name: untyped) -> untyped
+
+    def to_s: () -> untyped
+
+    private
+
+    attr_reader configured: untyped
+
+    attr_reader host_module_name: untyped
+
+    def translated: () -> untyped
+
+    def configured_name: () -> untyped
+  end
+end

@@ -1,0 +1,7 @@
+# Generated from app/controllers/appkit/qr_code_controller.rb with RBS::Inline
+
+module Appkit
+  class QrCodeController < ApplicationController
+    def show: () -> untyped
+  end
+end

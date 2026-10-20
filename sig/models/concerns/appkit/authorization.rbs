@@ -1,0 +1,11 @@
+# Generated from app/models/concerns/appkit/authorization.rb with RBS::Inline
+
+module Appkit
+  module Authorization
+    private
+
+    def ensure_can_administer: () -> untyped
+
+    def ensure_current_user: () -> untyped
+  end
+end

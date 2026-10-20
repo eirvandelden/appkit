@@ -1,0 +1,13 @@
+# Generated from app/models/concerns/appkit/transferable.rb with RBS::Inline
+
+module Appkit
+  module Transferable
+    extend ActiveSupport::Concern
+
+    EXPIRY_DURATION: untyped
+
+    def find_by_transfer_id: (untyped id) -> untyped
+
+    def transfer_id: () -> untyped
+  end
+end

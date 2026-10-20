@@ -1,0 +1,25 @@
+# Generated from app/models/appkit/manifest_icon.rb with RBS::Inline
+
+module Appkit
+  # Infers manifest.json icon metadata from a configured icon path, e.g.
+  # "/icon-mask-512.png" -> sizes "512x512", purpose "maskable".
+  class ManifestIcon
+    attr_reader path: untyped
+
+    def initialize: (untyped path) -> untyped
+
+    def to_h: () -> untyped
+
+    private
+
+    def content_type: () -> untyped
+
+    def sizes: () -> untyped
+
+    def svg?: () -> untyped
+
+    def purpose: () -> untyped
+
+    def maskable?: () -> untyped
+  end
+end

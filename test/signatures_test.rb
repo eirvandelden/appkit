@@ -1,5 +1,8 @@
 require "test_helper"
 require "prism"
+require "open3"
+require "tmpdir"
+require "fileutils"
 
 class SignaturesTest < ActiveSupport::TestCase
   ROOT = Appkit::Engine.root
@@ -20,7 +23,112 @@ class SignaturesTest < ActiveSupport::TestCase
     assert_empty misses, "steep:ignore comments without a diagnostic name or a reason:\n#{misses.join("\n")}"
   end
 
+  test "rbs:generate rewrites the sig file of a changed signature" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      rake(dir, "rbs:generate")
+
+      assert_includes dir.join("sig/models/appkit/qr_code_link.rbs").read, "def signed: () -> String"
+
+      write_fixture_link(dir, "Integer")
+      rake(dir, "rbs:generate")
+
+      assert_includes dir.join("sig/models/appkit/qr_code_link.rbs").read, "def signed: () -> Integer"
+    end
+  end
+
+  test "rbs:generate leaves sig/manifest.yaml unchanged" do
+    in_signature_copy do |dir|
+      dir.join("sig/manifest.yaml").write("dependencies:\n  - name: set\n")
+
+      rake(dir, "rbs:generate")
+
+      assert_equal "dependencies:\n  - name: set\n", dir.join("sig/manifest.yaml").read
+    end
+  end
+
+  test "rbs:check fails when sig/ is stale" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      commit_generated_sig(dir)
+
+      write_fixture_link(dir, "Integer")
+      _output, status = rake(dir, "rbs:check")
+
+      assert_not status.success?
+    end
+  end
+
+  test "rbs:check passes when sig/ matches" do
+    in_signature_copy do |dir|
+      write_fixture_link(dir, "String")
+      commit_generated_sig(dir)
+
+      output, status = rake(dir, "rbs:check")
+
+      assert_predicate status, :success?, output
+    end
+  end
+
+  test "sig/ is not ignored when the global ignore file ignores sig/" do
+    Tempfile.create("global-ignore") do |file|
+      file.write("sig/\n")
+      file.flush
+      %w[sig/manifest.yaml sig/models/appkit/qr_code_link.rbs].each do |path|
+        _output, status = Open3.capture2e("git", "-c", "core.excludesFile=#{file.path}", "check-ignore", "--no-index",
+"-q", path, chdir: ROOT.to_s)
+
+        assert_equal 1, status.exitstatus, "#{path} is ignored"
+      end
+    end
+  end
+
+  test "the gemspec packages sig/" do
+    files = Gem::Specification.load(ROOT.join("appkit.gemspec").to_s).files
+
+    assert_includes files, "sig/manifest.yaml"
+    assert files.any? { |file| file.start_with?("sig/") && file.end_with?(".rbs") }
+  end
+
   private
+    def in_signature_copy
+      Dir.mktmpdir("appkit-signatures") do |tmp|
+        dir = Pathname(tmp)
+        %w[app lib sig rakelib].each { |name| FileUtils.cp_r(ROOT.join(name), dir) if ROOT.join(name).exist? }
+        FileUtils.cp(ROOT.join(".gitignore"), dir.join(".gitignore"))
+        dir.join("sig").mkpath
+        dir.join("Rakefile").write("")
+        yield dir
+      end
+    end
+
+    def write_fixture_link(dir, return_type)
+      dir.join("app/models/appkit").mkpath
+      dir.join("app/models/appkit/qr_code_link.rb").write(<<~RUBY)
+        module Appkit
+          class QrCodeLink
+            #: () -> #{return_type}
+            def signed
+              "signed"
+            end
+          end
+        end
+      RUBY
+    end
+
+    def commit_generated_sig(dir)
+      rake(dir, "rbs:generate")
+      git = %w[git -c core.hooksPath=/dev/null -c user.name=Test -c user.email=test@example.com -c commit.gpgsign=false]
+      Open3.capture2e("git", "init", "-q", chdir: dir.to_s)
+      Open3.capture2e("git", "add", ".", chdir: dir.to_s)
+      Open3.capture2e(*git, "commit", "-q", "-m", "baseline", chdir: dir.to_s)
+    end
+
+    def rake(dir, task)
+      env = { "BUNDLE_GEMFILE" => ROOT.join("Gemfile").to_s }
+      Open3.capture2e(env, "bundle", "exec", "rake", task, chdir: dir.to_s)
+    end
+
     def source_files
       SOURCE_GLOBS.flat_map { |glob| Dir[ROOT.join(glob)] }.sort
     end
