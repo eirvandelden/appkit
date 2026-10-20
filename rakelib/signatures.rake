@@ -1,3 +1,5 @@
+require "active_support/core_ext/enumerable"
+
 namespace :rbs do
   desc "Regenerate sig/ from the inline #: signatures"
   task :generate do
@@ -16,7 +18,7 @@ desc "Type-check app/ and lib/ with Steep"
 task :steep do
   # A git hook exports GIT_DIR. rbs collection then runs its own git commands against this
   # repository and silently installs only the stdlib types, so every Rails type goes missing.
-  git_env = ENV.keys.grep(/\AGIT_/).to_h { |name| [ name, nil ] }
+  git_env = ENV.keys.grep(/\AGIT_/).index_with(nil)
   sh git_env, "bundle exec rbs collection update"
   sh "bundle exec steep check"
 end
