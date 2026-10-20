@@ -13,7 +13,7 @@ module Appkit
       before_validation { self.last_active_at ||= Time.now }
     end
 
-    class_methods do
+    module ClassMethods
       def start!(user_agent:, ip_address:)
         create! user_agent: user_agent, ip_address: ip_address
       end

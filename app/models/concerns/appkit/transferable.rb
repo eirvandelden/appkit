@@ -4,7 +4,7 @@ module Appkit
 
     EXPIRY_DURATION = 4.hours
 
-    class_methods do
+    module ClassMethods
       def find_by_transfer_id(id)
         find_signed(id, purpose: :transfer)
       end

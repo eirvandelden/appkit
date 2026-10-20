@@ -10,7 +10,7 @@ module Appkit
       helper_method :signed_in?
     end
 
-    class_methods do
+    module ClassMethods
       def require_unauthenticated_access(**options)
         allow_unauthenticated_access(**options)
         before_action :redirect_signed_in_user_to_root, **options
