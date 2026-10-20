@@ -4,7 +4,7 @@ module Appkit
   class Configuration
     DEFAULT_ICONS: Array[String]
 
-    attr_accessor app_name: (String | ^() -> String)?
+    attr_accessor app_name: (String | ^() -> untyped)?
 
     attr_accessor email_attribute: Symbol
 
@@ -24,7 +24,7 @@ module Appkit
 
     attr_accessor timezone_attribute: Symbol?
 
-    attr_accessor locale_attribute: Symbol
+    attr_accessor locale_attribute: Symbol?
 
     attr_accessor health_check_path: String
 

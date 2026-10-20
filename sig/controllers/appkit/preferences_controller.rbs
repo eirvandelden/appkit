@@ -19,10 +19,10 @@ module Appkit
     # : () -> ActionController::Parameters
     def preference_params: () -> ActionController::Parameters
 
-    # : () -> bool
-    def locale_attribute_shown?: () -> bool
+    # : () -> bool?
+    def locale_attribute_shown?: () -> bool?
 
-    # : () -> bool
-    def timezone_attribute_shown?: () -> bool
+    # : () -> bool?
+    def timezone_attribute_shown?: () -> bool?
   end
 end

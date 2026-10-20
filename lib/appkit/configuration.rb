@@ -2,7 +2,7 @@ module Appkit
   class Configuration
     DEFAULT_ICONS = %w[/icon.svg /icon-192.png /icon-512.png /icon-mask-512.png].freeze #: Array[String]
 
-    attr_accessor :app_name #: (String | ^() -> String)?
+    attr_accessor :app_name #: (String | ^() -> untyped)?
     attr_accessor :email_attribute #: Symbol
     attr_accessor :user_scope #: ^() -> untyped
     attr_accessor :user_class #: ^() -> untyped
@@ -12,7 +12,7 @@ module Appkit
     attr_accessor :sw_extra_cache_paths #: Array[String]
     attr_accessor :brand_color #: String?
     attr_accessor :timezone_attribute #: Symbol?
-    attr_accessor :locale_attribute #: Symbol
+    attr_accessor :locale_attribute #: Symbol?
     attr_accessor :health_check_path #: String
     attr_accessor :session_expiry #: ActiveSupport::Duration
 

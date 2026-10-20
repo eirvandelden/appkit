@@ -31,14 +31,15 @@ module Appkit
       #: () -> ActionController::Parameters
       def preference_params
         permitted = %i[color_scheme light_theme dark_theme]
-        permitted << Appkit.config.locale_attribute if locale_attribute_shown?
+        # locale_attribute_shown? checks the attribute is set, but Steep cannot carry that across the call.
+        permitted << Appkit.config.locale_attribute if locale_attribute_shown? # steep:ignore ArgumentTypeMismatch
         # timezone_attribute_shown? checks the attribute is set, but Steep cannot carry that across the call.
         permitted << Appkit.config.timezone_attribute if timezone_attribute_shown? # steep:ignore ArgumentTypeMismatch
 
         params.require(:user).permit(*permitted)
       end
 
-      #: () -> bool
+      #: () -> bool?
       def locale_attribute_shown?
         # Current is owned by the host app, so the shipped signatures cannot name it.
         # steep:ignore:start
@@ -46,7 +47,7 @@ module Appkit
         # steep:ignore:end
       end
 
-      #: () -> bool
+      #: () -> bool?
       def timezone_attribute_shown?
         # Current is owned by the host app, so the shipped signatures cannot name it.
         # steep:ignore:start
