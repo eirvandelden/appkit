@@ -33,6 +33,7 @@ classDiagram
     +origin_key() String?
     +origin_params() Hash
     +carry(path) String
+    +tile_path(page) String
     +back(fallback) Link?
     +exit_path(fallback) String
   }
@@ -64,7 +65,7 @@ sequenceDiagram
   participant U as Browser
   participant M as Appkit::Menu
   U ->> M : GET /hubs/processing (landing page)
-  M -->> U : tile href = carry(tile_path) = /records?filter=open&from=processing
+  M -->> U : tile href = tile_path(page) = /records?filter=open&from=processing
   U ->> M : GET /records?filter=open&from=processing
   M -->> U : back = "‹ Processing" to /hubs/processing
   U ->> M : GET /records/7?from=processing
@@ -101,6 +102,8 @@ class Appkit::Menu
   #: (String) -> String                  the path with from=<origin key> merged into its query, unchanged without an origin
   # URI-aware: keeps the existing query (?filter=open), replaces an existing from, escapes the value, keeps a #fragment.
   def carry(path)
+  #: (Appkit::Menu::Page) -> String       a tile's href: on a landing page the page's tile_path with from=<that landing hub's key>, merged as carry does; elsewhere the plain tile_path
+  def tile_path(page)
   #: (?String?) -> Appkit::Menu::Link?   the title-bar back link; nil on a list without an origin
   # A record is a request with params["id"] that is no hub's landing page; every other request, new and a failed create included, is a list.
   def back(fallback = nil)
@@ -183,6 +186,7 @@ Taken from journal_administration's plan, where three architects designed for de
 - **Origin restores the opened list.** Only tiles set an origin, and a hub holds at most one page per controller (enforced), so that page's `tile_path` is the list the user opened. A hub-key origin is kept over a page key because journal_administration's map fits the rule and its accepted plan uses hub keys.
 - **Landing match is configured per hub** (`landing:`), not hardcoded to a `hubs` controller, so a host can use the dashboard or any controller as a landing page.
 - **`Hub#action` and `Page#summary` are plain data** for the host's landing page: the nav ignores them, and appkit tests only that they are stored and that `summary` runs once.
+- **A tile starts the origin; `carry` only forwards it.** `Menu#tile_path(page)` adds the landing hub's key as `from` on a landing page, the one place a flow starts. `carry` forwards an existing `from` and never invents one, so hub-column links, rail links and links on other pages stay free of an origin, and `back` on a landing page stays nil.
 - **Back-link label.** A list from a tile shows "‹ <hub>"; a record shows "‹ <page>"; a record without an origin shows "‹ <owning page>" to the fallback.
 - **The badge is left out at 0** by `_nav`, as well as hidden by mvpa.css, so a test can check it without CSS.
 - **A record belongs to the unfiltered page.** A filtered page scores only on a list request. A record request that still carries the list's filter (`/records/7?filter=open`) scores 0 on the filtered page, so the unfiltered page and its hub are current: a transaction lights Administratie, not Verwerken. A controller with only filtered pages falls back to a hub that owns it, else no hub is current.
@@ -210,7 +214,8 @@ Taken from journal_administration's plan, where three architects designed for de
 - `test/integration/app_name_test.rb` — `assert_name_in_nav` drops its `h2` assertion: the nav no longer renders the app name, and the hub column `h2` holds the hub label. The `title` assertion stays.
 - `test/integration/nav_current_page_test.rb` — rewritten: it asserts the old Home link today; it now proves the dummy layout marks the current hub and page with `aria-current`, through real requests.
 - `test/integration/nav_queries_test.rb` — new; the query-count proof.
-- Dummy host: `test/dummy/config/routes.rb` gains `resources :hubs, only: :show` and an `admin/:id` record route (`AdminController#show`); `test/dummy/app/controllers/hubs_controller.rb` (new, renders a hub's page links); `test/dummy/app/controllers/application_controller.rb` gains a `menu` helper that builds a small map (an Overview hub landing on `home#index`, a Work hub landing on `hubs#show` with an unfiltered `admin` page and a filtered `admin?filter=open` page in another hub, counts as lambdas over `User`); `test/dummy/app/views/layouts/application.html.erb` renders the new nav.
+- `test/integration/origin_flow_test.rb` — new; the origin flow through real requests: tile, list, record.
+- Dummy host: `test/dummy/config/routes.rb` gains `resources :hubs, only: :show` and an `admin/:id` record route (`AdminController#show`); the admin list links a record with `menu.carry`, and the dummy layout renders `menu.back` as an `a.back` link; `test/dummy/app/controllers/hubs_controller.rb` (new, renders a hub's page links); `test/dummy/app/controllers/application_controller.rb` gains a `menu` helper that builds a small map (an Overview hub landing on `home#index`, a Work hub landing on `hubs#show` with an unfiltered `admin` page and a filtered `admin?filter=open` page in another hub, counts as lambdas over `User`); `test/dummy/app/views/layouts/application.html.erb` renders the new nav.
 - `test/types/host_probe.rb` — the additions named under Integration points.
 - `sig/` — regenerated from inline RBS.
 - `CHANGELOG.md` — under the existing `## Unreleased`: a `### Changed` line for the replaced `_nav`, and new numbered steps appended to the existing `### Upgrading` list, written so an agent in another app can follow them: build an `Appkit::Menu` per request from `request.parameters`; render `render layout: "appkit/shared/nav", locals: { menu:, user_name: }` with the search button as the block; move Voorkeuren into the account links; drop any reliance on the old home link and app-name heading; move `mvpa-css` to a commit whose CHANGELOG names the rail and hub column. No second `### Upgrading` section and no new heading format.
@@ -248,10 +253,11 @@ Phase A proves the generic behaviour that journal_administration's acceptance cr
 - Invariant: one page per controller in a hub → `test/models/appkit/menu/hub_test.rb` `test_two_pages_with_one_controller_raise`
 - Query count: a dummy request on a hub with two counted pages runs each count query once, and a request on a hub without pages runs none → `test/integration/nav_queries_test.rb` `test_nav_runs_each_current_hub_count_once`
 - The dummy layout marks the current hub and page through real requests → `test/integration/nav_current_page_test.rb` `test_landing_page_marks_its_hub`, `test_filtered_page_marks_its_hub_and_page`, `test_record_page_marks_the_unfiltered_page`, `a hub kept out of the rail still gets its hub column`
+- The origin flow starts at a tile and reaches a record through real requests → `test/integration/origin_flow_test.rb` `a tile on a landing page carries its hub as the origin`, `the origin travels from a tile to a list and on to a record`, `a landing page has no back link`
 
 Per changed file, the unit tests expected:
 
-- `app/models/appkit/menu.rb`: `current_hub picks the highest-scoring page`, `current_hub on a record edit is the unfiltered page's hub, not the filtered page's hub`, `current_hub on a landing request is the hub whose landing matches`, `current_hub falls back to a hub that owns the controller`, `current_hub can be a hub kept out of the rail`, `current_hub is nil for a request no hub owns`, `links lists every hub and page`, `origin_key and origin_params are empty without an origin`, `origin returns the hub named by from`, `origin ignores an unknown key`, `carry adds from only with an origin`, `carry merges into an existing query`, `carry replaces an existing from`, `carry keeps a fragment`, `back on a list with an origin leads to the landing page`, `back on a record with an origin leads to the origin hub's page for that controller`, `back on a record whose controller has no page in the origin hub uses the fallback`, `back without an origin uses the fallback and the owning page label`, `back on a list without an origin is nil`, `back on a landing page is nil, although its id is present`, `back on a new page counts as a list`, `exit_path prefers the origin landing page`, `exit_path without an origin is the fallback`.
+- `app/models/appkit/menu.rb`: `current_hub picks the highest-scoring page`, `current_hub on a record edit is the unfiltered page's hub, not the filtered page's hub`, `current_hub on a landing request is the hub whose landing matches`, `current_hub falls back to a hub that owns the controller`, `current_hub can be a hub kept out of the rail`, `current_hub is nil for a request no hub owns`, `links lists every hub and page`, `origin_key and origin_params are empty without an origin`, `origin returns the hub named by from`, `origin ignores an unknown key`, `carry adds from only with an origin`, `carry merges into an existing query`, `carry replaces an existing from`, `carry keeps a fragment`, `carry on a landing page without from leaves the path unchanged`, `tile_path on a landing page carries that hub as the origin`, `tile_path off a landing page is the plain tile path`, `back on a list with an origin leads to the landing page`, `back on a record with an origin leads to the origin hub's page for that controller`, `back on a record whose controller has no page in the origin hub uses the fallback`, `back without an origin uses the fallback and the owning page label`, `back on a list without an origin is nil`, `back on a landing page is nil, although its id is present`, `back on a new page counts as a list`, `exit_path prefers the origin landing page`, `exit_path without an origin is the fallback`.
 - `app/models/appkit/menu/hub.rb`: `landing? is true only for its landing request`, `owns? is true for its landing request`, `owns? is false for another hub's landing id`, `owns? is true for a page-less controller it lists`, `page_for returns its page for a controller, nil for another`, `two pages with one controller raise`, `rail? is true by default`, `rail? is false for a hub kept out of the rail`, `action is stored`.
 - `app/models/appkit/menu/page.rb`: `score is 2 for controller and filter`, `score is 1 for an unfiltered page's controller`, `score is 0 for a filtered page without its filter`, `score is 0 for a filtered page on a record`, `score is 0 otherwise`, `count evaluates its lambda once`, `count is nil without a lambda`, `summary evaluates its lambda once`, `controllers are public and filter is not`, `tile_path defaults to path`.
 - `app/views/appkit/shared/_nav.html.erb`: `nav marks the current hub and page`, `nav shows a badge above 0 and none at 0`, `nav leaves out the hub column for a hub without pages`, `nav leaves out the hub column when no hub is current`, `nav yields the top of the rail`, `nav hides the hub emoji from assistive tech`, `nav keeps a hub out of the rail`, `nav renders the hub column of a current hub kept out of the rail`.

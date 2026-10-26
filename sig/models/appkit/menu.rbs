@@ -36,6 +36,10 @@ module Appkit
     # : (String) -> String
     def carry: (String) -> String
 
+    # A tile's href: on a landing page the page's tile path with from=<that hub's key>, elsewhere the plain tile path.
+    # : (Page) -> String
+    def tile_path: (Page) -> String
+
     # The title-bar back link; nil on a list without an origin.
     # : (?String?) -> Link?
     def back: (?String?) -> Link?
@@ -61,6 +65,14 @@ module Appkit
 
     # : () -> Page?
     def current_page: () -> Page?
+
+    # The path with from=<key> merged into its query: keeps the query and a fragment, replaces an existing from.
+    # : (String, String) -> String
+    def with_from: (String, String) -> String
+
+    # The hub whose landing page is this request.
+    # : () -> Hub?
+    def landing_hub: () -> Hub?
 
     # A request with an id, except a landing page; new and create have no id, so they count as lists.
     # : () -> bool

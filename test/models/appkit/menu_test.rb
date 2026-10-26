@@ -116,6 +116,24 @@ module Appkit
       assert_equal "/records?from=work#top", menu.carry("/records#top")
     end
 
+    test "tile_path on a landing page carries that hub as the origin" do
+      work = build_menu("hubs", { "id" => "work" })
+      review = build_menu("hubs", { "id" => "review" })
+
+      assert_equal "/records?from=work", work.tile_path(work.hubs.first.pages.first)
+      assert_equal "/records?filter=open&from=review", review.tile_path(review.hubs.last.pages.first)
+    end
+
+    test "tile_path off a landing page is the plain tile path" do
+      menu = build_menu("records", { "from" => "work" })
+
+      assert_equal "/records", menu.tile_path(menu.hubs.first.pages.first)
+    end
+
+    test "carry on a landing page without from leaves the path unchanged" do
+      assert_equal "/records", build_menu("hubs", { "id" => "work" }).carry("/records")
+    end
+
     test "back on a list with an origin leads to the landing page" do
       back = build_menu("records", { "from" => "work" }).back
 

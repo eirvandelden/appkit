@@ -26,5 +26,6 @@ setup = Appkit::Menu::Hub.new(key: :setup, label: "Setup", emoji: "⚙️", path
 setup.rail?
 menu = Appkit::Menu.new(hubs: [ hub, setup ], account: [ link ], controller_path: "records", params: {})
 menu.carry("/records")
+menu.tile_path(page)
 menu.back("/records")
 menu.exit_path("/")
