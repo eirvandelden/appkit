@@ -34,8 +34,9 @@ en:
     shared:
       skip_to_main_content: "Skip to main content"
     navigation:
-      home: "Home"
       preferences: "Preferences"
+      rail: "Main navigation"
+      hub_column: "Pages of this hub"
       logout: "Logout"
     themes:
       color_schemes:

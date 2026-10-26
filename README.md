@@ -80,7 +80,7 @@ end
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `app_name` | the host application module name split into words (`MyRecipeBook` shows "My Recipe Book") | Display name: a string or a callable. A blank value (`""`, or a callable returning `nil` or `""`) counts as unset. The name is chosen per request locale: the host's top-level `app_name` locale key when the current locale defines it, then this option, then the module name. Shown in the sign-in page, first-run page, nav, login page title and PWA manifest. Host views can render it with `Appkit.config.app_display_name`. |
+| `app_name` | the host application module name split into words (`MyRecipeBook` shows "My Recipe Book") | Display name: a string or a callable. A blank value (`""`, or a callable returning `nil` or `""`) counts as unset. The name is chosen per request locale: the host's top-level `app_name` locale key when the current locale defines it, then this option, then the module name. Shown in the sign-in page, first-run page, login page title and PWA manifest. Host views can render it with `Appkit.config.app_display_name`. |
 | `email_attribute` | `:email` | Attribute on `user_class` used as the user's email/login identifier. |
 | `user_scope` | `-> { User.all }` | Relation used to look up users (e.g. for sign-in). |
 | `user_class` | `-> { "User".constantize }` | Lazily-resolved host app User class. |
