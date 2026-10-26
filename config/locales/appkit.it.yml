@@ -34,8 +34,9 @@ it:
     shared:
       skip_to_main_content: "Vai al contenuto principale"
     navigation:
-      home: "Home"
       preferences: "Preferenze"
+      rail: "Navigazione principale"
+      hub_column: "Pagine di questa sezione"
       logout: "Esci"
     themes:
       color_schemes:

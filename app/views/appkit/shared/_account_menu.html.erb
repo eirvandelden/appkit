@@ -1,0 +1,14 @@
+<% avatar = local_assigns.fetch(:avatar, false) %>
+<details>
+  <% if avatar %>
+    <summary aria-label="<%= user_name %>">👤</summary>
+  <% else %>
+    <summary><%= user_name %></summary>
+  <% end %>
+  <ul>
+    <% menu.account.each do |link| %>
+      <li><%= link_to link.label, link.path %></li>
+    <% end %>
+    <li><%= button_to t("appkit.navigation.logout"), session_path, method: :delete %></li>
+  </ul>
+</details>
