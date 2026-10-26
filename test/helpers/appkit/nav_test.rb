@@ -33,6 +33,16 @@ module Appkit
       assert_select "nav.rail > button.search:first-child", text: "Search"
     end
 
+    test "nav hides the hub emoji from assistive tech" do
+      render_nav(controller_path: "dashboard", params: {})
+
+      link = css_select("nav.rail a[href='/hubs/review']").first
+      named = link.children.reject { |node| node.element? && node["aria-hidden"] == "true" }
+
+      assert_equal "📥", link.at_css("span[aria-hidden='true']").text
+      assert_equal "Review", named.map(&:text).join.strip
+    end
+
     test "nav keeps a hub out of the rail" do
       render_nav(controller_path: "dashboard", params: {})
 
