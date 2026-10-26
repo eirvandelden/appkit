@@ -2,7 +2,12 @@
   <%= yield %>
   <ul>
     <% menu.hubs.select(&:rail?).each do |hub| %>
-      <li><%= link_to "#{hub.emoji} #{hub.label}", hub.path, "aria-current": (menu.current?(hub) ? "true" : nil) %></li>
+      <li>
+        <%= link_to hub.path, "aria-current": (menu.current?(hub) ? "true" : nil) do %>
+          <%= tag.span(hub.emoji, "aria-hidden": "true") %>
+          <%= hub.label %>
+        <% end %>
+      </li>
     <% end %>
     <li><%= render "appkit/shared/account_menu", menu: menu, user_name: user_name %></li>
   </ul>
