@@ -1,7 +1,7 @@
 <nav class="rail" aria-label="<%= t("appkit.navigation.rail") %>">
   <%= yield %>
   <ul>
-    <% menu.hubs.each do |hub| %>
+    <% menu.hubs.select(&:rail?).each do |hub| %>
       <li><%= link_to "#{hub.emoji} #{hub.label}", hub.path, "aria-current": (menu.current?(hub) ? "true" : nil) %></li>
     <% end %>
     <li><%= render "appkit/shared/account_menu", menu: menu, user_name: user_name %></li>

@@ -3,7 +3,7 @@
 module Appkit
   # Places one request in the menu map: which hub and page are current, where the origin leads.
   class Menu
-    # The rail hubs, in map order.
+    # Every hub in map order: the rail hubs and any hub kept out of the rail.
     attr_reader hubs: Array[Hub]
 
     # Account menu entries; the partial appends the logout button.

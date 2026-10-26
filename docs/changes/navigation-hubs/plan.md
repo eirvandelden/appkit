@@ -106,15 +106,18 @@ end
 
 # A hub: its landing page, its pages and the controllers it owns without a page.
 class Appkit::Menu::Hub
-  #: (key: Symbol, label: String, emoji: String, path: String, landing: Hash[String, String], ?pages: Array[Appkit::Menu::Page], ?controllers: Array[String], ?action: Appkit::Menu::Link?) -> void
+  #: (key: Symbol, label: String, emoji: String, path: String, landing: Hash[String, String], ?pages: Array[Appkit::Menu::Page], ?controllers: Array[String], ?action: Appkit::Menu::Link?, ?rail: bool) -> void
   # landing: the request that is this hub's landing page, as a controller path plus params,
   #   for example {"controller" => "hubs", "id" => "processing"} or {"controller" => "dashboard"}.
+  # rail: false keeps the hub out of the rail (Beheer, reached from the account menu); it still gets a hub column and can be current.
   # Raises ArgumentError when two pages share a controller, so a hub key always restores one list.
-  def initialize(key:, label:, emoji:, path:, landing:, pages: [], controllers: [], action: nil)
+  def initialize(key:, label:, emoji:, path:, landing:, pages: [], controllers: [], action: nil, rail: true)
   #: () -> Appkit::Menu::Link?           a title-bar action for the host's landing page (Importeren); the nav does not render it
   attr_reader :key, :label, :emoji, :path, :pages, :action
   #: (String, Hash[String, untyped]) -> bool   true for its landing request or a page-less controller it owns
   def owns?(controller_path, params)
+  #: () -> bool                          false for a hub kept out of the rail
+  def rail?
 end
 
 # One page of a hub and what needs attention there; count and summary are lazy and memoized.
@@ -145,7 +148,7 @@ end
 
 Views:
 
-- `appkit/shared/_nav.html.erb` (replaced). It stays a layout partial, as today. The host calls `render layout: "appkit/shared/nav", locals: { menu: menu, user_name: Current.user.name } do … end`, and the block (the search button) renders at the top of the rail. Renders `nav.rail`: a yielded block at the top (the host's search button), one `li` per rail hub with emoji and label, then the account `li` with `_account_menu`. Then `nav.hub-column` for the current hub when it has pages: an `h2` linking to the landing page, a `ul` of page links, each with `<data value>` when the count is above 0. The rail marks the current hub with `aria-current="true"`; the hub column marks the current page with `aria-current="page"`. Both navs have translated `aria-label`s.
+- `appkit/shared/_nav.html.erb` (replaced). It stays a layout partial, as today. The host calls `render layout: "appkit/shared/nav", locals: { menu: menu, user_name: Current.user.name } do … end`, and the block (the search button) renders at the top of the rail. Renders `nav.rail`: a yielded block at the top (the host's search button), one `li` per hub whose `rail?` is true, with emoji and label, then the account `li` with `_account_menu`. Then `nav.hub-column` for the current hub when it has pages, also for a hub kept out of the rail: an `h2` linking to the landing page, a `ul` of page links, each with `<data value>` when the count is above 0. The rail marks the current hub with `aria-current="true"`; the hub column marks the current page with `aria-current="page"`. Both navs have translated `aria-label`s.
 - `appkit/shared/_account_menu.html.erb` (new). Locals `menu:`, `user_name:`, `avatar: false`. A `<details>` whose summary is the user's name, or "👤" with `aria-label` set to the user's name when `avatar: true`. It lists `menu.account` and ends with the Uitloggen `button_to`.
 
 ### Complexity
@@ -232,14 +235,14 @@ Phase A proves the generic behaviour that journal_administration's acceptance cr
 - Invariant: no badge at 0 → nav test `test_nav_shows_a_badge_above_zero_and_none_at_zero`
 - Invariant: one page per controller in a hub → `test/models/appkit/menu/hub_test.rb` `test_two_pages_with_one_controller_raise`
 - Query count: a dummy request on a hub with two counted pages runs each count query once, and a request on a hub without pages runs none → `test/integration/nav_queries_test.rb` `test_nav_runs_each_current_hub_count_once`
-- The dummy layout marks the current hub and page through real requests → `test/integration/nav_current_page_test.rb` `test_landing_page_marks_its_hub`, `test_filtered_page_marks_its_hub_and_page`, `test_record_page_marks_the_unfiltered_page`
+- The dummy layout marks the current hub and page through real requests → `test/integration/nav_current_page_test.rb` `test_landing_page_marks_its_hub`, `test_filtered_page_marks_its_hub_and_page`, `test_record_page_marks_the_unfiltered_page`, `a hub kept out of the rail still gets its hub column`
 
 Per changed file, the unit tests expected:
 
-- `app/models/appkit/menu.rb`: `current_hub picks the highest-scoring page`, `current_hub on a record edit is the unfiltered page's hub, not the filtered page's hub`, `current_hub on a landing request is the hub whose landing matches`, `current_hub falls back to a hub that owns the controller`, `current_hub is nil for a request no hub owns`, `links lists every hub and page`, `origin_key and origin_params are empty without an origin`, `origin returns the hub named by from`, `origin ignores an unknown key`, `carry adds from only with an origin`, `carry merges into an existing query`, `carry replaces an existing from`, `carry keeps a fragment`, `back on a list with an origin leads to the landing page`, `back on a record with an origin leads to the origin hub's page for that controller`, `back on a record whose controller has no page in the origin hub uses the fallback`, `back without an origin uses the fallback and the owning page label`, `back on a list without an origin is nil`, `exit_path prefers the origin landing page`, `exit_path without an origin is the fallback`.
-- `app/models/appkit/menu/hub.rb`: `owns? is true for its landing request`, `owns? is false for another hub's landing id`, `owns? is true for a page-less controller it lists`, `two pages with one controller raise`, `action is stored`.
+- `app/models/appkit/menu.rb`: `current_hub picks the highest-scoring page`, `current_hub on a record edit is the unfiltered page's hub, not the filtered page's hub`, `current_hub on a landing request is the hub whose landing matches`, `current_hub falls back to a hub that owns the controller`, `current_hub can be a hub kept out of the rail`, `current_hub is nil for a request no hub owns`, `links lists every hub and page`, `origin_key and origin_params are empty without an origin`, `origin returns the hub named by from`, `origin ignores an unknown key`, `carry adds from only with an origin`, `carry merges into an existing query`, `carry replaces an existing from`, `carry keeps a fragment`, `back on a list with an origin leads to the landing page`, `back on a record with an origin leads to the origin hub's page for that controller`, `back on a record whose controller has no page in the origin hub uses the fallback`, `back without an origin uses the fallback and the owning page label`, `back on a list without an origin is nil`, `exit_path prefers the origin landing page`, `exit_path without an origin is the fallback`.
+- `app/models/appkit/menu/hub.rb`: `owns? is true for its landing request`, `owns? is false for another hub's landing id`, `owns? is true for a page-less controller it lists`, `two pages with one controller raise`, `rail? is true by default`, `rail? is false for a hub kept out of the rail`, `action is stored`.
 - `app/models/appkit/menu/page.rb`: `score is 2 for controller and filter`, `score is 1 for an unfiltered page's controller`, `score is 0 for a filtered page without its filter`, `score is 0 otherwise`, `count evaluates its lambda once`, `count is nil without a lambda`, `summary evaluates its lambda once`, `tile_path defaults to path`.
-- `app/views/appkit/shared/_nav.html.erb`: `nav marks the current hub and page`, `nav shows a badge above 0 and none at 0`, `nav leaves out the hub column for a hub without pages`, `nav yields the top of the rail`.
+- `app/views/appkit/shared/_nav.html.erb`: `nav marks the current hub and page`, `nav shows a badge above 0 and none at 0`, `nav leaves out the hub column for a hub without pages`, `nav yields the top of the rail`, `nav keeps a hub out of the rail`, `nav renders the hub column of a current hub kept out of the rail`.
 - `app/views/appkit/shared/_account_menu.html.erb`: `account menu lists the links and ends with Uitloggen`, `avatar form shows 👤 labelled with the user name`.
 
 Test setup: the dummy app and a fake map built in the tests. No fixtures for app models.

@@ -12,6 +12,7 @@ module Appkit
 
       # landing: the request that is this hub's landing page, as a controller path plus params,
       # for example {"controller" => "hubs", "id" => "processing"}.
+      # rail: false keeps the hub out of the rail, for a hub the host links from its account menu.
       # Raises ArgumentError when two pages share a controller, so a hub key always restores one list.
       #: (
       #    key: Symbol,
@@ -21,9 +22,10 @@ module Appkit
       #    landing: Hash[String, String],
       #    ?pages: Array[Page],
       #    ?controllers: Array[String],
-      #    ?action: Link?
+      #    ?action: Link?,
+      #    ?rail: bool
       #  ) -> void
-      def initialize(key:, label:, emoji:, path:, landing:, pages: [], controllers: [], action: nil)
+      def initialize(key:, label:, emoji:, path:, landing:, pages: [], controllers: [], action: nil, rail: true)
         @key = key
         @label = label
         @emoji = emoji
@@ -32,6 +34,7 @@ module Appkit
         @pages = pages
         @controllers = controllers
         @action = action
+        @rail = rail
         ensure_one_page_per_controller
       end
 
@@ -39,6 +42,12 @@ module Appkit
       #: (String, Hash[String, untyped]) -> bool
       def owns?(controller_path, params)
         @controllers.include?(controller_path) || landing?(controller_path, params)
+      end
+
+      # True when the rail lists this hub.
+      #: () -> bool
+      def rail?
+        @rail
       end
 
       private

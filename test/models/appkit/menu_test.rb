@@ -44,6 +44,15 @@ module Appkit
       assert_equal :work, menu.current_hub.key
     end
 
+    test "current_hub can be a hub kept out of the rail" do
+      setup = Menu::Hub.new(key: :setup, label: "Setup", emoji: "⚙️", path: "/hubs/setup",
+        landing: { "controller" => "hubs", "id" => "setup" }, pages: [ page(:categories, "categories") ], rail: false)
+      menu = build_menu("categories", { "id" => "3" }, hubs: [ *default_hubs, setup ])
+
+      assert_equal :setup, menu.current_hub.key
+      assert menu.current?(setup)
+    end
+
     test "current_hub is nil for a request no hub owns" do
       menu = build_menu("unknown", {})
 

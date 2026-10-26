@@ -21,7 +21,10 @@ page = Appkit::Menu::Page.new(key: :records, label: "Records", path: "/records",
   count: -> { 1 })
 hub = Appkit::Menu::Hub.new(key: :work, label: "Work", emoji: "🗄️", path: "/hubs/work",
   landing: { "controller" => "hubs", "id" => "work" }, pages: [ page ], action: link)
-menu = Appkit::Menu.new(hubs: [ hub ], account: [ link ], controller_path: "records", params: {})
+setup = Appkit::Menu::Hub.new(key: :setup, label: "Setup", emoji: "⚙️", path: "/hubs/setup",
+  landing: { "controller" => "hubs", "id" => "setup" }, rail: false)
+setup.rail?
+menu = Appkit::Menu.new(hubs: [ hub, setup ], account: [ link ], controller_path: "records", params: {})
 menu.carry("/records")
 menu.back("/records")
 menu.exit_path("/")

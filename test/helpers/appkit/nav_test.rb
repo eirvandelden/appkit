@@ -33,6 +33,20 @@ module Appkit
       assert_select "nav.rail > button.search:first-child", text: "Search"
     end
 
+    test "nav keeps a hub out of the rail" do
+      render_nav(controller_path: "dashboard", params: {})
+
+      assert_select "nav.rail a[href='/hubs/setup']", count: 0
+    end
+
+    test "nav renders the hub column of a current hub kept out of the rail" do
+      render_nav(controller_path: "categories", params: {})
+
+      assert_select "nav.rail a[aria-current]", count: 0
+      assert_select "nav.hub-column h2 a[href='/hubs/setup']", text: "Setup"
+      assert_select "nav.hub-column a[href='/categories'][aria-current='page']", text: /Categories/
+    end
+
     test "nav labels both landmarks" do
       render_nav(controller_path: "records", params: { "filter" => "open" })
 
@@ -78,7 +92,10 @@ module Appkit
           Menu::Hub.new(key: :overview, label: "Overview", emoji: "🏠", path: "/",
             landing: { "controller" => "dashboard" }),
           Menu::Hub.new(key: :review, label: "Review", emoji: "📥", path: "/hubs/review",
-            landing: { "controller" => "hubs", "id" => "review" }, pages: review_pages)
+            landing: { "controller" => "hubs", "id" => "review" }, pages: review_pages),
+          Menu::Hub.new(key: :setup, label: "Setup", emoji: "⚙️", path: "/hubs/setup",
+            landing: { "controller" => "hubs", "id" => "setup" }, rail: false,
+            pages: [ page(:categories, "Categories", "/categories") ])
         ]
       end
 
