@@ -54,13 +54,14 @@ module Appkit
     #: (String) -> String
     def carry(path)
       key = origin_key
-      return path unless key
+      key ? with_from(path, key) : path
+    end
 
-      uri = URI.parse(path)
-      query = URI.decode_www_form(uri.query.to_s).reject { |name, _| name == "from" } #: Array[[String, String]]
-      query << [ "from", key ]
-      uri.query = URI.encode_www_form(query)
-      uri.to_s
+    # A tile's href: on a landing page the page's tile path with from=<that hub's key>, elsewhere the plain tile path.
+    #: (Page) -> String
+    def tile_path(page)
+      hub = landing_hub
+      hub ? with_from(page.tile_path, hub.key.to_s) : page.tile_path
     end
 
     # The title-bar back link; nil on a list without an origin.
@@ -113,10 +114,26 @@ module Appkit
         placement&.last
       end
 
+      # The path with from=<key> merged into its query: keeps the query and a fragment, replaces an existing from.
+      #: (String, String) -> String
+      def with_from(path, key)
+        uri = URI.parse(path)
+        query = URI.decode_www_form(uri.query.to_s).reject { |name, _| name == "from" } #: Array[[String, String]]
+        query << [ "from", key ]
+        uri.query = URI.encode_www_form(query)
+        uri.to_s
+      end
+
+      # The hub whose landing page is this request.
+      #: () -> Hub?
+      def landing_hub
+        hubs.find { |hub| hub.landing?(@controller_path, @params) }
+      end
+
       # A request with an id, except a landing page; new and create have no id, so they count as lists.
       #: () -> bool
       def record?
-        @params["id"].present? && hubs.none? { |hub| hub.landing?(@controller_path, @params) }
+        @params["id"].present? && landing_hub.nil?
       end
 
       #: () -> Link?
