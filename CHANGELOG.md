@@ -16,7 +16,6 @@
 - appkit now requires Rails 8.1: the gemspec floors are railties `~> 8.1`, turbo-rails `~> 2.0`, importmap-rails `~> 2.2`, web-push `~> 3.1`, rqrcode `~> 3.2` and okcomputer `~> 1.20`, so apps on Rails 8.0 can no longer install appkit.
 - The reusable `rails-ci.yml` workflow now uses `actions/checkout@v7`, `actions/cache@v6` and `actions/setup-node@v7`. Checkout v7 refuses to check out a fork's pull request under `pull_request_target` or `workflow_run`, so an app that calls `rails-ci.yml` from one of those triggers fails on fork pull requests.
 - The reusable `rails-ci.yml` test job now runs `npm ci` when the calling app has a `package-lock.json`. Apps without that file are unaffected.
-
 - The `appkit/shared/nav` partial now renders a rail of task hubs and a hub column for the current hub, from an `Appkit::Menu` map, with an account menu under the user's name. It no longer renders the app-name heading, the home link, the yielded list items or the Voorkeuren link. The `appkit.navigation.home` locale key is gone; `appkit.navigation.rail` and `appkit.navigation.hub_column` are new.
 
 ### Fixed
