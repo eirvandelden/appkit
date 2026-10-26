@@ -23,7 +23,7 @@ class NavCurrentPageTest < ActionDispatch::IntegrationTest
   end
 
   test "record_page_marks_the_unfiltered_page" do
-    get admin_url
+    get admin_record_url(7, filter: "open")
 
     assert_select "nav.rail a[href='#{hub_path("work")}'][aria-current='true']"
     assert_select "nav.hub-column a[href='#{admin_path}'][aria-current='page']"
