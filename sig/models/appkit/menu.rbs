@@ -1,0 +1,77 @@
+# Generated from app/models/appkit/menu.rb with RBS::Inline
+
+module Appkit
+  # Places one request in the menu map: which hub and page are current, where the origin leads.
+  class Menu
+    # The rail hubs, in map order.
+    attr_reader hubs: Array[Hub]
+
+    # Account menu entries; the partial appends the logout button.
+    attr_reader account: Array[Link]
+
+    # : (hubs: Array[Hub], account: Array[Link], controller_path: String, params: Hash[String, untyped]) -> void
+    def initialize: (hubs: Array[Hub], account: Array[Link], controller_path: String, params: Hash[String, untyped]) -> void
+
+    # : () -> Hub?
+    def current_hub: () -> Hub?
+
+    # : (Hub | Page) -> bool
+    def current?: (Hub | Page) -> bool
+
+    # Every hub and page as a label and a path, for search.
+    # : () -> Array[Link]
+    def links: () -> Array[Link]
+
+    # The hub named by params["from"], nil for an unknown key.
+    # : () -> Hub?
+    def origin: () -> Hub?
+
+    # : () -> String?
+    def origin_key: () -> String?
+
+    # : () -> Hash[Symbol, String]
+    def origin_params: () -> Hash[Symbol, String]
+
+    # The path with from=<origin key> merged into its query, unchanged without an origin.
+    # : (String) -> String
+    def carry: (String) -> String
+
+    # The title-bar back link; nil on a list without an origin.
+    # : (?String?) -> Link?
+    def back: (?String?) -> Link?
+
+    # Where a delete lands: the origin landing page, else the fallback.
+    # : (String) -> String
+    def exit_path: (String) -> String
+
+    private
+
+    # The highest-scoring page and its hub, ties to map order; else a hub that owns the controller.
+    # : () -> [Hub, Page?]?
+    def placement: () -> [ Hub, Page? ]?
+
+    # : () -> [Hub, Page]?
+    def best_page_placement: () -> [ Hub, Page ]?
+
+    # : () { (Hub, Page) -> void } -> void
+    def each_page: () { (Hub, Page) -> void } -> void
+
+    # : () -> [Hub, nil]?
+    def owner_placement: () -> [ Hub, nil ]?
+
+    # : () -> Page?
+    def current_page: () -> Page?
+
+    # : () -> bool
+    def record?: () -> bool
+
+    # : () -> Link?
+    def origin_landing_link: () -> Link?
+
+    # : () -> Link?
+    def origin_page_link: () -> Link?
+
+    # : (String?) -> Link?
+    def fallback_link: (String?) -> Link?
+  end
+end

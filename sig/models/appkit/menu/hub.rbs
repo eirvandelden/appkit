@@ -1,0 +1,48 @@
+# Generated from app/models/appkit/menu/hub.rb with RBS::Inline
+
+module Appkit
+  class Menu
+    # A hub: its landing page, its pages and the controllers it owns without a page.
+    class Hub
+      attr_reader key: Symbol
+
+      attr_reader label: String
+
+      attr_reader emoji: String
+
+      attr_reader path: String
+
+      attr_reader pages: Array[Page]
+
+      # A title-bar action for the host's landing page; the nav does not render it.
+      attr_reader action: Link?
+
+      # landing: the request that is this hub's landing page, as a controller path plus params,
+      # for example {"controller" => "hubs", "id" => "processing"}.
+      # Raises ArgumentError when two pages share a controller, so a hub key always restores one list.
+      # : (
+      #    key: Symbol,
+      #    label: String,
+      #    emoji: String,
+      #    path: String,
+      #    landing: Hash[String, String],
+      #    ?pages: Array[Page],
+      #    ?controllers: Array[String],
+      #    ?action: Link?
+      #  ) -> void
+      def initialize: (key: Symbol, label: String, emoji: String, path: String, landing: Hash[String, String], ?pages: Array[Page], ?controllers: Array[String], ?action: Link?) -> void
+
+      # True for its landing request or a page-less controller it owns.
+      # : (String, Hash[String, untyped]) -> bool
+      def owns?: (String, Hash[String, untyped]) -> bool
+
+      private
+
+      # : () -> void
+      def ensure_one_page_per_controller: () -> void
+
+      # : (String, Hash[String, untyped]) -> bool
+      def landing?: (String, Hash[String, untyped]) -> bool
+    end
+  end
+end
