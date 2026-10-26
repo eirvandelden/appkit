@@ -34,8 +34,9 @@ nl:
     shared:
       skip_to_main_content: "Ga naar inhoud"
     navigation:
-      home: "Home"
       preferences: "Voorkeuren"
+      rail: "Hoofdnavigatie"
+      hub_column: "Pagina's in deze groep"
       logout: "Uitloggen"
     themes:
       color_schemes:

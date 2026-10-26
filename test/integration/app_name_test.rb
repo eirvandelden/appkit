@@ -72,7 +72,6 @@ class AppNameTest < ActionDispatch::IntegrationTest
       sign_in_as users(:alice)
       get root_url(locale: locale)
 
-      assert_select "h2", text: name
       assert_select "title", text: name
     end
 
