@@ -27,6 +27,13 @@ module Appkit
       assert_select "nav.hub-column", count: 0
     end
 
+    test "nav leaves out the hub column when no hub is current" do
+      render_nav(controller_path: "nowhere", params: {})
+
+      assert_select "nav.rail a[aria-current]", count: 0
+      assert_select "nav.hub-column", count: 0
+    end
+
     test "nav yields the top of the rail" do
       render_nav(controller_path: "dashboard", params: {})
 
