@@ -153,6 +153,17 @@ module Appkit
       assert_nil build_menu("records", {}).back("/records")
     end
 
+    test "back on a landing page is nil, although its id is present" do
+      assert_nil build_menu("hubs", { "id" => "work" }).back("/fallback")
+    end
+
+    test "back on a new page counts as a list" do
+      menu = build_menu("records", { "action" => "new", "from" => "work" })
+
+      assert_equal [ "Work", "/hubs/work" ], [ menu.back("/records").label, menu.back("/records").path ]
+      assert_nil build_menu("records", { "action" => "new" }).back("/records")
+    end
+
     test "exit_path prefers the origin landing page" do
       assert_equal "/hubs/work", build_menu("records", { "from" => "work" }).exit_path("/fallback")
     end

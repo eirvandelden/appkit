@@ -44,6 +44,14 @@ module Appkit
         @controllers.include?(controller_path) || landing?(controller_path, params)
       end
 
+      # True for the request that is this hub's landing page.
+      #: (String, Hash[String, untyped]) -> bool
+      def landing?(controller_path, params)
+        @landing.all? do |name, value|
+          name == "controller" ? controller_path == value : params[name].to_s == value
+        end
+      end
+
       # True when the rail lists this hub.
       #: () -> bool
       def rail?
@@ -55,13 +63,6 @@ module Appkit
         def ensure_one_page_per_controller
           controllers = pages.flat_map(&:controllers)
           raise ArgumentError, "hub #{key} has two pages for one controller" if controllers.uniq.size < controllers.size
-        end
-
-        #: (String, Hash[String, untyped]) -> bool
-        def landing?(controller_path, params)
-          @landing.all? do |name, value|
-            name == "controller" ? controller_path == value : params[name].to_s == value
-          end
         end
     end
   end

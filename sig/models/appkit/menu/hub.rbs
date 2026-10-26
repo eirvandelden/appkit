@@ -38,6 +38,10 @@ module Appkit
       # : (String, Hash[String, untyped]) -> bool
       def owns?: (String, Hash[String, untyped]) -> bool
 
+      # True for the request that is this hub's landing page.
+      # : (String, Hash[String, untyped]) -> bool
+      def landing?: (String, Hash[String, untyped]) -> bool
+
       # True when the rail lists this hub.
       # : () -> bool
       def rail?: () -> bool
@@ -46,9 +50,6 @@ module Appkit
 
       # : () -> void
       def ensure_one_page_per_controller: () -> void
-
-      # : (String, Hash[String, untyped]) -> bool
-      def landing?: (String, Hash[String, untyped]) -> bool
     end
   end
 end
