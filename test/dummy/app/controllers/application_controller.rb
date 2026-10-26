@@ -18,7 +18,9 @@ class ApplicationController < ActionController::Base
         Appkit::Menu::Hub.new(key: :work, label: "Work", emoji: "🗄️", path: hub_path("work"),
           landing: { "controller" => "hubs", "id" => "work" }, pages: work_pages),
         Appkit::Menu::Hub.new(key: :review, label: "Review", emoji: "📥", path: hub_path("review"),
-          landing: { "controller" => "hubs", "id" => "review" }, pages: review_pages)
+          landing: { "controller" => "hubs", "id" => "review" }, pages: review_pages),
+        Appkit::Menu::Hub.new(key: :setup, label: "Setup", emoji: "⚙️", path: hub_path("setup"),
+          landing: { "controller" => "hubs", "id" => "setup" }, pages: setup_pages, rail: false)
       ]
     end
 
@@ -35,6 +37,13 @@ class ApplicationController < ActionController::Base
       [
         Appkit::Menu::Page.new(key: :open_admin, label: "Open admin", path: admin_path(filter: "open"),
           controllers: [ "admin" ], filter: { "filter" => "open" })
+      ]
+    end
+
+    def setup_pages
+      [
+        Appkit::Menu::Page.new(key: :preferences, label: "Preferences", path: edit_preferences_path,
+          controllers: [ "appkit/preferences" ])
       ]
     end
 

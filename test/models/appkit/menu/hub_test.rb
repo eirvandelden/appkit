@@ -24,6 +24,14 @@ module Appkit
         assert_raises(ArgumentError) { build_hub(pages: pages) }
       end
 
+      test "rail? is true by default" do
+        assert_predicate build_hub, :rail?
+      end
+
+      test "rail? is false for a hub kept out of the rail" do
+        assert_not_predicate build_hub(rail: false), :rail?
+      end
+
       test "action is stored" do
         action = Link.new(label: "Import", path: "/imports/new")
 

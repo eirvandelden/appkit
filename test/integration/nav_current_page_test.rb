@@ -37,6 +37,15 @@ class NavCurrentPageTest < ActionDispatch::IntegrationTest
     assert_select "nav.hub-column", count: 0
   end
 
+  test "a hub kept out of the rail still gets its hub column" do
+    get edit_preferences_url
+
+    assert_select "nav.rail a[href='#{hub_path("setup")}']", count: 0
+    assert_select "nav.rail a[aria-current]", count: 0
+    assert_select "nav.hub-column h2 a[href='#{hub_path("setup")}']", text: "Setup"
+    assert_select "nav.hub-column a[href='#{edit_preferences_path}'][aria-current='page']"
+  end
+
   test "the rail ends with the account menu holding preferences and logout" do
     get root_url
 
