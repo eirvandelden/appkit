@@ -36,7 +36,7 @@ en:
     navigation:
       preferences: "Preferences"
       rail: "Main navigation"
-      hub_column: "Pages in this section"
+      hub_column: "Pages of this hub"
       logout: "Logout"
     themes:
       color_schemes:
