@@ -46,6 +46,11 @@ module Appkit
         assert_equal 1, calls
       end
 
+      test "controllers are public and filter is not" do
+        assert_equal [ "records" ], filtered_page.controllers
+        assert_not_respond_to filtered_page, :filter
+      end
+
       test "tile_path defaults to path" do
         assert_equal "/records", plain_page.tile_path
         assert_equal "/records?filter=open", filtered_page.tile_path

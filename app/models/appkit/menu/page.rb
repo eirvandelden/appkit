@@ -5,8 +5,8 @@ module Appkit
       attr_reader :key #: Symbol
       attr_reader :label #: String
       attr_reader :path #: String
+      # The controllers whose requests this page owns.
       attr_reader :controllers #: Array[String]
-      attr_reader :filter #: Hash[String, String]
 
       #: (
       #    key: Symbol,
@@ -63,6 +63,8 @@ module Appkit
       end
 
       private
+        attr_reader :filter #: Hash[String, String]
+
         # A record request carries the list's filter along at most; the record belongs to the unfiltered page.
         #: (Hash[String, untyped]) -> bool
         def filtered_list?(params)
