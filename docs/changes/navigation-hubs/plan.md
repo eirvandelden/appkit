@@ -172,6 +172,7 @@ Taken from journal_administration's plan, where three architects designed for de
 - **`Hub#action` and `Page#summary` are plain data** for the host's landing page: the nav ignores them, and appkit tests only that they are stored and that `summary` runs once.
 - **Back-link label.** A list from a tile shows "‹ <hub>"; a record shows "‹ <page>"; a record without an origin shows "‹ <owning page>" to the fallback.
 - **The badge is left out at 0** by `_nav`, as well as hidden by mvpa.css, so a test can check it without CSS.
+- **Back-link labels carry no "‹" prefix.** `Link#label` is the plain hub or page label; the host's title bar adds the prefix, so no locale key is needed for it.
 - **Phone avatar is "👤"**, labelled with the user's name.
 - **`_nav` is replaced, not kept beside a new partial** (intent decision). Other apps follow the `### Upgrading` steps.
 - **Markup contract** matches journal_administration's plan (`nav.rail`, `nav.hub-column`), which the mvpa.css rail slice adopts (Etienne, 2026-10-25). `ul.tiles` and the landing page are the host's views, not appkit's.
@@ -191,6 +192,7 @@ Taken from journal_administration's plan, where three architects designed for de
 - `config/locales/{en,nl,it}.yml` — the rail and hub-column landmark labels, the back-link prefix if any, Uitloggen; remove keys the old `_nav` alone used.
 - `test/models/appkit/menu_test.rb`, `test/models/appkit/menu/hub_test.rb`, `test/models/appkit/menu/page_test.rb` — new.
 - `test/helpers/appkit/nav_test.rb` — rewritten for the new partials (it renders `render layout: "appkit/shared/nav"` today).
+- `test/integration/app_name_test.rb` — `assert_name_in_nav` drops its `h2` assertion: the nav no longer renders the app name, and the hub column `h2` holds the hub label. The `title` assertion stays.
 - `test/integration/nav_current_page_test.rb` — rewritten: it asserts the old Home link today; it now proves the dummy layout marks the current hub and page with `aria-current`, through real requests.
 - `test/integration/nav_queries_test.rb` — new; the query-count proof.
 - Dummy host: `test/dummy/config/routes.rb` gains `resources :hubs, only: :show`; `test/dummy/app/controllers/hubs_controller.rb` (new, renders a hub's page links); `test/dummy/app/controllers/application_controller.rb` gains a `menu` helper that builds a small map (an Overview hub landing on `home#index`, a Work hub landing on `hubs#show` with an unfiltered `admin` page and a filtered `admin?filter=open` page in another hub, counts as lambdas over `User`); `test/dummy/app/views/layouts/application.html.erb` renders the new nav.
