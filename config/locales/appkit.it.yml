@@ -36,7 +36,7 @@ it:
     navigation:
       preferences: "Preferenze"
       rail: "Navigazione principale"
-      hub_column: "Pagine di questa sezione"
+      hub_column: "Pagine di questo hub"
       logout: "Esci"
     themes:
       color_schemes:
