@@ -18,7 +18,7 @@ module Appkit
     end
 
     test "current_hub on a record edit is the unfiltered page's hub, not the filtered page's hub" do
-      menu = build_menu("records", { "id" => "7", "filter" => "closed" })
+      menu = build_menu("records", { "id" => "7", "filter" => "open" })
 
       assert_equal :work, menu.current_hub.key
     end

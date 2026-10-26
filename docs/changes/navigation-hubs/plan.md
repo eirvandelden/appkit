@@ -132,9 +132,9 @@ class Appkit::Menu::Page
   #: () -> String                        the filtered list a tile opens; defaults to path
   def tile_path
   #: (String, Hash[String, untyped]) -> Integer
-  # 2: a filtered page whose controller and filter both match.
+  # 2: a filtered page whose controller and filter both match, on a request without params["id"].
   # 1: an unfiltered page whose controller matches (any action, so show, edit and new too).
-  # 0: otherwise; a filtered page never matches without its filter.
+  # 0: otherwise; a filtered page never matches without its filter, nor on a record (params["id"] present).
   def score(controller_path, params)
   #: () -> Integer?                      runs the count lambda at most once
   def count
@@ -180,6 +180,7 @@ Taken from journal_administration's plan, where three architects designed for de
 - **`Hub#action` and `Page#summary` are plain data** for the host's landing page: the nav ignores them, and appkit tests only that they are stored and that `summary` runs once.
 - **Back-link label.** A list from a tile shows "‹ <hub>"; a record shows "‹ <page>"; a record without an origin shows "‹ <owning page>" to the fallback.
 - **The badge is left out at 0** by `_nav`, as well as hidden by mvpa.css, so a test can check it without CSS.
+- **A record belongs to the unfiltered page.** A filtered page scores only on a list request. A record request that still carries the list's filter (`/records/7?filter=open`) scores 0 on the filtered page, so the unfiltered page and its hub are current: a transaction lights Administratie, not Verwerken. A controller with only filtered pages falls back to a hub that owns it, else no hub is current.
 - **A record is a request with an id that is no landing page.** A landing page such as `hubs#show` has an id but counts as a list, so it has no back link without an origin. `new` and a failed `create` have no id and also count as lists: with an origin `back` leads to the origin landing page, without one it is nil. That is enough, because journal_administration's `new` views keep their own "Terug" link and no tile opens a `new` page.
 - **Back-link labels carry no "‹" prefix.** `Link#label` is the plain hub or page label; the host's title bar adds the prefix, so no locale key is needed for it.
 - **Phone avatar is "👤"**, labelled with the user's name.
@@ -247,7 +248,7 @@ Per changed file, the unit tests expected:
 
 - `app/models/appkit/menu.rb`: `current_hub picks the highest-scoring page`, `current_hub on a record edit is the unfiltered page's hub, not the filtered page's hub`, `current_hub on a landing request is the hub whose landing matches`, `current_hub falls back to a hub that owns the controller`, `current_hub can be a hub kept out of the rail`, `current_hub is nil for a request no hub owns`, `links lists every hub and page`, `origin_key and origin_params are empty without an origin`, `origin returns the hub named by from`, `origin ignores an unknown key`, `carry adds from only with an origin`, `carry merges into an existing query`, `carry replaces an existing from`, `carry keeps a fragment`, `back on a list with an origin leads to the landing page`, `back on a record with an origin leads to the origin hub's page for that controller`, `back on a record whose controller has no page in the origin hub uses the fallback`, `back without an origin uses the fallback and the owning page label`, `back on a list without an origin is nil`, `back on a landing page is nil, although its id is present`, `back on a new page counts as a list`, `exit_path prefers the origin landing page`, `exit_path without an origin is the fallback`.
 - `app/models/appkit/menu/hub.rb`: `landing? is true only for its landing request`, `owns? is true for its landing request`, `owns? is false for another hub's landing id`, `owns? is true for a page-less controller it lists`, `two pages with one controller raise`, `rail? is true by default`, `rail? is false for a hub kept out of the rail`, `action is stored`.
-- `app/models/appkit/menu/page.rb`: `score is 2 for controller and filter`, `score is 1 for an unfiltered page's controller`, `score is 0 for a filtered page without its filter`, `score is 0 otherwise`, `count evaluates its lambda once`, `count is nil without a lambda`, `summary evaluates its lambda once`, `tile_path defaults to path`.
+- `app/models/appkit/menu/page.rb`: `score is 2 for controller and filter`, `score is 1 for an unfiltered page's controller`, `score is 0 for a filtered page without its filter`, `score is 0 for a filtered page on a record`, `score is 0 otherwise`, `count evaluates its lambda once`, `count is nil without a lambda`, `summary evaluates its lambda once`, `tile_path defaults to path`.
 - `app/views/appkit/shared/_nav.html.erb`: `nav marks the current hub and page`, `nav shows a badge above 0 and none at 0`, `nav leaves out the hub column for a hub without pages`, `nav yields the top of the rail`, `nav keeps a hub out of the rail`, `nav renders the hub column of a current hub kept out of the rail`.
 - `app/views/appkit/shared/_account_menu.html.erb`: `account menu lists the links and ends with Uitloggen`, `avatar form shows 👤 labelled with the user name`.
 

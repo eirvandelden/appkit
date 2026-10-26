@@ -30,9 +30,9 @@ module Appkit
       # : () -> String
       def tile_path: () -> String
 
-      # 2: a filtered page whose controller and filter both match.
+      # 2: a filtered page whose controller and filter both match, on a list (no id).
       # 1: an unfiltered page whose controller matches, for any action.
-      # 0: otherwise; a filtered page never matches without its filter.
+      # 0: otherwise; a filtered page never matches without its filter, nor on a record.
       # : (String, Hash[String, untyped]) -> Integer
       def score: (String, Hash[String, untyped]) -> Integer
 
@@ -46,8 +46,9 @@ module Appkit
 
       private
 
+      # A record request carries the list's filter along at most; the record belongs to the unfiltered page.
       # : (Hash[String, untyped]) -> bool
-      def filter_matches?: (Hash[String, untyped]) -> bool
+      def filtered_list?: (Hash[String, untyped]) -> bool
     end
   end
 end

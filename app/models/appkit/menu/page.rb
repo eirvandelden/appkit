@@ -35,15 +35,15 @@ module Appkit
         @tile_path || path
       end
 
-      # 2: a filtered page whose controller and filter both match.
+      # 2: a filtered page whose controller and filter both match, on a list (no id).
       # 1: an unfiltered page whose controller matches, for any action.
-      # 0: otherwise; a filtered page never matches without its filter.
+      # 0: otherwise; a filtered page never matches without its filter, nor on a record.
       #: (String, Hash[String, untyped]) -> Integer
       def score(controller_path, params)
         return 0 unless controllers.include?(controller_path)
         return 1 if filter.empty?
 
-        filter_matches?(params) ? 2 : 0
+        filtered_list?(params) ? 2 : 0
       end
 
       # Runs the count lambda at most once.
@@ -63,9 +63,10 @@ module Appkit
       end
 
       private
+        # A record request carries the list's filter along at most; the record belongs to the unfiltered page.
         #: (Hash[String, untyped]) -> bool
-        def filter_matches?(params)
-          filter.all? { |name, value| params[name].to_s == value }
+        def filtered_list?(params)
+          params["id"].blank? && filter.all? { |name, value| params[name].to_s == value }
         end
     end
   end

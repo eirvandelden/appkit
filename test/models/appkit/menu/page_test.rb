@@ -16,6 +16,10 @@ module Appkit
         assert_equal 0, filtered_page.score("records", { "filter" => "closed" })
       end
 
+      test "score is 0 for a filtered page on a record" do
+        assert_equal 0, filtered_page.score("records", { "filter" => "open", "id" => "7" })
+      end
+
       test "score is 0 otherwise" do
         assert_equal 0, plain_page.score("other", {})
       end
