@@ -1,0 +1,15 @@
+# Generated from app/models/appkit/menu/link.rb with RBS::Inline
+
+module Appkit
+  class Menu
+    # A label and a path.
+    class Link
+      attr_reader label: String
+
+      attr_reader path: String
+
+      # : (label: String, path: String) -> void
+      def initialize: (label: String, path: String) -> void
+    end
+  end
+end
