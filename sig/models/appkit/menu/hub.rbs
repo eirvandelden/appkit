@@ -42,6 +42,10 @@ module Appkit
       # : (String, Hash[String, untyped]) -> bool
       def landing?: (String, Hash[String, untyped]) -> bool
 
+      # Its page that owns the controller; a hub holds at most one.
+      # : (String) -> Page?
+      def page_for: (String) -> Page?
+
       # True when the rail lists this hub.
       # : () -> bool
       def rail?: () -> bool
