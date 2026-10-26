@@ -113,9 +113,10 @@ module Appkit
         placement&.last
       end
 
+      # A request with an id, except a landing page; new and create have no id, so they count as lists.
       #: () -> bool
       def record?
-        @params["id"].present?
+        @params["id"].present? && hubs.none? { |hub| hub.landing?(@controller_path, @params) }
       end
 
       #: () -> Link?

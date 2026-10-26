@@ -11,6 +11,14 @@ module Appkit
         assert_not build_hub.owns?("hubs", { "id" => "play" })
       end
 
+      test "landing? is true only for its landing request" do
+        hub = build_hub(controllers: [ "settings" ])
+
+        assert hub.landing?("hubs", { "id" => "work" })
+        assert_not hub.landing?("hubs", { "id" => "play" })
+        assert_not hub.landing?("settings", {})
+      end
+
       test "owns? is true for a page-less controller it lists" do
         hub = build_hub(controllers: [ "settings" ])
 

@@ -62,6 +62,7 @@ module Appkit
     # : () -> Page?
     def current_page: () -> Page?
 
+    # A request with an id, except a landing page; new and create have no id, so they count as lists.
     # : () -> bool
     def record?: () -> bool
 
