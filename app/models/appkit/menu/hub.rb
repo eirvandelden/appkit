@@ -52,6 +52,12 @@ module Appkit
         end
       end
 
+      # Its page that owns the controller; a hub holds at most one.
+      #: (String) -> Page?
+      def page_for(controller_path)
+        pages.find { |page| page.controllers.include?(controller_path) }
+      end
+
       # True when the rail lists this hub.
       #: () -> bool
       def rail?

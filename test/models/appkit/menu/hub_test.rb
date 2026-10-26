@@ -26,6 +26,14 @@ module Appkit
         assert_not hub.owns?("other", {})
       end
 
+      test "page_for returns its page for a controller, nil for another" do
+        page = build_page(:records)
+        hub = build_hub(pages: [ page ])
+
+        assert_same page, hub.page_for("records")
+        assert_nil hub.page_for("other")
+      end
+
       test "two pages with one controller raise" do
         pages = [ build_page(:one), build_page(:two) ]
 

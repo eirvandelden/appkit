@@ -127,7 +127,7 @@ module Appkit
 
       #: () -> Link?
       def origin_page_link
-        page = origin&.pages&.find { |candidate| candidate.controllers.include?(@controller_path) }
+        page = origin&.page_for(@controller_path)
         page && Link.new(label: page.label, path: carry(page.tile_path))
       end
 
