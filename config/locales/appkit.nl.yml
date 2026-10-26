@@ -36,7 +36,7 @@ nl:
     navigation:
       preferences: "Voorkeuren"
       rail: "Hoofdnavigatie"
-      hub_column: "Pagina's in deze groep"
+      hub_column: "Pagina's van deze hub"
       logout: "Uitloggen"
     themes:
       color_schemes:
