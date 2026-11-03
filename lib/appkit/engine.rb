@@ -1,3 +1,8 @@
+require "appkit/co_gem"
+
+# mvpa-css must be loaded before Appkit::Engine is defined, so initialize! also runs its initializers.
+Appkit::CoGem.new(name: "mvpa-css", github: "eirvandelden/mvpa.css").ensure_loaded
+
 module Appkit
   class Engine < ::Rails::Engine
     # no isolate_namespace — host URL helpers must work inside engine code
