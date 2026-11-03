@@ -2,7 +2,7 @@
 
 A non-isolated Rails engine bundling session-based authentication, PWA installability with web push notifications, and theme/preferences management for host Rails applications.
 
-Appkit requires [`mvpa-css`](https://github.com/eirvandelden/mvpa.css) as a co-gem for its themed UI components. `mvpa-css` is not declared in `appkit.gemspec` — gemspecs cannot declare git-sourced dependencies, so it is declared in this repo's `Gemfile` instead. Consuming apps must add `mvpa-css` to their own `Gemfile` as well.
+Appkit requires [`mvpa-css`](https://github.com/eirvandelden/mvpa.css) as a co-gem for its themed UI components. `mvpa-css` is not declared in `appkit.gemspec` — gemspecs cannot declare git-sourced dependencies, so it is declared in this repo's `Gemfile` instead. Consuming apps must add `gem "mvpa-css", github: "eirvandelden/mvpa.css"` to their own `Gemfile` as well. Appkit requires `mvpa-css` itself at boot and raises `Appkit::MissingCoGem` when the bundle does not have it.
 
 Appkit depends directly on [`importmap-rails`](https://github.com/rails/importmap-rails) (declared in `appkit.gemspec`, unlike `mvpa-css` — no action needed in consuming apps). The engine's own `config/importmap.rb` pins `appkit/pwa.js`, `appkit/controllers/push_controller.js`, `appkit/controllers/theme_controller.js`, and `appkit/controllers/auto_submit_controller.js` via the importmap DSL, and `lib/appkit/engine.rb` adds that file to the host app's `config.importmap.paths` automatically. The host's own layouts must still render `<%= javascript_importmap_tags %>` (including the `login` layout — a missing tag there silently breaks the auto-submit magic-link flow, since no JS runs on that page at all).
 

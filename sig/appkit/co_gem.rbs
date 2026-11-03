@@ -1,0 +1,29 @@
+# Generated from lib/appkit/co_gem.rb with RBS::Inline
+
+module Appkit
+  # Raised at boot when a co-gem is missing from the host app's bundle.
+  class MissingCoGem < StandardError
+  end
+
+  # A gem that appkit needs at runtime but that each host app declares in its own Gemfile.
+  class CoGem
+    # : (name: String, github: String) -> void
+    def initialize: (name: String, github: String) -> void
+
+    # Loads the co-gem, or raises MissingCoGem with the Gemfile line to add.
+    # : () -> void
+    def ensure_loaded: () -> void
+
+    private
+
+    attr_reader name: String
+
+    attr_reader github: String
+
+    # : () -> String
+    def missing_message: () -> String
+
+    # : () -> String
+    def gemfile_line: () -> String
+  end
+end

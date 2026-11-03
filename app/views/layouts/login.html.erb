@@ -13,8 +13,8 @@
     <%= javascript_importmap_tags %>
   </head>
   <body data-appkit-login>
+    <%= render "appkit/shared/flashes" %>
     <main>
-      <%= render "appkit/shared/flashes" %>
       <%= yield %>
     </main>
   </body>
