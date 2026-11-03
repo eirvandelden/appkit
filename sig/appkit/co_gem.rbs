@@ -21,9 +21,9 @@ module Appkit
     attr_reader github: String
 
     # : () -> String
-    def gemfile_line: () -> String
+    def missing_message: () -> String
 
     # : () -> String
-    def missing_message: () -> String
+    def gemfile_line: () -> String
   end
 end

@@ -17,6 +17,13 @@ module Appkit
       assert_not_nil flash[:alert]
     end
 
+    test "the login page renders flashes outside main" do
+      post session_url, params: { email_address: users(:alice).email, password: "wrong" }
+
+      assert_select "body > section[data-mvpa-flashes] aside[role='alert']"
+      assert_select "main section[data-mvpa-flashes]", count: 0
+    end
+
     test "rate limits repeated login attempts" do
       11.times { post session_url, params: { email_address: users(:alice).email, password: "wrong" } }
 

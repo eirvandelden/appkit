@@ -10,8 +10,10 @@
 - FirstRun bootstrap, session transfer + QR magic-link handoff, `VersionHeaders`, `Authorization`, static error pages via the install generator, and `Authenticatable#deactivate!` (Task 1b). Portions adapted from Basecamp's Writebook (MIT) — see `THIRD_PARTY_NOTICES.md`.
 - Theme/preferences: `UserTheming` concern (`color_scheme`/`light_theme`/`dark_theme` enums), `ThemeHelper`, Stimulus `theme_controller.js`, `PreferencesController`/view with an optional `config.timezone_attribute` gate, a reusable `_flashes` partial, and `en`/`nl`/`it` locale files covering sessions/first_run/preferences (Task 3).
 - Type signatures: appkit ships RBS in `sig/`, generated from inline `#:` comments with `rbs-inline`, and checks its own code with Steep. A type-checking app can drop its appkit stub or `@type const` workaround; a hand-written appkit stub left in place makes Steep report duplicate declarations.
+- A host app without the `mvpa-css` co-gem now fails at boot with `Appkit::MissingCoGem`, which names the `Gemfile` line to add. Appkit requires mvpa-css itself, so it loads before `Appkit::Engine` whatever the `Gemfile` order or `require:` option.
 
 ### Changed
+- The `login` layout now renders its flashes as a direct child of `<body>`, above `<main>`. mvpa-css treats `main` as a size container, so flashes inside it scrolled with the content on Safari before 18.4.
 - appkit now requires Rails 8.1: the gemspec floors are railties `~> 8.1`, turbo-rails `~> 2.0`, importmap-rails `~> 2.2`, web-push `~> 3.1`, rqrcode `~> 3.2` and okcomputer `~> 1.20`, so apps on Rails 8.0 can no longer install appkit.
 - The reusable `rails-ci.yml` workflow now uses `actions/checkout@v7`, `actions/cache@v6` and `actions/setup-node@v7`. Checkout v7 refuses to check out a fork's pull request under `pull_request_target` or `workflow_run`, so an app that calls `rails-ci.yml` from one of those triggers fails on fork pull requests.
 - The reusable `rails-ci.yml` test job now runs `npm ci` when the calling app has a `package-lock.json`. Apps without that file are unaffected.
@@ -26,3 +28,5 @@
 2. If the app calls `rails-ci.yml` from a `pull_request_target` or `workflow_run` trigger, move that call to `pull_request`. Otherwise checkout v7 fails on fork pull requests.
 3. Check that no `before_action` in your `ApplicationController` redirects or blocks `GET /manifest` or `GET /service-worker`; both now inherit it.
 4. If your `ApplicationController` does not include `Appkit::Authentication`, add `include Appkit::Authentication` to it by hand. Do not re-run `bin/rails generate appkit:install` for this: in an app that has a `sessions` table, it also creates an `align_sessions_for_appkit` migration.
+5. Add `gem "mvpa-css", github: "eirvandelden/mvpa.css"` to the app's `Gemfile` and run `bundle install`. Without it the app no longer boots.
+6. If the app overrides `app/views/layouts/login.html.erb`, move `<%= render "appkit/shared/flashes" %>` out of `<main>` to a direct child of `<body>`, above `<main>`.

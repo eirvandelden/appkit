@@ -25,14 +25,14 @@ module Appkit
       attr_reader :github #: String
 
       #: () -> String
-      def gemfile_line
-        %(gem "#{name}", github: "#{github}")
-      end
-
-      #: () -> String
       def missing_message
         "appkit needs the #{name} gem, but the bundle does not have it. " \
           "Add this line to the Gemfile and run bundle install:\n\n  #{gemfile_line}"
+      end
+
+      #: () -> String
+      def gemfile_line
+        %(gem "#{name}", github: "#{github}")
       end
   end
 end
