@@ -17,9 +17,9 @@ class OriginFlowTest < ActionDispatch::IntegrationTest
     get hub_url("work")
     get css_select("ul.tiles a").first["href"]
 
-    assert_select "a.back[href='#{hub_path("work")}']", text: "‹ Work"
+    assert_select "main > header nav a.back[href='#{hub_path("work")}']", text: "‹ Work"
 
-    get css_select("main a").first["href"]
+    get css_select("main a:not(.back)").first["href"]
 
     assert_equal admin_record_path(7, from: "work"), request.fullpath
     assert_select "a.back[href='#{admin_path(from: "work")}']", text: "‹ Admin"
