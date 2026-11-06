@@ -14,6 +14,13 @@ class NavCurrentPageTest < ActionDispatch::IntegrationTest
     assert_select "nav.hub-column a[aria-current]", count: 0
   end
 
+  test "the_shell_renders_as_the_body_header" do
+    get hub_url("work")
+
+    assert_select "body > header > nav.rail"
+    assert_select "body > header > nav.hub-column"
+  end
+
   test "filtered_page_marks_its_hub_and_page" do
     get admin_url(filter: "open")
 
