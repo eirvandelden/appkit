@@ -11,6 +11,10 @@ gem "mvpa-css", github: "eirvandelden/mvpa.css"
 # mvpa-css above: it is sourced from git.
 gem "rubocop-eirvandelden", github: "eirvandelden/rubocop-eirvandelden", require: false
 
+# Without a committed Gemfile.lock a fresh resolve picks RuboCop 1.74, which does not know
+# TargetRubyVersion 4.0. Keep the floor at a release that does.
+gem "rubocop", "~> 1.92", require: false
+
 gem "lefthook", require: false
 
 # Type signatures: rbs-inline generates sig/ from the #: comments, steep checks it.
