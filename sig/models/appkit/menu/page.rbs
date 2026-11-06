@@ -1,0 +1,55 @@
+# Generated from app/models/appkit/menu/page.rb with RBS::Inline
+
+module Appkit
+  class Menu
+    # One page of a hub and what needs attention there; count and summary are lazy and memoized.
+    class Page
+      attr_reader key: Symbol
+
+      attr_reader label: String
+
+      attr_reader path: String
+
+      # The controllers whose requests this page owns.
+      attr_reader controllers: Array[String]
+
+      # : (
+      #     key: Symbol,
+      #     label: String,
+      #     path: String,
+      #     controllers: Array[String],
+      #     ?filter: Hash[String, String],
+      #     ?tile_path: String?,
+      #     ?count: (^() -> Integer)?,
+      #     ?summary: (^() -> String)?
+      #   ) -> void
+      def initialize: (key: Symbol, label: String, path: String, controllers: Array[String], ?filter: Hash[String, String], ?tile_path: String?, ?count: (^() -> Integer)?, ?summary: (^() -> String)?) -> void
+
+      # The filtered list a tile opens; defaults to path.
+      # : () -> String
+      def tile_path: () -> String
+
+      # 2: a filtered page whose controller and filter both match, on a list (no id).
+      # 1: an unfiltered page whose controller matches, for any action.
+      # 0: otherwise; a filtered page never matches without its filter, nor on a record.
+      # : (String, Hash[String, untyped]) -> Integer
+      def score: (String, Hash[String, untyped]) -> Integer
+
+      # Runs the count lambda at most once.
+      # : () -> Integer?
+      def count: () -> Integer?
+
+      # Runs the summary lambda at most once; data for the host's tile, the nav does not render it.
+      # : () -> String?
+      def summary: () -> String?
+
+      private
+
+      attr_reader filter: Hash[String, String]
+
+      # A record request carries the list's filter along at most; the record belongs to the unfiltered page.
+      # : (Hash[String, untyped]) -> bool
+      def filtered_list?: (Hash[String, untyped]) -> bool
+    end
+  end
+end

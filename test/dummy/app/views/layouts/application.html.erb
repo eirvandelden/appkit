@@ -4,8 +4,16 @@
     <title><%= Appkit.config.app_display_name %></title>
   </head>
   <body>
-    <%= render layout: "appkit/shared/nav" do %>
-    <% end %>
-    <main><%= yield %></main>
+    <header>
+      <%= render layout: "appkit/shared/nav", locals: { menu: menu, user_name: Current.user.email } do %>
+      <% end %>
+    </header>
+    <main>
+      <% back = menu.back %>
+      <% if back %>
+        <header><nav><%= link_to "‹ #{back.label}", back.path, class: "back" %></nav></header>
+      <% end %>
+      <%= yield %>
+    </main>
   </body>
 </html>

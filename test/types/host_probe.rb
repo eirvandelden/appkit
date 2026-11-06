@@ -15,3 +15,17 @@ Appkit.configure do |config|
   config.locale_attribute = nil
   config.timezone_attribute = :time_zone
 end
+
+link = Appkit::Menu::Link.new(label: "Preferences", path: "/preferences/edit")
+page = Appkit::Menu::Page.new(key: :records, label: "Records", path: "/records", controllers: [ "records" ],
+  count: -> { 1 })
+hub = Appkit::Menu::Hub.new(key: :work, label: "Work", emoji: "🗄️", path: "/hubs/work",
+  landing: { "controller" => "hubs", "id" => "work" }, pages: [ page ], action: link)
+setup = Appkit::Menu::Hub.new(key: :setup, label: "Setup", emoji: "⚙️", path: "/hubs/setup",
+  landing: { "controller" => "hubs", "id" => "setup" }, rail: false)
+setup.rail?
+menu = Appkit::Menu.new(hubs: [ hub, setup ], account: [ link ], controller_path: "records", params: {})
+menu.carry("/records")
+menu.tile_path(page)
+menu.back("/records")
+menu.exit_path("/")
