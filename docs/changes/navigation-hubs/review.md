@@ -37,3 +37,29 @@ Checks: `bin/rails test` 235 runs, 0 failures. erb_lint, `rbs:check`, `steep`, b
 Compliance: every test named in plan.md `## Proof` and every unit test listed per file exists, including the three new `tile_path` and `carry` tests and the three origin flow tests. No existing test is weakened beyond the `app_name_test.rb` change that the plan records. All round 2 findings are closed: the dummy landing page now builds tile hrefs with `Menu#tile_path`, the origin flow test follows a tile to a list and a record through real requests, `record_page_marks_the_unfiltered_page` requests `admin/7?filter=open`, and Upgrading step 6 calls `user_name` the display name.
 
 Bugs, Security and Design: nothing found. `Menu#tile_path` is signed in plan.md `### Signatures` and inline; `with_from` and `landing_hub` are private. `from` is still matched against the map before any path uses it, and `exit_path` returns only a map path, so no open redirect. ERB escapes `user_name` in the avatar `aria-label`.
+
+## Round 4 — 2026-11-06T20:17Z — 42f3960
+
+Scope: the change-request commits since `72ee890` (`fc5fd43`, `4be0d5b`, `42f3960`), read against the full `origin/main...HEAD` diff.
+
+Checks: `bin/rails test` 236 runs, 0 failures. erb_lint is green. RuboCop reports only the known `rakelib/signatures.rake:12` offense, which is on main and not in this diff.
+
+Compliance: every test named in plan.md `## Proof` still exists. The new test `the_shell_renders_as_the_body_header` proves the plan's #47 note that the dummy layout renders the nav inside `<body> > <header>`. No existing test is weakened, skipped or deleted.
+
+Bugs, Security and Design: nothing found in code. The new commits add no public method, no call chain and no query.
+
+- [x] Nit: Upgrading step 7 tells a host to render `appkit/shared/account_menu` with `avatar: true`, but does not name the required locals `menu:` and `user_name:`. An agent that follows the step as written gets an undefined local variable error. — `CHANGELOG.md:33` → fixed (Name the back link's return value and the account menu's locals in the Upgrading steps)
+- [x] Nit: Upgrading step 7 says "Render `menu.back(fallback)` as the title-bar back link". It does not say that `back` returns an `Appkit::Menu::Link` or nil, nor that the host adds the "‹" prefix to `label` (plan.md, "Back-link labels carry no ‹ prefix"). The dummy layout shows the pattern: `link_to "‹ #{back.label}", back.path if back`. — `CHANGELOG.md:33` → fixed (Name the back link's return value and the account menu's locals in the Upgrading steps)
+- [x] Nit: The dummy layout renders the back link as `a.back` between `<body> > <header>` and `<main>`, not as the first item of `main > header nav` as Upgrading step 7 now says. Commit `4be0d5b` calls the dummy the reference host, so it contradicts the step it is meant to show. Move it into a `main > header nav`, or say in plan.md that only the #47 placement is mirrored. — `test/dummy/app/views/layouts/application.html.erb:12` → fixed (Put the dummy host's back link first in the title bar nav)
+
+## Round 5 — 2026-11-06T20:25Z — 6c54473
+
+Scope: the round 4 fix commits `7f6fcd0` and `6c54473`, read against the full `origin/main...HEAD` diff.
+
+Checks: `bin/rails test` 236 runs, 0 failures. erb_lint (`--lint-all`) is green. RuboCop reports only the known `rakelib/signatures.rake:12` offense, which is on main and not in this diff.
+
+Round 4 fixes hold. The dummy layout now renders the back link as the first item of `main > header nav`, and only when `menu.back` returns a link, so a landing page still has no back link. Upgrading step 7 says that `back` returns an `Appkit::Menu::Link` or `nil`, shows the host-written "‹" label, and names the account menu's `menu:`, `user_name:` and `avatar:` locals, which match `_account_menu.html.erb`.
+
+Compliance: every test named in plan.md `## Proof` still exists. The `origin_flow_test.rb` selector change does not weaken the test. The back link now sits inside `main`, so `main a:not(.back)` excludes only that link and still picks the "Record 7" link, as `main a` did before; the `request.fullpath` assertion still pins the record path with `from=work`. The first back-link assertion is stronger: it now also checks the `main > header nav` placement. No existing test is weakened, skipped or deleted.
+
+Bugs, Security and Design: nothing found. The two commits add no public method, no call chain and no query.
