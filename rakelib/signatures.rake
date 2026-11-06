@@ -9,6 +9,7 @@ GENERATE_SIG = [
 ].freeze
 
 module GeneratedSignatures
+  #: (from: String, to: String) -> void
   def self.copy(from:, to:)
     Dir.glob("**/*.rbs", base: from).each do |path|
       FileUtils.mkdir_p(File.dirname(File.join(to, path)))
