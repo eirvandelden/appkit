@@ -13,7 +13,7 @@ gem "rubocop-eirvandelden", github: "eirvandelden/rubocop-eirvandelden", require
 
 # Without a committed Gemfile.lock a fresh resolve picks RuboCop 1.74, which does not know
 # TargetRubyVersion 4.0. Keep the floor at a release that does.
-gem "rubocop", ">= 1.92", require: false
+gem "rubocop", "~> 1.92", require: false
 
 gem "lefthook", require: false
 
