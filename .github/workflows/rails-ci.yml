@@ -29,7 +29,8 @@ jobs:
         run: bin/bundler-audit
 
   scan_js:
-    runs-on: ubuntu-slim
+    # ubuntu-slim fails to load openssl-4.0.2 (libcrypto lacks OPENSSL_3.4.0)
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -45,7 +46,8 @@ jobs:
         run: bin/importmap audit
 
   lint:
-    runs-on: ubuntu-slim
+    # ubuntu-slim fails to load openssl-4.0.2 (libcrypto lacks OPENSSL_3.4.0)
+    runs-on: ubuntu-latest
     env:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
