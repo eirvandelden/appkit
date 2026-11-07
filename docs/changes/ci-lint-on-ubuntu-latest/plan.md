@@ -16,7 +16,10 @@ This is the appkit part of the sticker-app plan `docs/changes/fix-rbs-inline-lin
 ## Files that change
 
 - `.github/workflows/rails-ci.yml` — `runs-on: ubuntu-latest` for `scan_js` and `lint`, each with a one-line comment that names the `OPENSSL_3.4.0` LoadError on `ubuntu-slim`.
+- `.github/workflows/ci.yml` — the same change for appkit's own `lint` job (added after review round 1).
+- `CHANGELOG.md` — a `### Changed` line under `## Unreleased`, as `AGENTS.md` requires for every `rails-ci.yml` change. Apps need not act.
 
 ## Proof
 
+- appkit's own `lint` check passes → check: `gh pr checks` on this pull request.
 - Configuration, no test. The workflow YAML parses. On sticker-app's pull request, `ci / lint` and `ci / scan_js` pass → check: `gh pr checks` on that pull request, after this branch merges.
