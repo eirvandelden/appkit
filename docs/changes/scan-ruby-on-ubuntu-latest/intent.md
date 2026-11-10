@@ -37,7 +37,7 @@ The `scan_ruby` job of the reusable workflow `.github/workflows/rails-ci.yml` ru
 ## Acceptance criteria
 
 - `scan_ruby` in `rails-ci.yml` declares `runs-on: ubuntu-latest`.
-- The diff touches only that line.
+- The diff changes only that `runs-on` line and adds one entry to `CHANGELOG.md`. No other file changes.
 - Clocky's `scan_ruby` check, run against this branch of the workflow, no longer fails with `OpenSSL is not available`.
 - `actionlint` or the repository's workflow checks, where they exist, stay green.
 
@@ -45,6 +45,8 @@ The `scan_ruby` job of the reusable workflow `.github/workflows/rails-ci.yml` ru
 
 - Go back to `ubuntu-latest` for `scan_ruby` — Etienne's words: "go back to using ubuntu".
 - Autonomous delivery, no Codex review — chosen at the delivery question.
+- Add a `CHANGELOG.md` entry under `## Unreleased` — chosen option; appkit `CLAUDE.md` requires an entry for any `rails-ci.yml` change before merge.
+- Verify criterion 3 after the merge, from Clocky's next CI run, with no Clocky change — chosen option; keeps Clocky out of scope.
 - Workflow edit approved — Etienne said "yes" to editing workflow files and "fine, go back to using ubuntu".
 
 ## Open questions

@@ -95,3 +95,11 @@ Domain skills applied: None. The change is one CI runner value; no Rails, Ruby o
 
 - The plan replaces the intent's branch-specific Clocky check with a post-merge run, and green appkit CI cannot prove the fix → fixed (`## Design decisions` now names the conflict with criterion 3, offers Path 1 post-merge and Path 2 a temporary Clocky draft pull request, and leaves the choice to Etienne; `## Order of work` step 6 and `## Proof` follow the chosen path)
 - The criterion 2 check compares `origin/main...HEAD` but ran before the commit, so it misses the uncommitted edit → fixed (the check now runs as step 4, after the commit in step 3, and its `## Proof` line says "after the commit")
+
+## Amendment: Etienne's decisions on the open questions
+
+Etienne decided both open design questions. This amendment replaces the plan text above where they differ.
+
+- CHANGELOG: add the entry. The diff is `.github/workflows/rails-ci.yml` (one `runs-on` line) and `CHANGELOG.md`. Widen the bullet at `CHANGELOG.md:21` to name `scan_ruby`, or add one new bullet under `## Unreleased` in the same format. Keep "Apps need not act." and add no `### Upgrading` step. The `--numstat` check expects exactly these two files.
+- Criterion 3: Path 1. Verify from Clocky's next CI run after the merge. Open no Clocky pull request.
+- Push: the first push failed on a 1Password timeout. Etienne unlocks 1Password and pushes the branch before implement.
