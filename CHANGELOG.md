@@ -19,6 +19,7 @@
 - The reusable `rails-ci.yml` workflow now uses `actions/checkout@v7`, `actions/cache@v6` and `actions/setup-node@v7`. Checkout v7 refuses to check out a fork's pull request under `pull_request_target` or `workflow_run`, so an app that calls `rails-ci.yml` from one of those triggers fails on fork pull requests.
 - The reusable `rails-ci.yml` test job now runs `npm ci` when the calling app has a `package-lock.json`. Apps without that file are unaffected.
 - The reusable `rails-ci.yml` `scan_js` and `lint` jobs now run on `ubuntu-latest` instead of `ubuntu-slim`, whose libcrypto lacks `OPENSSL_3.4.0` and could not load `openssl` 4.0.2. Both jobs failed at boot before this change. Apps need not act.
+- The reusable `rails-ci.yml` `scan_ruby` job now runs on `ubuntu-latest` instead of `ubuntu-slim`, where `bin/brakeman` failed with `OpenSSL is not available`. Apps need not act.
 - The `appkit/shared/nav` partial now renders a rail of task hubs and a hub column for the current hub, from an `Appkit::Menu` map, with an account menu under the user's name. It no longer renders the app-name heading, the home link, the yielded list items or the Voorkeuren link. The `appkit.navigation.home` locale key is gone; `appkit.navigation.rail` and `appkit.navigation.hub_column` are new.
 
 ### Fixed
