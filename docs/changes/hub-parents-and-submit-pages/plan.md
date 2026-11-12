@@ -136,7 +136,7 @@ module Appkit
     #: (String) -> String
     def carry(path)
 
-    # For links from a list to its records: from=<hub>.<current page>, where the hub is the origin hub when the current page belongs to it, else the current hub (a list opened from the hub column has no origin). Without a current GET page, carry(path).
+    # For links from a list to its records: from=<current hub>.<current page>, also without an origin (a list opened from the hub column). Without a current page, carry(path). A page belongs to one hub, so the current hub is the origin hub whenever the origin holds the current page.
     #: (String) -> String
     def carry_list(path)
 
@@ -165,8 +165,8 @@ module Appkit
       #: () -> bool
       def rail?
 
-      # Its page with this key, nil otherwise.
-      #: (Symbol) -> Page?
+      # Its page with this key, nil otherwise; a String key (from a query parameter) compares by name.
+      #: (Symbol | String) -> Page?
       def page(key)
     end
 
@@ -246,7 +246,7 @@ Checked by: steep check
 
 - Journal Administration (`app/controllers/concerns/menu_map.rb`, `app/views/hubs/show.html.erb`, its layout) adopts this in its navigation-hubs phase E2.
 - mvpa.css styles `main nav:not(header nav) > ul > li > a` (tiles) and `nav.rail + nav` (hub column); this change keeps `li > a`, so no mvpa.css change is needed. The unused pop-up CSS cleanup is a separate mvpa.css change.
-- Turbo turns `data-turbo-method` links into form submissions with the CSRF token. `turbo-rails` is a gemspec dependency and pins `@hotwired/turbo-rails` in the host importmap, but a host must still import it (`import "@hotwired/turbo-rails"` in its `application.js`) and render `javascript_importmap_tags`; the dummy app does neither today, so this change adds both, and the Upgrading steps name the requirement.
+- Turbo turns `data-turbo-method` links into form submissions with the CSRF token. `turbo-rails` is a gemspec dependency, but it pins `@hotwired/turbo-rails` only through its installer, so a host must pin it (`pin "@hotwired/turbo-rails", to: "turbo.min.js"`) and import it (`import "@hotwired/turbo-rails"` in its `application.js`) and render `javascript_importmap_tags`; the dummy app does neither today, so this change adds both, and the Upgrading steps name the requirement.
 - `Appkit::SessionsController#destroy` (sign-out) redirects to `root_url`; the host's `root` then redirects an unauthenticated request to sign-in.
 
 ## Files that change
