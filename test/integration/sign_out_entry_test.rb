@@ -33,24 +33,25 @@ class SignOutEntryTest < ActionDispatch::IntegrationTest
     assert_select "script[type='module']", text: /import "application"/
   end
 
-test "the sign-out link sends the page's CSRF token, as Turbo does" do
-  with_forgery_protection do
-    get hub_url("profile")
-    token = css_select("meta[name='csrf-token']").first&.[]("content")
+  test "the sign-out link sends the page's CSRF token, as Turbo does" do
+    with_forgery_protection do
+      get hub_url("profile")
+      token = css_select("meta[name='csrf-token']").first&.[]("content")
 
-    assert_predicate token, :present?
-    delete session_path, headers: { "X-CSRF-Token" => token }
+      assert_predicate token, :present?
+      delete session_path, headers: { "X-CSRF-Token" => token }
 
-    assert_redirected_to root_url
+      assert_redirected_to root_url
+    end
   end
-end
 
   private
     def with_forgery_protection
+      before = ActionController::Base.allow_forgery_protection
       ActionController::Base.allow_forgery_protection = true
       yield
     ensure
-      ActionController::Base.allow_forgery_protection = false
+      ActionController::Base.allow_forgery_protection = before
     end
 
     def assert_signs_out(link)
