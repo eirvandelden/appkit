@@ -67,17 +67,14 @@ module Appkit
       key ? with_from(path, key) : path
     end
 
-    # Links a list to its records: from=<hub>.<current page>, where the hub is the origin hub when the current page
-    # belongs to it, else the current hub, so a list opened without an origin still brings its records back.
-    # Without a current page, the same as carry.
+    # Links a list to its records: from=<current hub>.<current page>, so a record returns to the list it was opened
+    # from, also when the list was opened without an origin. Without a current page, the same as carry.
     #: (String) -> String
     def carry_list(path)
       hub, page = placement
       return carry(path) unless hub && page
 
-      origin_hub = origin
-      list_hub = origin_hub && origin_hub.pages.include?(page) ? origin_hub : hub
-      with_from(path, list_key(list_hub, page))
+      with_from(path, list_key(hub, page))
     end
 
     # A tile's href: on a landing page the page's tile path with from=<that hub's key>, elsewhere the plain tile path.
