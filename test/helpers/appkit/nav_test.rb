@@ -72,23 +72,23 @@ module Appkit
       assert_select "nav.hub-column[aria-label='#{I18n.t("appkit.navigation.hub_column")}']"
     end
 
-test "nav renders no account pop-up" do
-  render_nav(controller_path: "dashboard", params: {})
+    test "nav renders no account pop-up" do
+      render_nav(controller_path: "dashboard", params: {})
 
-  assert_select "details", count: 0
-  assert_select "nav.rail li:last-child a[href='/hubs/profile']", text: /Profile/
-end
+      assert_select "details", count: 0
+      assert_select "nav.rail li:last-child a[href='/hubs/profile']", text: /Profile/
+    end
 
-test "nav renders a submit page as a link without a badge" do
-  render_nav(controller_path: "hubs", params: { "id" => "profile" })
+    test "nav renders a submit page as a link without a badge" do
+      render_nav(controller_path: "hubs", params: { "id" => "profile" })
 
-  assert_select "nav.hub-column li:last-child > a[href='/session'][data-turbo-method='delete']",
-    text: "Sign out"
-  assert_select "nav.hub-column li:last-child data", count: 0
-  assert_select "nav.hub-column form", count: 0
-end
+      assert_select "nav.hub-column li:last-child > a[href='/session'][data-turbo-method='delete']",
+        text: "Sign out"
+      assert_select "nav.hub-column li:last-child data", count: 0
+      assert_select "nav.hub-column form", count: 0
+    end
 
-private
+    private
       def render_nav(controller_path:, params:)
         render layout: "appkit/shared/nav", locals: { menu: build_menu(controller_path, params) } do
           "<button class='search'>Search</button>".html_safe

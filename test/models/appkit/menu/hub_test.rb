@@ -42,14 +42,15 @@ module Appkit
 
       test "rail? is true without a parent" do
         assert_predicate build_hub, :rail?
-        assert_nil build_hub.parent
       end
 
       test "rail? is false with a parent" do
-        hub = build_hub(parent: :profile)
+        assert_not_predicate build_hub(parent: :profile), :rail?
+      end
 
-        assert_not_predicate hub, :rail?
-        assert_equal :profile, hub.parent
+      test "parent is stored" do
+        assert_equal :profile, build_hub(parent: :profile).parent
+        assert_nil build_hub.parent
       end
 
       test "page returns its page by key, nil otherwise" do
