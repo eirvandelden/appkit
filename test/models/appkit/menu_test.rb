@@ -254,7 +254,7 @@ module Appkit
       assert_equal "/records/7?from=review.open", build_menu("records", { "from" => "review.open" }).carry("/records/7")
     end
 
-    test "carry_list names the current page in the origin hub" do
+    test "carry_list names the current hub and page with an origin" do
       menu = build_menu("records", { "filter" => "open", "from" => "review" })
 
       assert_equal "/records/7?from=review.open", menu.carry_list("/records/7")
@@ -308,6 +308,7 @@ module Appkit
         Menu::Hub.new(key: key, label: key.to_s.capitalize, emoji: "📥", path: "/hubs/#{key}",
           landing: { "controller" => "hubs", "id" => key.to_s }, pages: pages, controllers: controllers, parent: parent)
       end
+
       def page(key, controller, label: key.to_s.capitalize, filter: {})
         path = filter.empty? ? "/#{controller}" : "/#{controller}?#{filter.to_query}"
         Menu::Page.new(key: key, label: label, path: path, controllers: [ controller ], filter: filter)
