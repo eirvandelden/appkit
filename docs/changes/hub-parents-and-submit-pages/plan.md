@@ -83,7 +83,16 @@ classDiagram
   class MenuHelper {
     +menu_entry_to(String, Page, **html) SafeBuffer
   }
+  class Origin {
+    +parse(Array~Hub~, String?)$ Origin?
+    +hub Hub
+    +page Page?
+    +key() String
+  }
   Menu "1" --> "*" Hub : validates parents
+  Menu ..> Origin : parses from
+  Origin --> Hub
+  Origin --> Page : list
   Hub ..> Hub : parent, by key
   Hub "1" --> "*" Page
   MenuHelper ..> Page : link, data-turbo-method when submit
@@ -184,6 +193,26 @@ module Appkit
     end
   end
 
+  class Menu
+    # Where a flow started: a hub, and for a list origin one GET page of that hub. Written "<hub>" or "<hub>.<page>".
+    class Origin
+      # The origin a from value names, nil when it names no hub in the map. An unknown page or a submit page
+      # in the page part degrades to a hub origin.
+      #: (Array[Hub], String?) -> Origin?
+      def self.parse(hubs, value)
+
+      #: (hub: Hub, ?page: Page?) -> void
+      def initialize(hub:, page: nil)
+
+      attr_reader :hub #: Hub
+      attr_reader :page #: Page?
+
+      # The from value: "<hub>", or "<hub>.<page>" for a list origin.
+      #: () -> String
+      def key
+    end
+  end
+
   # Renders a menu entry for a page as a link; a submit page's link also carries data-turbo-method with its verb,
   # so tiles and hub-column items keep the li > a markup that mvpa.css styles.
   # @rbs module-self ::ActionView::Base
@@ -252,7 +281,7 @@ Checked by: steep check
 ## Files that change
 
 - `app/models/appkit/menu.rb` — drop `account`; validate parents; `current?` marks the parent; `links` skips submit pages and dedupes; list origin parsing in `origin`/`origin_key`; new `carry_list`; `tile_path` for submit pages; `back` uses the list origin's page.
-- `app/models/appkit/menu/origin.rb` — new `Appkit::Menu::Origin` (`Origin.parse(hubs, value)`, `#hub`, `#page`, `#key`): parses and writes the `from` value, so `Menu` stays near its size target (review round 4).
+- `app/models/appkit/menu/origin.rb` — new `Appkit::Menu::Origin` (`Origin.parse(hubs, value)`, `#hub`, `#page`, `#key`): parses and writes the `from` value (review round 4). `Menu` keeps 118 code lines (98 at `709fcac`), above the ~100-line target; RuboCop passes, and the rest of its growth is the parent check and `carry_list`. Recorded as a known exception for this change.
 - `app/models/appkit/menu/hub.rb` — `parent:` replaces `rail:`; `rail?` reads `parent`; new `page(key)`.
 - `app/models/appkit/menu/page.rb` — `verb:`, `submit?`, argument validation.
 - `app/helpers/appkit/menu_helper.rb` — new `Appkit::MenuHelper#menu_entry_to`.
