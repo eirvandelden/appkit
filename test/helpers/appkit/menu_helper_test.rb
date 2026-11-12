@@ -23,6 +23,10 @@ module Appkit
       assert_select "a.tile[aria-current='page'][data-turbo-confirm='Sure?'][data-turbo-method='delete']"
     end
 
+    test "a missing block raises" do
+      assert_raises(ArgumentError) { menu_entry_to("/records", list_page) }
+    end
+
     private
       def list_page
         Menu::Page.new(key: :records, label: "Records", path: "/records", controllers: [ "records" ])
