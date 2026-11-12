@@ -21,13 +21,11 @@ module Appkit
     # : () -> Array[Link]
     def links: () -> Array[Link]
 
-    # The hub named by the hub part of params["from"], nil for an unknown key.
-    # A list origin is "<hub>.<page>"; the hub key is the part before the first dot.
+    # The hub named by the hub part of params["from"], nil for an unknown key (Origin.parse).
     # : () -> Hub?
     def origin: () -> Hub?
 
     # "<hub>", or "<hub>.<page>" when the page part names a GET page of that hub; nil without an origin.
-    # An unknown page or a submit page in the page part degrades to "<hub>".
     # : () -> String?
     def origin_key: () -> String?
 
@@ -78,18 +76,9 @@ module Appkit
     # : () -> Page?
     def current_page: () -> Page?
 
-    # The origin hub and, for a list origin, its GET page; parsed once.
-    # : () -> [Hub, Page?]?
-    def origin_parts: () -> [ Hub, Page? ]?
-
-    # : () -> [Hub, Page?]?
-    def parse_origin: () -> [ Hub, Page? ]?
-
-    # : (Hub, String?) -> Page?
-    def list_page: (Hub, String?) -> Page?
-
-    # : (Hub, Page) -> String
-    def list_key: (Hub, Page) -> String
+    # The origin params["from"] names, parsed once.
+    # : () -> Origin?
+    def parsed_origin: () -> Origin?
 
     # The path with from=<key> merged into its query: keeps the query and a fragment, replaces an existing from.
     # : (String, String) -> String

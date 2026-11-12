@@ -37,21 +37,16 @@ module Appkit
       links.uniq(&:path)
     end
 
-    # The hub named by the hub part of params["from"], nil for an unknown key.
-    # A list origin is "<hub>.<page>"; the hub key is the part before the first dot.
+    # The hub named by the hub part of params["from"], nil for an unknown key (Origin.parse).
     #: () -> Hub?
     def origin
-      origin_parts&.first
+      parsed_origin&.hub
     end
 
     # "<hub>", or "<hub>.<page>" when the page part names a GET page of that hub; nil without an origin.
-    # An unknown page or a submit page in the page part degrades to "<hub>".
     #: () -> String?
     def origin_key
-      hub, page = origin_parts
-      return unless hub
-
-      page ? list_key(hub, page) : hub.key.to_s
+      parsed_origin&.key
     end
 
     #: () -> Hash[Symbol, String]
@@ -74,7 +69,7 @@ module Appkit
       hub, page = placement
       return carry(path) unless hub && page
 
-      with_from(path, list_key(hub, page))
+      with_from(path, Origin.new(hub: hub, page: page).key)
     end
 
     # A tile's href: on a landing page the page's tile path with from=<that hub's key>, elsewhere the plain tile path.
@@ -150,30 +145,12 @@ module Appkit
         placement&.last
       end
 
-      # The origin hub and, for a list origin, its GET page; parsed once.
-      #: () -> [Hub, Page?]?
-      def origin_parts
-        return @origin_parts if defined?(@origin_parts)
+      # The origin params["from"] names, parsed once.
+      #: () -> Origin?
+      def parsed_origin
+        return @parsed_origin if defined?(@parsed_origin)
 
-        @origin_parts = parse_origin
-      end
-
-      #: () -> [Hub, Page?]?
-      def parse_origin
-        hub_key, page_key = @params["from"].to_s.split(".", 2)
-        hub = hubs.find { |candidate| candidate.key.to_s == hub_key }
-        hub && [ hub, list_page(hub, page_key) ]
-      end
-
-      #: (Hub, String?) -> Page?
-      def list_page(hub, page_key)
-        page = page_key && hub.page(page_key)
-        page unless page.nil? || page.submit?
-      end
-
-      #: (Hub, Page) -> String
-      def list_key(hub, page)
-        "#{hub.key}.#{page.key}"
+        @parsed_origin = Origin.parse(hubs, @params["from"]&.to_s)
       end
 
       # The path with from=<key> merged into its query: keeps the query and a fragment, replaces an existing from.
@@ -206,7 +183,7 @@ module Appkit
 
       #: () -> Link?
       def origin_page_link
-        page = origin_parts&.last || origin&.page_for(@controller_path)
+        page = parsed_origin&.page || origin&.page_for(@controller_path)
         page && Link.new(label: page.label, path: carry(page.tile_path))
       end
 

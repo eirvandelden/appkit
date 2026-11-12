@@ -31,6 +31,7 @@ sign_out.submit?
 hub.page(:records)
 menu = Appkit::Menu.new(hubs: [ hub, setup ], controller_path: "records", params: {})
 menu.carry_list("/records/7")
+Appkit::Menu::Origin.parse([ hub ], "work.records")&.key
 menu.carry("/records")
 menu.tile_path(page)
 menu.back("/records")
