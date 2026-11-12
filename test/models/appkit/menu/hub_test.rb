@@ -40,12 +40,25 @@ module Appkit
         assert_raises(ArgumentError) { build_hub(pages: pages) }
       end
 
-      test "rail? is true by default" do
+      test "rail? is true without a parent" do
         assert_predicate build_hub, :rail?
+        assert_nil build_hub.parent
       end
 
-      test "rail? is false for a hub kept out of the rail" do
-        assert_not_predicate build_hub(rail: false), :rail?
+      test "rail? is false with a parent" do
+        hub = build_hub(parent: :profile)
+
+        assert_not_predicate hub, :rail?
+        assert_equal :profile, hub.parent
+      end
+
+      test "page returns its page by key, nil otherwise" do
+        page = build_page(:records)
+        hub = build_hub(pages: [ page ])
+
+        assert_same page, hub.page(:records)
+        assert_same page, hub.page("records")
+        assert_nil hub.page(:other)
       end
 
       test "action is stored" do

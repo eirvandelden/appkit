@@ -17,6 +17,10 @@ class NavQueriesTest < ActionDispatch::IntegrationTest
     assert_empty count_queries { get root_url }
   end
 
+  test "a hub with only uncounted pages runs no count" do
+    assert_empty count_queries { get hub_url("profile") }
+  end
+
   private
     def count_queries(&block)
       counts = Hash.new(0)

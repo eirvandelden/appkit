@@ -3,29 +3,31 @@
 module Appkit
   # Places one request in the menu map: which hub and page are current, where the origin leads.
   class Menu
-    # Every hub in map order: the rail hubs and any hub kept out of the rail.
+    # Every hub in map order: the rail hubs and the hubs under a parent hub.
     attr_reader hubs: Array[Hub]
 
-    # Account menu entries; the partial appends the logout button.
-    attr_reader account: Array[Link]
-
-    # : (hubs: Array[Hub], account: Array[Link], controller_path: String, params: Hash[String, untyped]) -> void
-    def initialize: (hubs: Array[Hub], account: Array[Link], controller_path: String, params: Hash[String, untyped]) -> void
+    # Raises ArgumentError when a hub's parent names no hub in the map, or names a hub that has a parent itself.
+    # : (hubs: Array[Hub], controller_path: String, params: Hash[String, untyped]) -> void
+    def initialize: (hubs: Array[Hub], controller_path: String, params: Hash[String, untyped]) -> void
 
     # : () -> Hub?
     def current_hub: () -> Hub?
 
+    # A page: true for the current page. A hub: true for the current hub, or for the current hub's parent hub.
     # : (Hub | Page) -> bool
     def current?: (Hub | Page) -> bool
 
-    # Every hub and page as a label and a path, for search.
+    # Every hub and every page that is not a submit page, as a label and a path, each path once, for search.
     # : () -> Array[Link]
     def links: () -> Array[Link]
 
-    # The hub named by params["from"], nil for an unknown key.
+    # The hub named by the hub part of params["from"], nil for an unknown key.
+    # A list origin is "<hub>.<page>"; the hub key is the part before the first dot.
     # : () -> Hub?
     def origin: () -> Hub?
 
+    # "<hub>", or "<hub>.<page>" when the page part names a GET page of that hub; nil without an origin.
+    # An unknown page or a submit page in the page part degrades to "<hub>".
     # : () -> String?
     def origin_key: () -> String?
 
@@ -36,11 +38,19 @@ module Appkit
     # : (String) -> String
     def carry: (String) -> String
 
+    # Links a list to its records: from=<hub>.<current page>, where the hub is the origin hub when the current page
+    # belongs to it, else the current hub, so a list opened without an origin still brings its records back.
+    # Without a current page, the same as carry.
+    # : (String) -> String
+    def carry_list: (String) -> String
+
     # A tile's href: on a landing page the page's tile path with from=<that hub's key>, elsewhere the plain tile path.
+    # A submit page's tile sends its request to its own path, with no origin.
     # : (Page) -> String
     def tile_path: (Page) -> String
 
-    # The title-bar back link; nil on a list without an origin.
+    # The title-bar back link; nil on a list without an origin. On a record: the list origin's page when the
+    # origin names one, else the origin hub's page for the controller, else the fallback.
     # : (?String?) -> Link?
     def back: (?String?) -> Link?
 
@@ -49,6 +59,9 @@ module Appkit
     def exit_path: (String) -> String
 
     private
+
+    # : () -> void
+    def ensure_parents_are_rail_hubs: () -> void
 
     # The highest-scoring page and its hub, ties to map order; else a hub that owns the controller.
     # : () -> [Hub, Page?]?
@@ -65,6 +78,19 @@ module Appkit
 
     # : () -> Page?
     def current_page: () -> Page?
+
+    # The origin hub and, for a list origin, its GET page; parsed once.
+    # : () -> [Hub, Page?]?
+    def origin_parts: () -> [ Hub, Page? ]?
+
+    # : () -> [Hub, Page?]?
+    def parse_origin: () -> [ Hub, Page? ]?
+
+    # : (Hub, String?) -> Page?
+    def list_page: (Hub, String?) -> Page?
+
+    # : (Hub, Page) -> String
+    def list_key: (Hub, Page) -> String
 
     # The path with from=<key> merged into its query: keeps the query and a fragment, replaces an existing from.
     # : (String, String) -> String

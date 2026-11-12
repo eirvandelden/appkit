@@ -7,6 +7,12 @@ class AdminController < ApplicationController
   end
 
   def show
-    render html: "admin record".html_safe, layout: true
+  end
+
+  def edit
+  end
+
+  def update
+    redirect_to menu.carry(admin_record_path(params[:id]))
   end
 end

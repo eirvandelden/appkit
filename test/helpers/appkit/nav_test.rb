@@ -50,16 +50,17 @@ module Appkit
       assert_equal "Review", named.map(&:text).join.strip
     end
 
-    test "nav keeps a hub out of the rail" do
+    test "nav keeps a hub under a parent out of the rail" do
       render_nav(controller_path: "dashboard", params: {})
 
       assert_select "nav.rail a[href='/hubs/setup']", count: 0
     end
 
-    test "nav renders the hub column of a current hub kept out of the rail" do
+    test "nav marks the parent of a hub under it" do
       render_nav(controller_path: "categories", params: {})
 
-      assert_select "nav.rail a[aria-current]", count: 0
+      assert_select "nav.rail a[aria-current='true']", text: /Profile/
+      assert_select "nav.rail a[aria-current]", count: 1
       assert_select "nav.hub-column h2 a[href='/hubs/setup']", text: "Setup"
       assert_select "nav.hub-column a[href='/categories'][aria-current='page']", text: /Categories/
     end
@@ -71,37 +72,31 @@ module Appkit
       assert_select "nav.hub-column[aria-label='#{I18n.t("appkit.navigation.hub_column")}']"
     end
 
-    test "nav ends the rail with the account menu" do
-      render_nav(controller_path: "dashboard", params: {})
+test "nav renders no account pop-up" do
+  render_nav(controller_path: "dashboard", params: {})
 
-      assert_select "nav.rail details summary", text: "Alice"
-    end
+  assert_select "details", count: 0
+  assert_select "nav.rail li:last-child a[href='/hubs/profile']", text: /Profile/
+end
 
-    test "account menu lists the links and ends with Uitloggen" do
-      render partial: "appkit/shared/account_menu", locals: { menu: build_menu("dashboard", {}), user_name: "Alice" }
+test "nav renders a submit page as a link without a badge" do
+  render_nav(controller_path: "hubs", params: { "id" => "profile" })
 
-      assert_select "details ul li:nth-child(1) a[href='/preferences/edit']", text: "Preferences"
-      assert_select "details ul li:last-child form[action='#{session_path}'] button",
-        text: I18n.t("appkit.navigation.logout")
-    end
+  assert_select "nav.hub-column li:last-child > a[href='/session'][data-turbo-method='delete']",
+    text: "Sign out"
+  assert_select "nav.hub-column li:last-child data", count: 0
+  assert_select "nav.hub-column form", count: 0
+end
 
-    test "avatar form shows 👤 labelled with the user name" do
-      render partial: "appkit/shared/account_menu",
-        locals: { menu: build_menu("dashboard", {}), user_name: "Alice", avatar: true }
-
-      assert_select "details summary[aria-label='Alice']", text: "👤"
-    end
-
-    private
+private
       def render_nav(controller_path:, params:)
-        render layout: "appkit/shared/nav", locals: { menu: build_menu(controller_path, params), user_name: "Alice" } do
+        render layout: "appkit/shared/nav", locals: { menu: build_menu(controller_path, params) } do
           "<button class='search'>Search</button>".html_safe
         end
       end
 
       def build_menu(controller_path, params)
-        Menu.new(hubs: hubs, account: [ Menu::Link.new(label: "Preferences", path: "/preferences/edit") ],
-          controller_path: controller_path, params: params)
+        Menu.new(hubs: hubs, controller_path: controller_path, params: params)
       end
 
       def hubs
@@ -110,8 +105,10 @@ module Appkit
             landing: { "controller" => "dashboard" }),
           Menu::Hub.new(key: :review, label: "Review", emoji: "📥", path: "/hubs/review",
             landing: { "controller" => "hubs", "id" => "review" }, pages: review_pages),
+          Menu::Hub.new(key: :profile, label: "Profile", emoji: "👤", path: "/hubs/profile",
+            landing: { "controller" => "hubs", "id" => "profile" }, pages: profile_pages),
           Menu::Hub.new(key: :setup, label: "Setup", emoji: "⚙️", path: "/hubs/setup",
-            landing: { "controller" => "hubs", "id" => "setup" }, rail: false,
+            landing: { "controller" => "hubs", "id" => "setup" }, parent: :profile,
             pages: [ page(:categories, "Categories", "/categories") ])
         ]
       end
@@ -127,6 +124,13 @@ module Appkit
       def page(key, label, path, count: nil, filter: {})
         Menu::Page.new(key: key, label: label, path: path, controllers: [ key == :open ? "records" : key.to_s ],
           filter: filter, count: count)
+      end
+
+      def profile_pages
+        [
+          page(:preferences, "Preferences", "/preferences/edit"),
+          Menu::Page.new(key: :sign_out, label: "Sign out", path: "/session", controllers: [], verb: :delete)
+        ]
       end
   end
 end

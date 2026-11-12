@@ -19,8 +19,10 @@ class ApplicationController < ActionController::Base
           landing: { "controller" => "hubs", "id" => "work" }, pages: work_pages),
         Appkit::Menu::Hub.new(key: :review, label: "Review", emoji: "📥", path: hub_path("review"),
           landing: { "controller" => "hubs", "id" => "review" }, pages: review_pages),
+        Appkit::Menu::Hub.new(key: :profile, label: "Profile", emoji: "👤", path: hub_path("profile"),
+          landing: { "controller" => "hubs", "id" => "profile" }, pages: profile_pages),
         Appkit::Menu::Hub.new(key: :setup, label: "Setup", emoji: "⚙️", path: hub_path("setup"),
-          landing: { "controller" => "hubs", "id" => "setup" }, pages: setup_pages, rail: false)
+          landing: { "controller" => "hubs", "id" => "setup" }, pages: setup_pages, parent: :profile)
       ]
     end
 
@@ -36,23 +38,27 @@ class ApplicationController < ActionController::Base
     def review_pages
       [
         Appkit::Menu::Page.new(key: :open_admin, label: "Open admin", path: admin_path(filter: "open"),
-          controllers: [ "admin" ], filter: { "filter" => "open" })
+          controllers: [ "admin" ], filter: { "filter" => "open" }),
+        Appkit::Menu::Page.new(key: :all, label: "All", path: inbox_path, controllers: [ "inbox" ])
+      ]
+    end
+
+    def profile_pages
+      [
+        Appkit::Menu::Page.new(key: :preferences, label: t("appkit.navigation.preferences"),
+          path: edit_preferences_path, controllers: [ "appkit/preferences" ]),
+        Appkit::Menu::Page.new(key: :sign_out, label: t("appkit.navigation.logout"), path: session_path,
+          controllers: [], verb: :delete)
       ]
     end
 
     def setup_pages
       [
-        Appkit::Menu::Page.new(key: :preferences, label: "Preferences", path: edit_preferences_path,
-          controllers: [ "appkit/preferences" ])
+        Appkit::Menu::Page.new(key: :settings, label: "Settings", path: settings_path, controllers: [ "settings" ])
       ]
     end
 
     def menu
-      @menu ||= Appkit::Menu.new(hubs: menu_hubs, account: menu_account,
-        controller_path: controller_path, params: request.parameters)
-    end
-
-    def menu_account
-      [ Appkit::Menu::Link.new(label: t("appkit.navigation.preferences"), path: edit_preferences_path) ]
+      @menu ||= Appkit::Menu.new(hubs: menu_hubs, controller_path: controller_path, params: request.parameters)
     end
 end

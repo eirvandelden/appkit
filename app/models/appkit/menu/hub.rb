@@ -9,10 +9,13 @@ module Appkit
       attr_reader :pages #: Array[Page]
       # A title-bar action for the host's landing page; the nav does not render it.
       attr_reader :action #: Link?
+      # The key of the rail hub this hub sits under, nil for a rail hub.
+      attr_reader :parent #: Symbol?
 
       # landing: the request that is this hub's landing page, as a controller path plus params,
       # for example {"controller" => "hubs", "id" => "processing"}.
-      # rail: false keeps the hub out of the rail, for a hub the host links from its account menu.
+      # parent: the key of the rail hub this hub sits under; the hub then has no rail item, and the rail marks
+      # the parent while it is current. Menu checks that the parent exists and is a rail hub.
       # Raises ArgumentError when two pages share a controller, so a hub key always restores one list.
       #: (
       #    key: Symbol,
@@ -23,9 +26,9 @@ module Appkit
       #    ?pages: Array[Page],
       #    ?controllers: Array[String],
       #    ?action: Link?,
-      #    ?rail: bool
+      #    ?parent: Symbol?
       #  ) -> void
-      def initialize(key:, label:, emoji:, path:, landing:, pages: [], controllers: [], action: nil, rail: true)
+      def initialize(key:, label:, emoji:, path:, landing:, pages: [], controllers: [], action: nil, parent: nil)
         @key = key
         @label = label
         @emoji = emoji
@@ -34,7 +37,7 @@ module Appkit
         @pages = pages
         @controllers = controllers
         @action = action
-        @rail = rail
+        @parent = parent
         ensure_one_page_per_controller
       end
 
@@ -58,10 +61,16 @@ module Appkit
         pages.find { |page| page.controllers.include?(controller_path) }
       end
 
-      # True when the rail lists this hub.
+      # Its page with this key, nil otherwise; a String key compares by name, as from a query parameter.
+      #: (Symbol | String) -> Page?
+      def page(key)
+        pages.find { |page| page.key.to_s == key.to_s }
+      end
+
+      # True when the hub has no parent hub, so the rail lists it.
       #: () -> bool
       def rail?
-        @rail
+        parent.nil?
       end
 
       private
