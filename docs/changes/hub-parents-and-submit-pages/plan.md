@@ -252,6 +252,7 @@ Checked by: steep check
 ## Files that change
 
 - `app/models/appkit/menu.rb` — drop `account`; validate parents; `current?` marks the parent; `links` skips submit pages and dedupes; list origin parsing in `origin`/`origin_key`; new `carry_list`; `tile_path` for submit pages; `back` uses the list origin's page.
+- `app/models/appkit/menu/origin.rb` — new `Appkit::Menu::Origin` (`Origin.parse(hubs, value)`, `#hub`, `#page`, `#key`): parses and writes the `from` value, so `Menu` stays near its size target (review round 4).
 - `app/models/appkit/menu/hub.rb` — `parent:` replaces `rail:`; `rail?` reads `parent`; new `page(key)`.
 - `app/models/appkit/menu/page.rb` — `verb:`, `submit?`, argument validation.
 - `app/helpers/appkit/menu_helper.rb` — new `Appkit::MenuHelper#menu_entry_to`.
@@ -316,6 +317,7 @@ Per changed file, the unit tests expected, named as behaviour:
 - `app/models/appkit/menu/page.rb`: `verb defaults to get`, `submit? is true for a non-GET verb`, `an unknown verb raises`, `a submit page refuses controllers, a filter, a tile path, a count or a summary`, `a submit page scores 0`.
 - `app/models/appkit/menu/hub.rb`: `rail? is true without a parent`, `rail? is false with a parent`, `parent is stored`, `page returns its page by key, nil otherwise`.
 - `app/models/appkit/menu.rb`: `a parent that names no hub raises`, `a parent that has a parent raises`, `current? marks the parent hub of the current hub`, `current? does not mark an unrelated hub`, `links skips submit pages and lists each path once`, `tile_path of a submit page is its own path, also on a landing page`, `origin reads the hub part of a list origin`, `origin_key keeps a list origin`, `an unknown page in a list origin degrades to the hub origin`, `carry carries a list origin`, `carry_list names the current hub and page with an origin`, `carry_list without an origin names the current hub and page`, `carry_list when the current page is not in the origin hub names the current hub`, `carry_list without a current page is carry`, `a submit page in a list origin degrades to the hub origin`, `back on a record with a list origin leads to that list`, `back on a list with a list origin leads to the landing page`, `exit_path with a list origin is the hub landing page`.
+- `app/models/appkit/menu/origin.rb`: `parse names a hub origin`, `parse names a list origin`, `parse degrades an unknown page to a hub origin`, `parse degrades a submit page to a hub origin`, `parse is nil for an unknown hub or no value`, `key writes a list origin`.
 - `app/helpers/appkit/menu_helper.rb`: `a page renders a plain link`, `a submit page renders a link with data-turbo-method`, `html options pass through and data merges`.
 - `app/views/appkit/shared/_nav.html.erb` (`test/helpers/appkit/nav_test.rb`): `nav renders no account pop-up`, `nav marks the parent of a hub under it`, `nav renders a submit page as a link without a badge`.
 
