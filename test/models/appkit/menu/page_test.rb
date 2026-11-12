@@ -56,6 +56,33 @@ module Appkit
         assert_equal "/records?filter=open", filtered_page.tile_path
       end
 
+      test "verb defaults to get" do
+        assert_equal :get, plain_page.verb
+        assert_not_predicate plain_page, :submit?
+      end
+
+      test "submit? is true for a non-GET verb" do
+        assert_predicate sign_out_page, :submit?
+        assert_equal :delete, sign_out_page.verb
+      end
+
+      test "an unknown verb raises" do
+        assert_raises(ArgumentError) { build_page(verb: :head) }
+      end
+
+      test "a submit page refuses controllers, a filter, a tile path, a count or a summary" do
+        [
+          { controllers: [ "sessions" ] }, { filter: { "filter" => "open" } }, { tile_path: "/session?x=1" },
+          { count: -> { 1 } }, { summary: -> { "1" } }
+        ].each do |options|
+          assert_raises(ArgumentError, options.keys.first.to_s) { sign_out_page(**options) }
+        end
+      end
+
+      test "a submit page scores 0" do
+        assert_equal 0, sign_out_page.score("sessions", {})
+      end
+
       private
         def plain_page
           build_page
@@ -63,6 +90,10 @@ module Appkit
 
         def filtered_page
           build_page(filter: { "filter" => "open" }, tile_path: "/records?filter=open")
+        end
+
+        def sign_out_page(**options)
+          Page.new(key: :sign_out, label: "Sign out", path: "/session", controllers: [], verb: :delete, **options)
         end
 
         def build_page(**options)
