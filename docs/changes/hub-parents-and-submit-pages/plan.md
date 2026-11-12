@@ -73,7 +73,7 @@ classDiagram
     +parent Symbol?
     +rail?() bool
     +pages Array~Page~
-    +page(Symbol) Page?
+    +page(Symbol or String) Page?
   }
   class Page {
     +key Symbol
