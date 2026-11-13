@@ -2,10 +2,12 @@
 <html>
   <head>
     <title><%= Appkit.config.app_display_name %></title>
+    <%= csrf_meta_tags %>
+    <%= javascript_importmap_tags %>
   </head>
   <body>
     <header>
-      <%= render layout: "appkit/shared/nav", locals: { menu: menu, user_name: Current.user.email } do %>
+      <%= render layout: "appkit/shared/nav", locals: { menu: menu } do %>
       <% end %>
     </header>
     <main>

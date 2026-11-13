@@ -9,7 +9,6 @@
         <% end %>
       </li>
     <% end %>
-    <li><%= render "appkit/shared/account_menu", menu: menu, user_name: user_name %></li>
   </ul>
 </nav>
 <% hub = menu.current_hub %>
@@ -19,7 +18,7 @@
     <ul>
       <% hub.pages.each do |page| %>
         <li>
-          <%= link_to page.path, "aria-current": (menu.current?(page) ? "page" : nil) do %>
+          <%= menu_entry_to page.path, page, "aria-current": (menu.current?(page) ? "page" : nil) do %>
             <%= page.label %>
             <% count = page.count %>
             <%= tag.data(count, value: count) if count&.positive? %>

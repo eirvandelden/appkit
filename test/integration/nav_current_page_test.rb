@@ -44,19 +44,29 @@ class NavCurrentPageTest < ActionDispatch::IntegrationTest
     assert_select "nav.hub-column", count: 0
   end
 
-  test "a hub kept out of the rail still gets its hub column" do
-    get edit_preferences_url
+  test "a page of a hub under a parent marks the parent in the rail" do
+    get settings_url
 
+    assert_select "nav.rail a[href='#{hub_path("profile")}'][aria-current='true']"
+    assert_select "nav.rail a[aria-current]", count: 1
     assert_select "nav.rail a[href='#{hub_path("setup")}']", count: 0
-    assert_select "nav.rail a[aria-current]", count: 0
     assert_select "nav.hub-column h2 a[href='#{hub_path("setup")}']", text: "Setup"
-    assert_select "nav.hub-column a[href='#{edit_preferences_path}'][aria-current='page']"
+    assert_select "nav.hub-column a[href='#{settings_path}'][aria-current='page']", text: /Settings/
   end
 
-  test "the rail ends with the account menu holding preferences and logout" do
+  test "a landing page of a hub under a parent marks the parent in the rail" do
+    get hub_url("setup")
+
+    assert_select "nav.rail a[href='#{hub_path("profile")}'][aria-current='true']"
+    assert_select "nav.rail a[href='#{hub_path("setup")}']", count: 0
+    assert_select "nav.hub-column h2 a[href='#{hub_path("setup")}']", text: "Setup"
+  end
+
+  test "the rail holds no account pop-up" do
     get root_url
 
-    assert_select "nav.rail details a[href='#{edit_preferences_path}']"
-    assert_select "nav.rail details form[action='#{session_path}']"
+    assert_select "nav.rail details", count: 0
+    assert_select "nav.rail", text: /#{Regexp.escape(users(:alice).email)}/, count: 0
+    assert_select "nav.rail a[href='#{hub_path("profile")}']", text: /Profile/
   end
 end

@@ -1,0 +1,12 @@
+# Generated from app/helpers/appkit/menu_helper.rb with RBS::Inline
+
+module Appkit
+  # @rbs module-self ::ActionView::Base
+  module MenuHelper : ::ActionView::Base
+    # A tile or hub-column entry for a page, always a link so it keeps the li > a markup mvpa.css styles.
+    # A submit page's link also carries data-turbo-method with its verb, so Turbo sends that request.
+    # Raises ArgumentError without a block: the block renders the entry's content.
+    # : (String, Menu::Page, **untyped) { () -> untyped } -> ActiveSupport::SafeBuffer
+    def menu_entry_to: (String, Menu::Page, **untyped) { () -> untyped } -> ActiveSupport::SafeBuffer
+  end
+end

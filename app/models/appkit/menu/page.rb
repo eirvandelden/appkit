@@ -1,13 +1,20 @@
 module Appkit
   class Menu
-    # One page of a hub and what needs attention there; count and summary are lazy and memoized.
+    # One page of a hub: it opens a list with GET, or, as a submit page, sends one other request.
+    # Count and summary are lazy and memoized.
     class Page
+      VERBS = %i[get post patch put delete].freeze #: Array[Symbol]
+
       attr_reader :key #: Symbol
       attr_reader :label #: String
       attr_reader :path #: String
       # The controllers whose requests this page owns.
       attr_reader :controllers #: Array[String]
+      # The request a tile or hub-column item sends: :get, or :post, :patch, :put or :delete for a submit page.
+      attr_reader :verb #: Symbol
 
+      # Raises ArgumentError for a verb outside VERBS, and for a submit page with controllers, a filter,
+      # a tile_path, a count or a summary: a submit page is never current and shows no badge.
       #: (
       #    key: Symbol,
       #    label: String,
@@ -16,9 +23,11 @@ module Appkit
       #    ?filter: Hash[String, String],
       #    ?tile_path: String?,
       #    ?count: (^() -> Integer)?,
-      #    ?summary: (^() -> String)?
+      #    ?summary: (^() -> String)?,
+      #    ?verb: Symbol
       #  ) -> void
-      def initialize(key:, label:, path:, controllers:, filter: {}, tile_path: nil, count: nil, summary: nil)
+      def initialize(key:, label:, path:, controllers:, filter: {}, tile_path: nil, count: nil, summary: nil,
+        verb: :get)
         @key = key
         @label = label
         @path = path
@@ -27,6 +36,15 @@ module Appkit
         @tile_path = tile_path
         @count_lambda = count
         @summary_lambda = summary
+        @verb = verb
+        ensure_known_verb
+        ensure_plain_submit_page
+      end
+
+      # True when the page sends a request other than GET.
+      #: () -> bool
+      def submit?
+        verb != :get
       end
 
       # The filtered list a tile opens; defaults to path.
@@ -63,6 +81,23 @@ module Appkit
       end
 
       private
+        #: () -> void
+        def ensure_known_verb
+          raise ArgumentError, "page #{key} has an unknown verb #{verb.inspect}" unless VERBS.include?(verb)
+        end
+
+        #: () -> void
+        def ensure_plain_submit_page
+          return unless submit? && list_options?
+
+          raise ArgumentError, "submit page #{key} takes no controllers, filter, tile_path, count or summary"
+        end
+
+        #: () -> bool
+        def list_options?
+          [ controllers, filter ].any?(&:present?) || [ @tile_path, @count_lambda, @summary_lambda ].any?
+        end
+
         attr_reader :filter #: Hash[String, String]
 
         # A record request carries the list's filter along at most; the record belongs to the unfiltered page.

@@ -1,17 +1,16 @@
 module Appkit
   # Places one request in the menu map: which hub and page are current, where the origin leads.
   class Menu
-    # Every hub in map order: the rail hubs and any hub kept out of the rail.
+    # Every hub in map order: the rail hubs and the hubs under a parent hub.
     attr_reader :hubs #: Array[Hub]
-    # Account menu entries; the partial appends the logout button.
-    attr_reader :account #: Array[Link]
 
-    #: (hubs: Array[Hub], account: Array[Link], controller_path: String, params: Hash[String, untyped]) -> void
-    def initialize(hubs:, account:, controller_path:, params:)
+    # Raises ArgumentError when a hub's parent names no hub in the map, or names a hub that has a parent itself.
+    #: (hubs: Array[Hub], controller_path: String, params: Hash[String, untyped]) -> void
+    def initialize(hubs:, controller_path:, params:)
       @hubs = hubs
-      @account = account
       @controller_path = controller_path
       @params = params
+      ensure_parents_are_rail_hubs
     end
 
     #: () -> Hub?
@@ -19,29 +18,35 @@ module Appkit
       placement&.first
     end
 
+    # A page: true for the current page. A hub: true for the current hub, or for the current hub's parent hub.
     #: (Hub | Page) -> bool
     def current?(entry)
-      entry.is_a?(Hub) ? entry.equal?(current_hub) : entry.equal?(current_page)
+      return entry.equal?(current_page) if entry.is_a?(Page)
+
+      hub = current_hub
+      !hub.nil? && (entry.equal?(hub) || entry.key == hub.parent)
     end
 
-    # Every hub and page as a label and a path, for search.
+    # Every hub and every page that is not a submit page, as a label and a path, each path once, for search.
     #: () -> Array[Link]
     def links
-      hubs.flat_map do |hub|
-        pages = hub.pages.map { |page| Link.new(label: page.label, path: page.path) }
+      links = hubs.flat_map do |hub|
+        pages = hub.pages.reject(&:submit?).map { |page| Link.new(label: page.label, path: page.path) }
         [ Link.new(label: hub.label, path: hub.path), *pages ]
       end
+      links.uniq(&:path)
     end
 
-    # The hub named by params["from"], nil for an unknown key.
+    # The hub named by the hub part of params["from"], nil for an unknown key (Origin.parse).
     #: () -> Hub?
     def origin
-      hubs.find { |hub| hub.key.to_s == @params["from"].to_s }
+      parsed_origin&.hub
     end
 
+    # "<hub>", or "<hub>.<page>" when the page part names a GET page of that hub; nil without an origin.
     #: () -> String?
     def origin_key
-      origin&.key&.to_s
+      parsed_origin&.key
     end
 
     #: () -> Hash[Symbol, String]
@@ -57,14 +62,28 @@ module Appkit
       key ? with_from(path, key) : path
     end
 
+    # Links a list to its records: from=<current hub>.<current page>, so a record returns to the list it was opened
+    # from, also when the list was opened without an origin. Without a current page, the same as carry.
+    #: (String) -> String
+    def carry_list(path)
+      hub, page = placement
+      return carry(path) unless hub && page
+
+      with_from(path, Origin.new(hub: hub, page: page).key)
+    end
+
     # A tile's href: on a landing page the page's tile path with from=<that hub's key>, elsewhere the plain tile path.
+    # A submit page's tile sends its request to its own path, with no origin.
     #: (Page) -> String
     def tile_path(page)
+      return page.tile_path if page.submit?
+
       hub = landing_hub
       hub ? with_from(page.tile_path, hub.key.to_s) : page.tile_path
     end
 
-    # The title-bar back link; nil on a list without an origin.
+    # The title-bar back link; nil on a list without an origin. On a record: the list origin's page when the
+    # origin names one, else the origin hub's page for the controller, else the fallback.
     #: (?String?) -> Link?
     def back(fallback = nil)
       return origin_landing_link unless record?
@@ -79,6 +98,18 @@ module Appkit
     end
 
     private
+      #: () -> void
+      def ensure_parents_are_rail_hubs
+        hubs.each do |hub|
+          next if hub.rail?
+
+          parent = hubs.find { |candidate| candidate.key == hub.parent }
+          next if parent&.rail?
+
+          raise ArgumentError, "hub #{hub.key} names parent #{hub.parent}, not a rail hub in the map"
+        end
+      end
+
       # The highest-scoring page and its hub, ties to map order; else a hub that owns the controller.
       #: () -> [Hub, Page?]?
       def placement
@@ -114,6 +145,14 @@ module Appkit
         placement&.last
       end
 
+      # The origin params["from"] names, parsed once.
+      #: () -> Origin?
+      def parsed_origin
+        return @parsed_origin if defined?(@parsed_origin)
+
+        @parsed_origin = Origin.parse(hubs, @params["from"]&.to_s)
+      end
+
       # The path with from=<key> merged into its query: keeps the query and a fragment, replaces an existing from.
       #: (String, String) -> String
       def with_from(path, key)
@@ -144,7 +183,7 @@ module Appkit
 
       #: () -> Link?
       def origin_page_link
-        page = origin&.page_for(@controller_path)
+        page = parsed_origin&.page || origin&.page_for(@controller_path)
         page && Link.new(label: page.label, path: carry(page.tile_path))
       end
 

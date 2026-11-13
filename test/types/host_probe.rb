@@ -22,9 +22,16 @@ page = Appkit::Menu::Page.new(key: :records, label: "Records", path: "/records",
 hub = Appkit::Menu::Hub.new(key: :work, label: "Work", emoji: "🗄️", path: "/hubs/work",
   landing: { "controller" => "hubs", "id" => "work" }, pages: [ page ], action: link)
 setup = Appkit::Menu::Hub.new(key: :setup, label: "Setup", emoji: "⚙️", path: "/hubs/setup",
-  landing: { "controller" => "hubs", "id" => "setup" }, rail: false)
+  landing: { "controller" => "hubs", "id" => "setup" }, parent: :work)
 setup.rail?
-menu = Appkit::Menu.new(hubs: [ hub, setup ], account: [ link ], controller_path: "records", params: {})
+setup.parent
+sign_out = Appkit::Menu::Page.new(key: :sign_out, label: "Sign out", path: "/session", controllers: [],
+  verb: :delete)
+sign_out.submit?
+hub.page(:records)
+menu = Appkit::Menu.new(hubs: [ hub, setup ], controller_path: "records", params: {})
+menu.carry_list("/records/7")
+Appkit::Menu::Origin.parse([ hub ], "work.records")&.key
 menu.carry("/records")
 menu.tile_path(page)
 menu.back("/records")

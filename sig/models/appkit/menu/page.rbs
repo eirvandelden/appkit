@@ -2,8 +2,11 @@
 
 module Appkit
   class Menu
-    # One page of a hub and what needs attention there; count and summary are lazy and memoized.
+    # One page of a hub: it opens a list with GET, or, as a submit page, sends one other request.
+    # Count and summary are lazy and memoized.
     class Page
+      VERBS: Array[Symbol]
+
       attr_reader key: Symbol
 
       attr_reader label: String
@@ -13,17 +16,27 @@ module Appkit
       # The controllers whose requests this page owns.
       attr_reader controllers: Array[String]
 
+      # The request a tile or hub-column item sends: :get, or :post, :patch, :put or :delete for a submit page.
+      attr_reader verb: Symbol
+
+      # Raises ArgumentError for a verb outside VERBS, and for a submit page with controllers, a filter,
+      # a tile_path, a count or a summary: a submit page is never current and shows no badge.
       # : (
-      #     key: Symbol,
-      #     label: String,
-      #     path: String,
-      #     controllers: Array[String],
-      #     ?filter: Hash[String, String],
-      #     ?tile_path: String?,
-      #     ?count: (^() -> Integer)?,
-      #     ?summary: (^() -> String)?
-      #   ) -> void
-      def initialize: (key: Symbol, label: String, path: String, controllers: Array[String], ?filter: Hash[String, String], ?tile_path: String?, ?count: (^() -> Integer)?, ?summary: (^() -> String)?) -> void
+      #    key: Symbol,
+      #    label: String,
+      #    path: String,
+      #    controllers: Array[String],
+      #    ?filter: Hash[String, String],
+      #    ?tile_path: String?,
+      #    ?count: (^() -> Integer)?,
+      #    ?summary: (^() -> String)?,
+      #    ?verb: Symbol
+      #  ) -> void
+      def initialize: (key: Symbol, label: String, path: String, controllers: Array[String], ?filter: Hash[String, String], ?tile_path: String?, ?count: (^() -> Integer)?, ?summary: (^() -> String)?, ?verb: Symbol) -> void
+
+      # True when the page sends a request other than GET.
+      # : () -> bool
+      def submit?: () -> bool
 
       # The filtered list a tile opens; defaults to path.
       # : () -> String
@@ -44,6 +57,15 @@ module Appkit
       def summary: () -> String?
 
       private
+
+      # : () -> void
+      def ensure_known_verb: () -> void
+
+      # : () -> void
+      def ensure_plain_submit_page: () -> void
+
+      # : () -> bool
+      def list_options?: () -> bool
 
       attr_reader filter: Hash[String, String]
 

@@ -26,7 +26,7 @@ module Appkit
     test "ties go to map order" do
       first = hub(:first, pages: [ page(:a, "records") ])
       second = hub(:second, pages: [ page(:b, "records") ])
-      menu = Menu.new(hubs: [ first, second ], account: [], controller_path: "records", params: {})
+      menu = Menu.new(hubs: [ first, second ], controller_path: "records", params: {})
 
       assert_equal :first, menu.current_hub.key
     end
@@ -44,13 +44,11 @@ module Appkit
       assert_equal :work, menu.current_hub.key
     end
 
-    test "current_hub can be a hub kept out of the rail" do
-      setup = Menu::Hub.new(key: :setup, label: "Setup", emoji: "⚙️", path: "/hubs/setup",
-        landing: { "controller" => "hubs", "id" => "setup" }, pages: [ page(:categories, "categories") ], rail: false)
-      menu = build_menu("categories", { "id" => "3" }, hubs: [ *default_hubs, setup ])
+    test "current_hub can be a hub under a parent" do
+      menu = build_menu("categories", { "id" => "3" }, hubs: profile_hubs)
 
       assert_equal :setup, menu.current_hub.key
-      assert menu.current?(setup)
+      assert menu.current?(menu.current_hub)
     end
 
     test "current_hub is nil for a request no hub owns" do
@@ -190,9 +188,113 @@ module Appkit
       assert_equal "/fallback", build_menu("records", {}).exit_path("/fallback")
     end
 
+    test "a parent that names no hub raises" do
+      orphan = hub(:setup, parent: :nowhere)
+
+      assert_raises(ArgumentError) { build_menu("records", {}, hubs: [ *default_hubs, orphan ]) }
+    end
+
+    test "a parent that has a parent raises" do
+      nested = hub(:deep, parent: :setup)
+
+      assert_raises(ArgumentError) { build_menu("records", {}, hubs: [ *profile_hubs, nested ]) }
+    end
+
+    test "current? marks the parent hub of the current hub" do
+      menu = build_menu("categories", {}, hubs: profile_hubs)
+      profile = menu.hubs.find { |candidate| candidate.key == :profile }
+
+      assert menu.current?(profile)
+    end
+
+    test "current? does not mark an unrelated hub" do
+      menu = build_menu("categories", {}, hubs: profile_hubs)
+
+      assert_not menu.current?(menu.hubs.first)
+    end
+
+    test "links skips submit pages and lists each path once" do
+      twin = hub(:twin, pages: [ page(:records, "records") ])
+      links = build_menu("records", {}, hubs: [ *profile_hubs, twin ]).links
+
+      assert_not_includes links.map(&:path), "/session"
+      assert_equal 1, links.count { |link| link.path == "/records" }
+      assert_includes links.map(&:label), "Preferences"
+    end
+
+    test "tile_path of a submit page is its own path, also on a landing page" do
+      menu = build_menu("hubs", { "id" => "profile" }, hubs: profile_hubs)
+
+      assert_equal "/session", menu.tile_path(sign_out_page)
+    end
+
+    test "origin reads the hub part of a list origin" do
+      assert_equal :review, build_menu("records", { "from" => "review.open" }).origin.key
+    end
+
+    test "origin_key keeps a list origin" do
+      menu = build_menu("records", { "from" => "review.open" })
+
+      assert_equal "review.open", menu.origin_key
+      assert_equal({ from: "review.open" }, menu.origin_params)
+    end
+
+    test "an unknown page in a list origin degrades to the hub origin" do
+      assert_equal "review", build_menu("records", { "from" => "review.bogus" }).origin_key
+    end
+
+    test "a submit page in a list origin degrades to the hub origin" do
+      menu = build_menu("records", { "id" => "7", "from" => "profile.sign_out" }, hubs: profile_hubs)
+
+      assert_equal "profile", menu.origin_key
+      assert_nil menu.back
+    end
+
+    test "carry carries a list origin" do
+      assert_equal "/records/7?from=review.open", build_menu("records", { "from" => "review.open" }).carry("/records/7")
+    end
+
+    test "carry_list names the current hub and page with an origin" do
+      menu = build_menu("records", { "filter" => "open", "from" => "review" })
+
+      assert_equal "/records/7?from=review.open", menu.carry_list("/records/7")
+    end
+
+    test "carry_list without an origin names the current hub and page" do
+      assert_equal "/records/7?from=work.records", build_menu("records", {}).carry_list("/records/7")
+    end
+
+    test "carry_list when the current page is not in the origin hub names the current hub" do
+      menu = build_menu("records", { "from" => "review" })
+
+      assert_equal "/records/7?from=work.records", menu.carry_list("/records/7")
+    end
+
+    test "carry_list without a current page is carry" do
+      assert_equal "/records/7?from=work", build_menu("settings", { "from" => "work" }).carry_list("/records/7")
+      assert_equal "/records/7", build_menu("unknown", {}).carry_list("/records/7")
+    end
+
+    test "back on a record with a list origin leads to that list" do
+      back = build_menu("records", { "id" => "7", "from" => "review.open" }).back("/fallback")
+
+      assert_equal "Open records", back.label
+      assert_equal "/records?filter=open&from=review.open", back.path
+    end
+
+    test "back on a list with a list origin leads to the landing page" do
+      back = build_menu("records", { "filter" => "open", "from" => "review.open" }).back
+
+      assert_equal [ "Review", "/hubs/review" ], [ back.label, back.path ]
+    end
+
+    test "exit_path with a list origin is the hub landing page" do
+      assert_equal "/hubs/review", build_menu("records", { "from" => "review.open" }).exit_path("/fallback")
+    end
+
     private
       def build_menu(controller_path, params, hubs: default_hubs)
-        Menu.new(hubs: hubs, account: [], controller_path: controller_path, params: params)
+        Menu.new(hubs: hubs, controller_path: controller_path, params: params)
       end
 
       def default_hubs
@@ -202,14 +304,27 @@ module Appkit
         ]
       end
 
-      def hub(key, pages: [], controllers: [])
+      def hub(key, pages: [], controllers: [], parent: nil)
         Menu::Hub.new(key: key, label: key.to_s.capitalize, emoji: "📥", path: "/hubs/#{key}",
-          landing: { "controller" => "hubs", "id" => key.to_s }, pages: pages, controllers: controllers)
+          landing: { "controller" => "hubs", "id" => key.to_s }, pages: pages, controllers: controllers, parent: parent)
       end
 
       def page(key, controller, label: key.to_s.capitalize, filter: {})
         path = filter.empty? ? "/#{controller}" : "/#{controller}?#{filter.to_query}"
         Menu::Page.new(key: key, label: label, path: path, controllers: [ controller ], filter: filter)
+      end
+
+      def profile_hubs
+        [
+          *default_hubs,
+          hub(:profile, pages: [ page(:preferences, "preferences"), sign_out_page ]),
+          hub(:setup, pages: [ page(:categories, "categories") ], parent: :profile)
+        ]
+      end
+
+      def sign_out_page
+        @sign_out_page ||= Menu::Page.new(key: :sign_out, label: "Sign out", path: "/session", controllers: [],
+          verb: :delete)
       end
   end
 end

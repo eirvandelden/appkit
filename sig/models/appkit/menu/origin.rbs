@@ -1,0 +1,25 @@
+# Generated from app/models/appkit/menu/origin.rb with RBS::Inline
+
+module Appkit
+  class Menu
+    # Where a flow started: a hub, and for a list origin one GET page of that hub. Written "<hub>" or "<hub>.<page>".
+    class Origin
+      attr_reader hub: Hub
+
+      # The list the flow started from; nil for a hub origin.
+      attr_reader page: Page?
+
+      # The origin a from value names, nil when it names no hub in the map. The hub key is the part before the
+      # first dot. An unknown page or a submit page in the page part degrades to a hub origin.
+      # : (Array[Hub], String?) -> Origin?
+      def self.parse: (Array[Hub], String?) -> Origin?
+
+      # : (hub: Hub, ?page: Page?) -> void
+      def initialize: (hub: Hub, ?page: Page?) -> void
+
+      # The from value: "<hub>", or "<hub>.<page>" for a list origin.
+      # : () -> String
+      def key: () -> String
+    end
+  end
+end
