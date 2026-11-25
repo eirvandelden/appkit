@@ -37,6 +37,10 @@ class ParsersTest < ActiveSupport::TestCase
     assert_not_includes facts.keys, "A::B#hidden"
   end
 
+  def test_rbs_absolute_class_name_ignores_the_enclosing_scope
+    assert_includes Semver::Parsers.rbs("module A\n  class ::A::B\n    def go: () -> void\n  end\nend\n").keys, "A::B#go"
+  end
+
   def test_gemspec_runtime_ignores_development_dependencies
     text = "spec.add_dependency \"rails\", \"~> 8.1\"\nspec.add_development_dependency \"rake\"\n"
 
@@ -65,5 +69,13 @@ class ParsersTest < ActiveSupport::TestCase
 
   def test_template_files_digest_changes_with_content
     assert_not_equal P.template_files("a"), P.template_files("b")
+  end
+
+  test "the semver code needs the standard library only" do
+    script = File.expand_path("../../script", __dir__)
+    code = "require 'semver'; Semver::Parsers.config_options(\"attr_accessor :a\\n\"); Semver::Rules::ALL"
+    _out, err, status = Open3.capture3(RbConfig.ruby, "-I", script, "-e", code)
+
+    assert_predicate status, :success?, err
   end
 end

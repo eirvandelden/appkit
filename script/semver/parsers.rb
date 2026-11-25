@@ -7,9 +7,8 @@ module Semver
 
     #: (String) -> Hash[String, String]
     def self.config_options(text)
-      text.scan(/^\s*attr_accessor\s+:(\w+)/).flatten.index_with do |name|
-        text.match?(/^\s*@#{name}\s*=/) ? "has_default" : "no_default"
-      end
+      names = text.scan(/^\s*attr_accessor\s+:(\w+)/).flatten
+      names.zip(names.map { |name| text.match?(/^\s*@#{name}\s*=/) ? "has_default" : "no_default" }).to_h
     end
 
     #: (String) -> Hash[String, String]
@@ -58,7 +57,9 @@ module Semver
       current = scope.last
       case line
       when /\A(class|module|interface)\s+(\S+)(.*)\z/
-        name = [ *scope.map { |entry| entry[:name] }, Regexp.last_match(2) ].join("::")
+        declared = Regexp.last_match(2)
+        name = declared.start_with?("::") ? declared.delete_prefix("::") : [ *scope.map { |entry|
+ entry[:name] }, declared ].join("::")
         scope.push({ name: name, private: false })
         facts[name] = line
       when "end" then scope.pop
