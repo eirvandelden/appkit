@@ -1,6 +1,6 @@
 # Plan: Semantic versioning with automatic releases
 
-Author: Etienne van Delden. Status: accepted (2026-11-25). Type: feature. Delivery: autonomous. Codex review: no.
+Author: Etienne van Delden. Status: accepted (2026-11-25). Type: feature. Delivery: autonomous. Codex review: yes.
 
 ## Problem
 
@@ -12,7 +12,7 @@ Appkit has real semver versions. A major version marks a breaking change, a mino
 
 ## Affected users and systems
 
-- Host apps that pin appkit by SHA. They can move to `tag: "vX.Y.Z"`; old SHA pins keep working.
+- Host apps that pin appkit by SHA. They can move to `tag: "X.Y.Z"`; old SHA pins keep working.
 - Etienne and the AI agents that open PRs in this repository.
 - The mvpa.css repository, which adopts the same fragment format, level names and workflow shape, with its own copy of the script and the CI check (no shared gem or action).
 - `lib/appkit/version.rb`, `sig/appkit/version.rbs`, `lib/appkit/revision.rb`, `appkit.gemspec`, `CHANGELOG.md`, `AGENTS.md` (`CLAUDE.md` is a symlink to it), `README.md`, `.github/workflows/`.
@@ -31,13 +31,13 @@ Appkit has real semver versions. A major version marks a breaking change, a mino
 
 ## In scope
 
-- Retro pass: classify the 24 merged PRs as major, minor or patch; show a PR-to-version table; write nothing until Etienne approves it. Then tag the historic merge commits `vX.Y.Z`, create GitHub Releases, and split the `## Unreleased` changelog into one section per version, with each Upgrading step under the right version.
+- Retro pass: classify the 24 merged PRs as major, minor or patch; show a PR-to-version table; write nothing until Etienne approves it. Then tag the historic merge commits `X.Y.Z`, create GitHub Releases, and split the `## Unreleased` changelog into one section per version, with each Upgrading step under the right version.
 - Fragment files: one per PR, with an explicit `level` and the changelog text. Highest level wins when a merge carries several.
-- Release workflow on push to `main`: compute the version, stamp `version.rb` and `CHANGELOG.md`, delete the consumed fragments, commit, tag `vX.Y.Z`, create the GitHub Release. A merge without a fragment still releases at least a patch. A concurrency group serialises runs.
+- Release workflow on push to `main`: compute the version, stamp `version.rb` and `CHANGELOG.md`, delete the consumed fragments, commit, tag `X.Y.Z`, create the GitHub Release. A merge without a fragment still releases at least a patch. A concurrency group serialises runs.
 - `Appkit::VERSION` becomes the plain released version. `Appkit::Revision` and the service worker cache name keep following the commit.
 - CI check: fail a PR when its diff touches public surface and the declared level is below the detected floor. Public surface: migration templates, `Appkit.config` options, routes, public `sig/` signatures, gemspec runtime dependencies, `rails-ci.yml`. A documented way to override a false positive.
 - Agent rules in `AGENTS.md` and `CLAUDE.md`: when a change is major, minor or patch; write the fragment; never edit a version by hand. The README explains how apps pin a tag.
-- A moving major tag for the reusable workflow (such as `v2`), moved by the release workflow, and an upgrade step telling apps to call it.
+- A moving major tag for the reusable workflow (such as `2`), moved by the release workflow, and an upgrade step telling apps to call it.
 - Tests for the new code (the script that computes the version, and the CI check).
 
 ## Out of scope
@@ -50,14 +50,14 @@ Appkit has real semver versions. A major version marks a breaking change, a mino
 
 ## Acceptance criteria
 
-- A branch adds `changelog.d/<branch-slug>.md` with `level: minor`, merges, and `main` gets a new minor version, a `vX.Y.Z` tag and a GitHub Release.
+- A branch adds `changelog.d/<branch-slug>.md` with `level: minor`, merges, and `main` gets a new minor version, a `X.Y.Z` tag and a GitHub Release.
 - Two branches, one `level: major` and one `level: patch`, merge in either order: each merge gets the next correct version, and the major bump is never lost.
 - A merge with no fragment releases a patch with a generated changelog line.
 - A PR that adds a migration template, renames a public class or route, or changes a `sig/` signature, with `level: patch`, fails CI with a message that names the touched file and the minimum level.
 - The same PR with `level: major` passes.
 - After the retro pass, `git tag` lists the versions from the approved table, and each changelog section holds only its own Added, Changed, Fixed and Upgrading text.
 - After the retro pass every row's version is the previous row's version bumped by that row's level, starting from 0.1.0, and the major number equals the count of rows classified major.
-- An app can write `gem "appkit", github: "eirvandelden/appkit", tag: "vX.Y.Z"` for a release cut after this change, and `bundle install` resolves `appkit X.Y.Z`. A historic retro tag is a label: the gem at that commit still reports its old version string.
+- An app can write `gem "appkit", github: "eirvandelden/appkit", tag: "X.Y.Z"` for a release cut after this change, and `bundle install` resolves `appkit X.Y.Z`. A historic retro tag is a label: the gem at that commit still reports its old version string.
 - `AGENTS.md` tells an agent which level a change needs and where its fragment goes; the instructions say never to edit `version.rb` by hand.
 - The release workflow run is idempotent: a re-run on the same commit creates no second tag.
 
@@ -85,6 +85,8 @@ Appkit has real semver versions. A major version marks a breaking change, a mino
 - The generic files follow the accepted mvpa.css layout: `level`, `version`, `fragment`, `release`, `repository`, `surface_change` (holding `Snapshot` and `Verdict`), `Repository#publish` without arguments because each attempt replans from the tip. appkit keeps its richer `Rule`, `Parsers`, `Finding` and `Findings` in the repo-specific part — Etienne agreed to follow the mvpa.css generic files.
 - A false positive is overridden in the fragment front matter as `overrides: {rule_id: reason}` — git records it and agents can read it.
 
+- Tags carry no `v` prefix: `1.2.3`, and the moving major tag is the bare number, `3`. Apps pin `tag: "1.2.3"` and call `rails-ci.yml@3` — Etienne: a `v` in front of a version is ugly.
+
 ## Open questions
 
 - None.
@@ -100,7 +102,7 @@ New terms for the glossary:
 - **Floor** — the lowest Level a PR diff allows. It is `patch` when no rule fires.
 - **Public surface** — the files an app can see, as `CLAUDE.md` "Upgrade instructions" lists them.
 - **Override** — a reason in a fragment that silences one rule for that PR.
-- **Last release** — the highest `vX.Y.Z` tag reachable from `HEAD`. The moving `v<major>` tag never matches.
+- **Last release** — the highest `X.Y.Z` tag reachable from `HEAD`. The moving `<major>` tag never matches.
 
 ### Diagrams
 
@@ -195,7 +197,7 @@ module Semver
   # A semver number.
   class Version
     #: (String) -> Version
-    def self.parse(text); end          # "1.2.3" or "v1.2.3"; raises ArgumentError otherwise
+    def self.parse(text); end          # "1.2.3"; raises ArgumentError otherwise
     #: (Level) -> Version
     def bump(level); end               # major zeroes minor and patch
     #: (Version) -> Integer
@@ -203,9 +205,9 @@ module Semver
     #: () -> String
     def to_s; end                      # "1.2.3"
     #: () -> String
-    def tag; end                       # "v1.2.3"
+    def tag; end                       # "1.2.3"
     #: () -> String
-    def major_tag; end                 # "v1"
+    def major_tag; end                 # "1"
   end
 
   # One PR's changelog entry.
@@ -229,7 +231,7 @@ module Semver
     #: (?runner: ^(*String) -> String) -> void
     def initialize(runner: ...); end   # injected for tests
     #: () -> Array[Version]
-    def merged_versions; end           # git tag --merged HEAD --list 'v*.*.*'
+    def merged_versions; end           # git tag --merged HEAD --list '[0-9]*.[0-9]*.[0-9]*'
     #: (Version) -> bool
     def head_is?(version); end
     #: (Version) -> Array[String]
@@ -237,7 +239,7 @@ module Semver
     #: (Array[String]) -> Array[String]
     def in_merge_order(paths); end     # orders fragment paths by the commit that added each
     #: (Array[Version]) -> void
-    def reconcile(versions); end       # ensure every merged tag has a GitHub Release and the newest of each major has its v<major> tag
+    def reconcile(versions); end       # ensure every merged tag has a GitHub Release and the newest of each major has its <major> tag
     #: (Version, paths: Array[String]) -> void
     def stage(version, paths:); end    # git add the stamped files and remember the version for publish
     #: () -> void
@@ -357,16 +359,16 @@ Rule levels:
 ### Complexity
 
 - A PR check starts a constant number of git processes plus two `git show` per changed surface file: O(C) in the changed surface files. Unchanged files are never read.
-- A release run is O(T + F + C): one tag listing, F fragment reads, one log of C commits, one commit, one atomic push, one `v<major>` push and one `gh` call per merged tag that lacks a Release (normally zero or one). A rejected push repeats the run up to three times.
+- A release run is O(T + F + C): one tag listing, F fragment reads, one log of C commits, one commit, one atomic push, one `<major>` push and one `gh` call per merged tag that lacks a Release (normally zero or one). A rejected push repeats the run up to three times.
 - The retro runs the check cost once per first-parent merge (24 merges).
 - No database queries.
 
 ### Invariants
 
-- The next version is higher than every merged `vX.Y.Z`, and it is the last release bumped by the highest Level among all pending fragments, so a major is never lost, whatever the merge order. Enforced in `Release#version`; tested with two fragments in both orders.
+- The next version is higher than every merged `X.Y.Z`, and it is the last release bumped by the highest Level among all pending fragments, so a major is never lost, whatever the merge order. Enforced in `Release#version`; tested with two fragments in both orders.
 - At most one release run changes `main` at a time. Enforced by the `release` concurrency group with `cancel-in-progress: false`.
 - Pending fragments are read from the checked-out tip of `main` after `fetch`, never from the push event. A queued run therefore never releases a fragment twice.
-- A re-run on a commit that is the last release commit creates no second tag. Every run first reconciles every merged `vX.Y.Z` tag: a missing GitHub Release (checked by exit status and the not-found message, never by any failure) or a missing `v<major>` tag is repaired, also after later merges. `gh release create` runs with `--verify-tag`.
+- A re-run on a commit that is the last release commit creates no second tag. Every run first reconciles every merged `X.Y.Z` tag: a missing GitHub Release (checked by exit status and the not-found message, never by any failure) or a missing `<major>` tag is repaired, also after later merges. `gh release create` runs with `--verify-tag`.
 - The release commit and its tag land together or not at all (`git push --atomic`). A rejected push leaves the remote refs unchanged; `Release#cut` then refreshes and replans, and after the third rejected attempt the run fails red.
 - The release commit cannot trigger another release: a `GITHUB_TOKEN` push starts no run, and nothing is due when `HEAD` is the last release commit. The job has no subject-based skip, so a manual `workflow_dispatch` repair still runs.
 - All fragments are parsed and validated before any file is written. A bad fragment fails the run with nothing changed; the PR check uses the same `Fragment.parse`.
@@ -391,7 +393,7 @@ Rule levels:
 ## Design decisions
 
 - The check runs as its own workflow `changelog-check.yml`, leaving `ci.yml` unchanged.
-- The generator template `ci.yml.tt` calls `rails-ci.yml@v<major of Appkit::VERSION>` for new installs. Existing apps move by an Upgrading step.
+- The generator template `ci.yml.tt` calls `rails-ci.yml@<major of Appkit::VERSION>` for new installs. Existing apps move by an Upgrading step.
 - This change's own fragment declares `major`: it changes the shape of `Appkit::VERSION` and asks apps to call `rails-ci.yml` at a major tag.
 - The build order differs from the decision order. The shared code (`Level`, `Version`, `Fragment`, `SurfaceChange`) comes first because the retro reuses `SurfaceChange`. The visible order still holds: the retro tags exist on `origin` before the release workflow merges.
 - Historic retro tags are labels. The first installable semver release is the one cut after this change.
@@ -403,7 +405,7 @@ Rule levels:
 
 ## Integration points
 
-- GitHub: `release.yml` (push to `main`, `contents: write`), `changelog-check.yml` (`pull_request`), GitHub Releases, tags `vX.Y.Z` and `v<major>`.
+- GitHub: `release.yml` (push to `main`, `contents: write`), `changelog-check.yml` (`pull_request`), GitHub Releases, tags `X.Y.Z` and `<major>`.
 - `git` and `gh` on the runner. `gh` is preinstalled on `ubuntu-latest`.
 - The `rails-ci.yml` workflow that apps call.
 - The mvpa.css repository copies `script/semver/` and both workflows later; this change does not touch it.
@@ -430,7 +432,7 @@ Rule levels:
 2. `Level`, `Version`, `Fragment`, with unit tests.
 3. `Parsers`, `Rule`, `Finding`, `Findings`, `SurfaceChange` (with `Snapshot` and `Verdict` inside its file), `bin/surface`, with a git-fixture test per rule. The retro reuses `SurfaceChange`, so this comes before the retro.
 4. Write `retro.rb` and produce `retro-table.md` for the 24 merges, with the recorded baseline SHA. Stop with a `Decision needed:` line: Etienne edits the human-level column and says "accepted". Never tag before that.
-5. Run `retro.rb apply` (dry run first), after it verifies the baseline SHA: push the historic tags, create the releases and the `v<major>` tag, and rebuild `CHANGELOG.md` per version in one commit. Then run `retro.rb verify`.
+5. Run `retro.rb apply` (dry run first), after it verifies the baseline SHA: push the historic tags, create the releases and the `<major>` tag, and rebuild `CHANGELOG.md` per version in one commit. Then run `retro.rb verify`.
 6. `Repository` and `Release`: make step 1 pass, then the two-fragment order test, the no-fragment patch test, the idempotency test, and the bare-remote tests.
 7. When the mvpa.css change has merged, diff its `script/semver/` generic files against appkit's and align the generic ones (signatures, names, tests) without changing mvpa.css. `Rule`, `Parsers`, `Finding`, `Findings` and `rules.rb` stay appkit's. If mvpa.css has not merged yet, record the diff in the delivery account and align in a follow-up.
 8. `release.yml`, `changelog-check.yml`, their workflow tests, the `version.rb` change (and `rbs:generate`) and the `ci.yml.tt` change.
@@ -453,7 +455,7 @@ Rule levels:
 
 ## Proof
 
-- A branch adds a `level: minor` fragment, merges, and `main` gets the next minor, a `vX.Y.Z` tag and a GitHub Release → `test/semver/release_flow_test.rb` `test_minor_fragment_releases_next_minor_tag_and_release`
+- A branch adds a `level: minor` fragment, merges, and `main` gets the next minor, a `X.Y.Z` tag and a GitHub Release → `test/semver/release_flow_test.rb` `test_minor_fragment_releases_next_minor_tag_and_release`
 - A major and a patch fragment merge in either order, and the major is never lost → `test/semver/release_test.rb` `test_highest_level_wins_in_either_order`
 - A merge with no fragment releases a patch with a generated line → `test/semver/release_test.rb` `test_no_fragment_releases_patch_from_commit_subjects`
 - A new migration template with `level: patch` fails the check, naming the file and the minimum level → `test/semver/surface_change_test.rb` `test_added_template_floor_is_major` and `test/semver/check_test.rb` `test_patch_fragment_below_floor_fails_with_file_and_level`
@@ -463,7 +465,7 @@ Rule levels:
 - A PR with no fragment and no surface change passes as patch → `test/semver/check_test.rb` `test_no_fragment_and_no_findings_passes`
 - After the retro, `git tag` lists the approved versions at the recorded baseline and each changelog section holds only its own text → check: `ruby docs/changes/semver-releases/retro.rb verify` (compares tags and `CHANGELOG.md` with `retro-table.md`)
 - After the retro the highest version has major = the count of major rows → check: `ruby docs/changes/semver-releases/retro.rb verify`
-- An app can write `gem "appkit", github: "eirvandelden/appkit", tag: "v1.2.3"` and resolve `appkit 1.2.3` → check: build a throwaway Gemfile in a tmp directory against a local tag and run `bundle lock`; the result shows `appkit (1.2.3)`
+- An app can write `gem "appkit", github: "eirvandelden/appkit", tag: "1.2.3"` and resolve `appkit 1.2.3` → check: build a throwaway Gemfile in a tmp directory against a local tag and run `bundle lock`; the result shows `appkit (1.2.3)`
 - `AGENTS.md` tells an agent which level a change needs and where its fragment goes, and says never to edit `version.rb` → `test/semver/agent_rules_test.rb` `test_agents_md_names_fragment_folder_and_level_rules`
 - A re-run on the same commit creates no second tag → `test/semver/release_test.rb` `test_rerun_on_release_commit_creates_no_second_tag`
 - Invariant: partial failure is repaired by the next run, enforced by `Release#cut` → `test/semver/release_test.rb` `test_missing_github_release_is_repaired`
