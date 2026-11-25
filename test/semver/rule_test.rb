@@ -23,8 +23,7 @@ after: "pin \"a\", to: \"b\"\n")
   end
 
   def test_match_follows_the_glob
-    assert_match rule, "config/importmap.rb"
-    assert_no_match rule, "lib/config/importmap.rb"
+    assert_equal [ true, false ], [ "config/importmap.rb", "lib/config/importmap.rb" ].map { |path| rule.match?(path) }
   end
 
   def test_a_callable_level_sees_the_fact_value
