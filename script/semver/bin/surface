@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+# Usage: script/semver/bin/surface --base <ref> --head <ref>
+require "optparse"
+require_relative "../../semver"
+
+options = {}
+OptionParser.new do |parser|
+  parser.on("--base REF") { |ref| options[:base] = ref }
+  parser.on("--head REF") { |ref| options[:head] = ref }
+end.parse!
+
+begin
+  check = Semver::Check.between(base: options.fetch(:base), head: options.fetch(:head))
+  verdict = check.verdict
+  puts "Declared level: #{check.declared}"
+  puts verdict.lines
+  puts "Declare a higher level in changelog.d/<slug>.md, or add `overrides:` with a reason." unless verdict.passed?
+  exit(verdict.passed? ? 0 : 1)
+rescue ArgumentError, KeyError, Semver::Repository::CommandFailed => error
+  warn "semver check failed: #{error.message}"
+  exit 1
+end

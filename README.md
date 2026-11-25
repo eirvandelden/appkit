@@ -40,9 +40,11 @@ If a host app forgets to set it, the login page falls back to magenta rather tha
 ## Installation
 
 ```ruby
-gem "appkit", github: "eirvandelden/appkit"
+gem "appkit", github: "eirvandelden/appkit", tag: "1.2.3"
 gem "mvpa-css", github: "eirvandelden/mvpa.css"
 ```
+
+appkit follows [semver](https://semver.org). A major version marks a change that needs app work, a minor version an opt-in feature, a patch version a fix. Each release is a git tag without a `v` prefix, such as `1.2.3`, and a GitHub Release. `CHANGELOG.md` lists each version, with its `### Upgrading` steps. Read the sections between your version and the new one before you move the tag. A pin on a git SHA keeps working.
 
 Then install the gem, copy the migrations, error pages and CI caller, and migrate:
 
@@ -164,7 +166,7 @@ OkComputer.require_authentication(Rails.application.credentials.dig(:health_chec
 
 ## Development
 
-appkit does not commit its `Gemfile.lock`. The gem version names its commit (`0.1.0.pre.git.<sha>`), and a committed lockfile can never name its own commit. Host apps read only the dependencies in `appkit.gemspec`, never appkit's lockfile.
+appkit does not commit its `Gemfile.lock`, so a fresh clone and every CI run resolve the newest gems that `appkit.gemspec` and `Gemfile` allow. `Appkit::VERSION` is the plain released version: the release workflow stamps it, and nobody edits it by hand. Each PR adds a fragment, `changelog.d/<branch-slug>.md`, that declares its level (`major`, `minor` or `patch`) and the changelog text. `AGENTS.md` describes the format and the levels, and `script/semver/` holds the code. `Appkit::Revision` still names the installed commit when a host uses a git source, so the service worker cache name rotates with every commit. A host that uses a path source gets the release version, so its cache name no longer changes with each local commit.
 
 A fresh clone and every CI run resolve the newest gems that `appkit.gemspec` and `Gemfile` allow, so two runs on one commit can use different gem versions. An existing local `Gemfile.lock` stays untracked and keeps its versions; `bundle update` moves it to newer gems.
 
@@ -208,7 +210,7 @@ Types for what the host app owns, such as `User`, `Session` and `Current`, are `
 
 This repo's own `.github/workflows/ci.yml` tests the engine against `test/dummy` (`bundle exec rake test`), lints with RuboCop, checks `sig/` and runs Steep, and scans for security issues with Brakeman/bundler-audit.
 
-Consuming apps get CI via `.github/workflows/rails-ci.yml`, a reusable `workflow_call` workflow with `scan_ruby`, `scan_js`, `lint`, `test`, and `system-test` jobs. Each app's own CI becomes a thin ~6-line caller (see `lib/generators/appkit/install/templates/github/workflows/ci.yml.tt`, copied in by `bin/rails generate appkit:install`):
+Consuming apps get CI via `.github/workflows/rails-ci.yml`, a reusable `workflow_call` workflow with `scan_ruby`, `scan_js`, `lint`, `test`, and `system-test` jobs. Each app's own CI becomes a thin ~6-line caller (see `lib/generators/appkit/install/templates/github/workflows/ci.yml.tt`, copied in by `bin/rails generate appkit:install`). The `@3` is the moving major tag. The release workflow moves it to the newest `3.x.y`, so an app gets workflow fixes without a breaking change:
 
 ```yaml
 name: CI
@@ -218,7 +220,7 @@ on:
     branches: [main]
 jobs:
   ci:
-    uses: eirvandelden/appkit/.github/workflows/rails-ci.yml@main
+    uses: eirvandelden/appkit/.github/workflows/rails-ci.yml@3
     with:
       run_system_tests: true
 ```

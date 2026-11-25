@@ -1,0 +1,69 @@
+require_relative "semver_test_helper"
+
+class ParsersTest < ActiveSupport::TestCase
+  P = Semver::Parsers
+
+  def test_config_options_mark_defaults
+    text = "attr_accessor :a\nattr_accessor :b\ndef initialize\n  @b = 1\nend\n"
+
+    assert_equal({ "a" => "no_default", "b" => "has_default" }, P.config_options(text))
+  end
+
+  def test_routes_nest_resources_and_read_verbs
+    text = [ "Rails.application.routes.draw do", "  resource :session, only: :new do",
+             "    resources :transfers", "  end", "  get \"manifest\" => \"pwa#m\"", "end", "" ].join("\n")
+    facts = P.routes(text)
+
+    assert_equal [ "resource :session", "resource :session > resources :transfers", "GET /manifest" ], facts.keys
+  end
+
+  def test_unknown_routes_dsl_is_unparsed_fact
+    facts = P.routes("Rails.application.routes.draw do\n  mount Foo => \"/foo\"\nend\n")
+
+    assert_equal [ "unparsed:mount Foo => \"/foo\"" ], facts.keys
+  end
+
+  def test_rbs_reads_methods_attrs_constants_and_skips_private
+    text = [ "module A", "  class B", "    X: Integer", "    attr_reader y: String", "    def self.make: () -> B",
+             "    def go: (Integer) -> void", "    private", "    def hidden: () -> void", "  end", "end",
+             "" ].join("\n")
+    facts = P.rbs(text)
+
+    assert_equal "(Integer) -> void", facts["A::B#go"]
+    assert_equal "() -> B", facts["A::B.make"]
+    assert_equal "Integer", facts["A::B::X"]
+    assert_includes facts.keys, "A::B#y"
+    assert_includes facts.keys, "A::B"
+    assert_not_includes facts.keys, "A::B#hidden"
+  end
+
+  def test_gemspec_runtime_ignores_development_dependencies
+    text = "spec.add_dependency \"rails\", \"~> 8.1\"\nspec.add_development_dependency \"rake\"\n"
+
+    assert_equal({ "rails" => "~> 8.1" }, P.gemspec_runtime(text))
+  end
+
+  def test_workflow_inputs_secrets_permissions_and_bins
+    text = [ "on:", "  workflow_call:", "    inputs:", "      a:", "        required: true", "    secrets:", "      s:",
+             "        required: true", "permissions:", "  contents: read", "jobs:", "  j:", "    steps:",
+             "      - run: bin/rails test", "" ].join("\n")
+    facts = P.workflow_inputs(text)
+
+    assert_equal "required", facts["input:a"]
+    assert_equal "required", facts["secret:s"]
+    assert_equal "read", facts["permission:contents"]
+    assert_includes facts.keys, "bin:bin/rails"
+  end
+
+  def test_importmap_pins
+    assert_equal({ "a" => "a.js" }, P.importmap_pins("pin \"a\", to: \"a.js\"\n"))
+  end
+
+  def test_locale_keys_flatten
+    assert_equal({ "en.a.b" => "x" }, P.locale_keys("en:\n  a:\n    b: x\n"))
+  end
+
+  def test_template_files_digest_changes_with_content
+    assert_not_equal P.template_files("a"), P.template_files("b")
+  end
+end

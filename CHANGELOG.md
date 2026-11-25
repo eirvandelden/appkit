@@ -1,6 +1,6 @@
 # Changelog
 
-**Note:** This project uses git SHAs instead of semver. Pin to a specific SHA in your Gemfile.
+**Note:** appkit follows semver. Each release has a section here, newest first, headed `## X.Y.Z - YYYY-MM-DD`, and a git tag `X.Y.Z`. Pin `tag: "X.Y.Z"` in your Gemfile. A release workflow writes the sections from the fragments in `changelog.d/`. Do not edit them by hand.
 
 ## Unreleased
 

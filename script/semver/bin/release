@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+# Cuts the next release from the pending changelog fragments. Run from the repository root.
+require_relative "../../semver"
+
+Semver::Release.pending(repository: Semver::Repository.new).cut

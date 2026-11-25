@@ -412,7 +412,7 @@ Rule levels:
 
 ## Files that change
 
-- `script/semver/{level,version,fragment,repository,release,parsers,rule,finding,findings,surface_change}.rb` — new.
+- `script/semver/{level,version,fragment,repository,release,parsers,rule,finding,findings,surface_change,check}.rb` — new. `check.rb` (`Semver::Check`) is not in the signatures above: it reads the fragments a PR adds and builds the PR check verdict, for `bin/surface`. `Fragment.validate!` takes `known_rules:`, `Rule` levels may also be nil or a `(key, value)` callable, and `Rule::ALL` is filled by `rules.rb`.
 - `script/semver/bin/release`, `script/semver/bin/surface` — new entry points.
 - `test/semver/*_test.rb` — new unit and integration tests.
 - `.github/workflows/release.yml`, `.github/workflows/changelog-check.yml` — new.

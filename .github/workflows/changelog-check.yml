@@ -1,0 +1,26 @@
+name: Changelog check
+
+# Fails a pull request whose diff touches the public surface with a lower level than the surface needs.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: spinel-coop/setup-rv@main
+        with:
+          ruby-version: current
+
+      - name: Check the declared level
+        run: ruby script/semver/bin/surface --base "${{ github.event.pull_request.base.sha }}" --head "${{ github.event.pull_request.head.sha }}"
