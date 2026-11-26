@@ -15,6 +15,16 @@ class WorkflowsTest < ActiveSupport::TestCase
     assert release[true].key?("workflow_dispatch")
   end
 
+  def test_release_workflow_pins_third_party_actions_and_keeps_the_token_to_one_step
+    steps = workflow("release").dig("jobs", "release", "steps")
+    third_party = steps.map { |step| step["uses"] }.compact.reject { |use| use.start_with?("actions/") }
+
+    assert_empty third_party.grep_v(/@\h{40}\z/)
+    assert steps.first["with"].key?("persist-credentials")
+    assert_not steps.first.dig("with", "persist-credentials")
+    assert_equal [ "Cut the release" ], steps.select { |step| step.key?("env") }.map { |step| step["name"] }
+  end
+
   def test_check_workflow_runs_on_pull_request
     check = workflow("changelog-check")
 

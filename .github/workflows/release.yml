@@ -24,9 +24,10 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Set up Ruby
-        uses: spinel-coop/setup-rv@main
+        uses: spinel-coop/setup-rv@789f43073788bc826ed91610498297012e8e6438
         with:
           ruby-version: current
 
@@ -38,4 +39,10 @@ jobs:
       - name: Cut the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: ruby script/semver/bin/release
+        run: |
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
+          echo "::add-mask::${auth}"
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0="http.https://github.com/.extraheader"
+          export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic ${auth}"
+          ruby script/semver/bin/release
