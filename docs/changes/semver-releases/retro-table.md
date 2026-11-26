@@ -45,7 +45,7 @@ Edit the Level column (patch, minor or major), then set `Status: accepted`. The 
 
 ## Known limits
 
-- Changelog text goes to the PR that last touched each line (`git blame --first-parent` on `origin/main`). #18 rewrote the Task 0-3 lines and the manifest and service worker upgrade steps of #15, so they land in 4.0.1 (row 13). Move them in `retro.rb` if you disagree.
+- Changelog text goes to the PR that last touched each line (`git blame --first-parent` on `origin/main`). #18 rewrote the Task 0-3 lines and the manifest and service worker upgrade steps of #15, so they land in 3.0.0 (row 13, #18). Move them in `retro.rb` if you disagree.
 - Row 0 holds every commit before the first merge. Its tag points at the commit before merge #1.
 - A PR with no changelog text gets its title as a `### Changed` line.
 
