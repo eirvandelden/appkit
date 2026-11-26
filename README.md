@@ -210,7 +210,7 @@ Types for what the host app owns, such as `User`, `Session` and `Current`, are `
 
 This repo's own `.github/workflows/ci.yml` tests the engine against `test/dummy` (`bundle exec rake test`), lints with RuboCop, checks `sig/` and runs Steep, and scans for security issues with Brakeman/bundler-audit.
 
-Consuming apps get CI via `.github/workflows/rails-ci.yml`, a reusable `workflow_call` workflow with `scan_ruby`, `scan_js`, `lint`, `test`, and `system-test` jobs. Each app's own CI becomes a thin ~6-line caller (see `lib/generators/appkit/install/templates/github/workflows/ci.yml.tt`, copied in by `bin/rails generate appkit:install`). The `@3` is the moving major tag. The release workflow moves it to the newest `3.x.y`, so an app gets workflow fixes without a breaking change:
+Consuming apps get CI via `.github/workflows/rails-ci.yml`, a reusable `workflow_call` workflow with `scan_ruby`, `scan_js`, `lint`, `test`, and `system-test` jobs. Each app's own CI becomes a thin ~6-line caller (see `lib/generators/appkit/install/templates/github/workflows/ci.yml.tt`, copied in by `bin/rails generate appkit:install`). The `@<major>` is the moving major tag, the bare major number of the appkit release the app pinned (for example `@3`). The release workflow moves it to the newest `<major>.x.y`, so an app gets workflow fixes without a breaking change. Replace `<major>` with that number:
 
 ```yaml
 name: CI
@@ -220,7 +220,7 @@ on:
     branches: [main]
 jobs:
   ci:
-    uses: eirvandelden/appkit/.github/workflows/rails-ci.yml@3
+    uses: eirvandelden/appkit/.github/workflows/rails-ci.yml@<major>
     with:
       run_system_tests: true
 ```
