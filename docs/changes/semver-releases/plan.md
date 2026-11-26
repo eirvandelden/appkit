@@ -332,6 +332,8 @@ module Semver
     def check(declared, overrides: {}); end
     #: (String) -> Array[String]
     def added_paths(prefix); end       # files under prefix that the diff adds, from the fork point
+    #: (String) -> Array[[String, String, String?]]
+    def edited(prefix); end            # files under prefix that exist at the fork point and that the diff edits or deletes: path, text before, text after
   end
 
   # The outcome of a check: whether the declared level is enough, and one line per finding.

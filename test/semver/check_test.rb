@@ -64,6 +64,48 @@ class CheckTest < ActiveSupport::TestCase
     assert_match(%r{changelog\.d/feature/work\.md.*changelog\.d/<slug>\.md}, error.message)
   end
 
+  def pending_major_on_main
+    @fixture.checkout("main")
+    @fixture.write("changelog.d/old.md", fragment_text("major"))
+    @fixture.commit("Pending major on main")
+    @fixture.checkout("work")
+    @fixture.git(@fixture.dir, "merge", "-q", "main")
+  end
+
+  def test_deleting_a_pending_fragment_is_a_problem
+    pending_major_on_main
+    @fixture.remove("changelog.d/old.md")
+    @fixture.commit("Drop the pending fragment")
+
+    assert_match(%r{changelog\.d/old\.md.*deleted}, check.fragment_problems.join)
+  end
+
+  def test_lowering_a_pending_fragment_is_a_problem
+    pending_major_on_main
+    @fixture.write("changelog.d/old.md", fragment_text("patch"))
+    @fixture.commit("Lower the pending fragment")
+
+    assert_match(%r{changelog\.d/old\.md.*major.*patch}, check.fragment_problems.join)
+  end
+
+  def test_raising_a_pending_fragment_is_no_problem
+    @fixture.checkout("main")
+    @fixture.write("changelog.d/old.md", fragment_text("patch"))
+    @fixture.commit("Pending patch on main")
+    @fixture.checkout("work")
+    @fixture.git(@fixture.dir, "merge", "-q", "main")
+    @fixture.write("changelog.d/old.md", fragment_text("minor"))
+    @fixture.commit("Raise the pending fragment")
+
+    assert_empty check.fragment_problems
+  end
+
+  def test_no_problem_without_touching_pending_fragments
+    breaking_pr("major")
+
+    assert_empty check.fragment_problems
+  end
+
   def test_override_in_the_fragment_passes
     @fixture.write(TEMPLATE, "class CreateThings; end\n")
     @fixture.write("changelog.d/work.md",

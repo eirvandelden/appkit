@@ -14,8 +14,10 @@ begin
   verdict = check.verdict
   puts "Declared level: #{check.declared}"
   puts verdict.lines
+  problems = check.fragment_problems
+  puts problems.map { |problem| "FAIL #{problem}" }
   puts "Declare a higher level in changelog.d/<slug>.md, or add `overrides:` with a reason." unless verdict.passed?
-  exit(verdict.passed? ? 0 : 1)
+  exit(verdict.passed? && problems.empty? ? 0 : 1)
 rescue ArgumentError, KeyError, Semver::Repository::CommandFailed => error
   warn "semver check failed: #{error.message}"
   exit 1

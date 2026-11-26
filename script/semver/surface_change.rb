@@ -97,6 +97,14 @@ module Semver
       @after.git("diff", "--diff-filter=A", "--name-only", "--no-renames", @fork, @head, "--", prefix).split("\n")
     end
 
+    # Files under prefix that exist at the fork point and that the diff edits or deletes: path, text before, text
+    # after (nil when deleted).
+    #: (String) -> Array[[String, String, String?]]
+    def edited(prefix)
+      out = @after.git("diff", "--diff-filter=MD", "--name-only", "--no-renames", @fork, @head, "--", prefix)
+      out.split("\n").map { |path| [ path, @before.read(path).to_s, @after.read(path) ] }
+    end
+
     private
 
     def changed_paths

@@ -34,15 +34,36 @@ module Semver
       end
     end
 
+    # What the PR does to fragments that are already pending: deleting one or lowering its level lowers the next
+    # release without a finding from the surface rules.
+    #: () -> Array[String]
+    def fragment_problems
+      @surface.edited(DIR).filter_map do |path, before, after|
+        next unless fragment_path?(path)
+
+        problem(path, Fragment.parse(before).level, after && Fragment.parse(after).level)
+      end
+    end
+
     private
 
     def added_paths
-      paths = @surface.added_paths(DIR).select { |path| path.end_with?(".md") && path != "#{DIR}/README.md" }
+      paths = @surface.added_paths(DIR).select { |path| fragment_path?(path) }
       paths.each { |path| Fragment.refuse_nested!(path, DIR) }
+    end
+
+    def fragment_path?(path)
+      path.end_with?(".md") && path != "#{DIR}/README.md"
     end
 
     def snapshot
       Snapshot.at(@head, dir: @dir)
+    end
+
+    def problem(path, was, now)
+      return "#{path}: a fragment already pending on the base branch is deleted" unless now
+
+      "#{path}: the level of a pending fragment is lowered from #{was} to #{now}" if now < was
     end
   end
 end
