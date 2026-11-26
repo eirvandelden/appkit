@@ -120,13 +120,14 @@ end
 # A command runner that runs git for real and fakes gh, recording every call.
 class FakeRunner
   attr_reader :calls, :releases
-  attr_accessor :reject_pushes, :on_reject
+  attr_accessor :reject_pushes, :on_reject, :reject_major_pushes
 
   def initialize(dir)
     @dir = dir
     @calls = []
     @releases = {}
     @reject_pushes = 0
+    @reject_major_pushes = 0
     @gh_failures = []
   end
 
@@ -137,8 +138,16 @@ class FakeRunner
   def call(*cmd)
     @calls << cmd
     return gh(cmd) if cmd.first == "gh"
+    if major_push?(cmd)
+      @reject_major_pushes -= 1
+      raise Semver::Repository::CommandFailed, "rejected: the major tag push was refused"
+    end
     return git(cmd) unless push_rejected?(cmd)
     raise Semver::Repository::CommandFailed, "rejected: remote has moved"
+  end
+
+  def major_push?(cmd)
+    cmd[1] == "push" && cmd.include?("--force") && @reject_major_pushes.positive?
   end
 
   private

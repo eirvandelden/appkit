@@ -3,6 +3,9 @@ module Semver
   class Repository
     class CommandFailed < StandardError; end
 
+    # The atomic push of the release commit and its tag lost a race with another push to main.
+    class Rejected < CommandFailed; end
+
     TAG_PATTERN = /\A\d+\.\d+\.\d+\z/ #: Regexp
     DEFAULT_RUNNER = lambda do |*cmd|
       out, err, status = Open3.capture3(*cmd)
@@ -57,7 +60,7 @@ module Semver
 
     #: () -> void
     def refresh
-      git("fetch", "origin", "main", "--tags")
+      git("fetch", "--force", "origin", "main", "--tags")
       git("reset", "--hard", "origin/main")
       git("clean", "-fdq")
       @staged = nil
@@ -115,9 +118,11 @@ module Semver
     def push_atomic(version)
       git("push", "--atomic", "origin", "refs/heads/main:refs/heads/main",
 "refs/tags/#{version.tag}:refs/tags/#{version.tag}")
-    rescue CommandFailed
+    rescue CommandFailed => error
       git("tag", "-d", version.tag)
-      raise
+      raise unless error.message.include?("rejected")
+
+      raise Rejected, error.message
     end
   end
 end

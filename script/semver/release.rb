@@ -45,11 +45,10 @@ module Semver
 
     protected
 
+    # Rendered once, before the release commit exists, so the changelog and the GitHub Release agree.
     #: () -> String
     def body
-      sections = Fragment::SECTIONS.filter_map { |name| section(name) }
-      sections = [ "### Changed\n#{subject_lines}" ] if sections.empty?
-      sections.join("\n\n")
+      @body ||= render_body
     end
 
     # Only #cut calls this, on a Release it has just replanned from the tip of main.
@@ -70,6 +69,12 @@ module Semver
 
     def level
       @fragments.map(&:level).max || Level::PATCH
+    end
+
+    def render_body
+      sections = Fragment::SECTIONS.filter_map { |name| section(name) }
+      sections = [ "### Changed\n#{subject_lines}" ] if sections.empty?
+      sections.join("\n\n")
     end
 
     def section(name)
@@ -99,9 +104,7 @@ module Semver
 
       release.publish
       true
-    rescue Repository::CommandFailed => error
-      raise unless error.message.include?("rejected")
-
+    rescue Repository::Rejected
       false
     end
   end

@@ -85,4 +85,29 @@ class RemoteTest < ActiveSupport::TestCase
     assert_equal %w[1.0.0 1.1.0 1.1.1], @runner.releases.keys.sort
     assert_includes @fixture.remote_tags, "1"
   end
+
+  def test_rejected_major_tag_push_fails_the_run_and_the_next_run_repairs_it
+    merge_fragment("one", "minor")
+    @runner.reject_major_pushes = 1
+    error = assert_raises(Semver::Repository::CommandFailed) { cut }
+    assert_match(/major tag push was refused/, error.message)
+    assert_equal 1, @runner.calls.count { |call| call[1] == "push" && call.include?("--atomic") }
+
+    cut
+
+    assert_equal %w[1.0.0 1.1.0], @runner.releases.keys.sort
+    assert_equal @fixture.git(@fixture.dir, "rev-parse", "1.1.0^{commit}"),
+@fixture.git(@fixture.dir, "ls-remote", "origin", "refs/tags/1").split.first
+  end
+
+  def test_github_release_notes_match_the_changelog_for_a_merge_without_fragment
+    @fixture.write("lib/thing.rb", "x\n")
+    @fixture.commit("Fix the thing")
+    @fixture.push
+    cut
+
+    assert_includes @runner.releases["1.0.1"], "- Fix the thing"
+    assert_not_includes @runner.releases["1.0.1"], "Release 1.0.1"
+    assert_not_includes @fixture.read("CHANGELOG.md"), "- Release 1.0.1"
+  end
 end
