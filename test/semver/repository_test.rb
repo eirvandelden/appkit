@@ -80,6 +80,15 @@ class RepositoryTest < ActiveSupport::TestCase
     assert_equal 1, @runner.calls.count { |call| call[1..2] == %w[release create] }
   end
 
+  def test_reconcile_keeps_upgrade_steps_after_a_fenced_heading_in_the_notes
+    notes = "### Upgrading\n1. Add:\n```markdown\n## Example\n```\n2. Run it.\n"
+    older = "## 0.9.0 - 2025-01-01\n\n- Older.\n"
+    @fixture.write("CHANGELOG.md", "# Changelog\n\n## 1.0.0 - 2026-01-01\n\n#{notes}\n#{older}")
+    Dir.chdir(@fixture.dir) { @repository.reconcile(@repository.merged_versions) }
+
+    assert_equal notes.strip, @runner.releases["1.0.0"]
+  end
+
   def test_reconcile_creates_only_the_missing_releases
     @repository.ensure_release(Semver::Version.parse("1.0.0"), "notes")
     @fixture.tag("1.0.1")

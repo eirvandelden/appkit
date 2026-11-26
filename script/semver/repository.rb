@@ -100,8 +100,19 @@ module Semver
     def changelog_notes(version)
       return "Release #{version}" unless File.exist?("CHANGELOG.md")
 
-      section = File.read("CHANGELOG.md")[/^## #{Regexp.escape(version.to_s)}\b.*?\n(.*?)(?=^## |\z)/m, 1]
-      section.to_s.strip.empty? ? "Release #{version}" : section.strip
+      section = changelog_section(version).join.strip
+      section.empty? ? "Release #{version}" : section
+    end
+
+    # The lines under `## <version>`, up to the next `## ` heading that is not inside a code fence.
+    def changelog_section(version)
+      lines = File.readlines("CHANGELOG.md")
+      start = lines.index { |line| line.match?(/\A## #{Regexp.escape(version.to_s)}\b/) } or return []
+      fenced = false
+      lines.drop(start + 1).take_while do |line|
+        fenced = !fenced if line.lstrip.start_with?("```")
+        fenced || !line.start_with?("## ")
+      end
     end
 
     def move_major_tag(newest)
