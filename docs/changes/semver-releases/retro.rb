@@ -210,14 +210,14 @@ ref).strip}: a merge happened, run `table` again and review the new rows" unless
     rewrite_changelog(entries)
   end
 
+  # Resumable: a tag that exists at the right commit and a Release that exists are reused, so a retry
+  # after a partial failure finishes the work instead of failing on the first tag.
   #: (*untyped, **untyped) -> untyped
   def self.publish(entries)
-    entries.each { |entry| git("tag", entry[:version].to_s, entry[:sha]) }
+    git("fetch", "origin", "--tags")
+    entries.each { |entry| ensure_tag(entry) }
     git("push", "origin", *entries.map { |entry| "refs/tags/#{entry[:version]}" })
-    entries.each do |entry|
-      gh("release", "create", entry[:version].to_s, "--title", entry[:version].to_s, "--verify-tag",
-         "--notes", entry[:notes].sub(/\A.*?\n\n/m, ""))
-    end
+    entries.each { |entry| ensure_release(entry) }
     entries.group_by { |entry| entry[:version].major }.each_value do |group|
       newest = group.last[:version]
       git("tag", "-f", newest.major_tag, newest.to_s)
@@ -226,11 +226,30 @@ ref).strip}: a merge happened, run `table` again and review the new rows" unless
   end
 
   #: (*untyped, **untyped) -> untyped
+  def self.ensure_tag(entry)
+    problem = tag_problems(entry).first or return
+    raise problem unless problem.include?("is missing")
+
+    git("tag", entry[:version].to_s, entry[:sha])
+  end
+
+  #: (*untyped, **untyped) -> untyped
+  def self.ensure_release(entry)
+    tag = entry[:version].to_s
+    return if gh("release", "view", tag, allow_failure: true)
+
+    gh("release", "create", tag, "--title", tag, "--verify-tag", "--notes", entry[:notes].sub(/\A.*?\n\n/m, ""))
+  end
+
+  #: (*untyped, **untyped) -> untyped
   def self.rewrite_changelog(entries)
     current = File.read("CHANGELOG.md")
     header = current[0...(current.index(/^## /) || current.length)]
     File.write("CHANGELOG.md", header + entries.reverse.map { |entry| entry[:notes] }.join("\n"))
     git("add", "CHANGELOG.md")
+    return if git("diff", "--cached", "--quiet",
+allow_failure: true) && git("diff", "--cached", "--name-only").strip.empty?
+
     git("commit", "-m", "Split the changelog into one section per retro version")
   end
 
