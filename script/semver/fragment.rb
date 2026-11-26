@@ -65,6 +65,8 @@ module Semver
           current << line
         end
       end
+      raise ArgumentError, "a code fence is still open at the end of the body" if fenced
+
       sections
     end
 
