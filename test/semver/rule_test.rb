@@ -42,4 +42,15 @@ after: "pin \"a\", to: \"b\"\n")
     assert_equal %w[major], config.findings(path: path, before: with, after: without).map { |f| f.level.to_s }
     assert_empty config.findings(path: path, before: without, after: with)
   end
+
+  def test_an_unparsed_marker_inside_a_qualified_key_is_major
+    routes = Semver::Rules::ALL.find { |candidate| candidate.id == "routes" }
+    before = "Rails.application.routes.draw do\n  resource :session do\n    resources :transfers\n  end\nend\n"
+    after = "Rails.application.routes.draw do\n  resource :session do\n    scope path: \"auth\" do\n" \
+            "      resources :transfers\n    end\n  end\nend\n"
+
+    levels = routes.findings(path: "config/routes.rb", before: before, after: after).map { |f| f.level.to_s }
+
+    assert_includes levels, "major"
+  end
 end

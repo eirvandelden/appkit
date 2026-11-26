@@ -36,7 +36,7 @@ module Semver
     end
 
     def finding(kind, path, key, value)
-      level = key.start_with?("unparsed:") ? Level::MAJOR : level_for(kind, key, value)
+      level = key.include?("unparsed:") ? Level::MAJOR : level_for(kind, key, value)
       Finding.new(rule: id, path: path, level: level, reason: "#{kind} #{key}") if level
     end
 
