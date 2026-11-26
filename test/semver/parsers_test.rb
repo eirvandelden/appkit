@@ -51,6 +51,27 @@ class ParsersTest < ActiveSupport::TestCase
     assert_includes Semver::Parsers.rbs("module A\n  class ::A::B\n    def go: () -> void\n  end\nend\n").keys, "A::B#go"
   end
 
+  def test_rbs_nested_classes_are_named_once
+    facts = P.rbs("module A\n  class B\n    class C\n      def go: () -> void\n    end\n  end\nend\n")
+
+    assert_includes facts.keys, "A::B::C#go"
+    assert_not_includes facts.keys, "A::A::B::C#go"
+  end
+
+  def test_rbs_overload_lines_belong_to_their_method
+    text = "class A\n  def go: (String) -> void\n    | (Integer) -> void\nend\n"
+    changed = "class A\n  def go: (String) -> void\n    | (Symbol) -> void\nend\n"
+
+    assert_not_equal P.rbs(text)["A#go"], P.rbs(changed)["A#go"]
+  end
+
+  def test_rbs_public_ends_private
+    facts = P.rbs("class A\n  private\n  def a: () -> void\n  public\n  def b: () -> void\nend\n")
+
+    assert_not_includes facts.keys, "A#a"
+    assert_includes facts.keys, "A#b"
+  end
+
   def test_gemspec_runtime_ignores_development_dependencies
     text = "spec.add_dependency \"rails\", \"~> 8.1\"\nspec.add_development_dependency \"rake\"\n"
 

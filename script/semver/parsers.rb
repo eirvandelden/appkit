@@ -75,15 +75,24 @@ module Semver
       case line
       when /\A(class|module|interface)\s+(\S+)(.*)\z/
         declared = Regexp.last_match(2)
-        name = declared.start_with?("::") ? declared.delete_prefix("::") : [ *scope.map { |entry|
- entry[:name] }, declared ].join("::")
+        name = qualified(declared, current)
         scope.push({ name: name, private: false })
         facts[name] = line
       when "end" then scope.pop
       when "private" then current[:private] = true if current
+      when "public" then current[:private] = false if current
+      when /\A\|/ then facts[current[:last]] =
+"#{facts[current[:last]]} #{line}" if current && !current[:private] && current[:last]
       when /\A(include|extend)\s+(.+)\z/ then facts["#{current&.fetch(:name)} #{line}"] = "" if current
       else rbs_member(line, current, facts)
       end
+    end
+
+    #: (String, Hash[Symbol, untyped]?) -> String
+    def self.qualified(declared, current)
+      return declared.delete_prefix("::") if current.nil? || declared.start_with?("::")
+
+      "#{current[:name]}::#{declared}"
     end
 
     #: (String, Hash[Symbol, untyped]?, Hash[String, String]) -> void
@@ -92,11 +101,19 @@ module Semver
 
       owner = current[:name]
       case line
-      when /\Adef\s+self\.(\S+?):\s*(.*)\z/ then facts["#{owner}.#{Regexp.last_match(1)}"] = Regexp.last_match(2)
-      when /\Adef\s+(\S+?):\s*(.*)\z/ then facts["#{owner}##{Regexp.last_match(1)}"] = Regexp.last_match(2)
+      when /\Adef\s+self\.(\S+?):\s*(.*)\z/ then member(current, facts, "#{owner}.#{Regexp.last_match(1)}",
+Regexp.last_match(2))
+      when /\Adef\s+(\S+?):\s*(.*)\z/ then member(current, facts, "#{owner}##{Regexp.last_match(1)}",
+Regexp.last_match(2))
       when /\Aattr_\w+\s+(\w+):\s*(.*)\z/ then facts["#{owner}##{Regexp.last_match(1)}"] = line
       when /\A([A-Z]\w*):\s*(.*)\z/ then facts["#{owner}::#{Regexp.last_match(1)}"] = Regexp.last_match(2)
       end
+    end
+
+    #: (Hash[Symbol, untyped], Hash[String, String], String, String) -> void
+    def self.member(current, facts, key, signature)
+      facts[key] = signature
+      current[:last] = key
     end
 
     #: (String) -> Hash[String, String]
