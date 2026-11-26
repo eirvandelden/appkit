@@ -116,6 +116,14 @@ class ReleaseTest < ActiveSupport::TestCase
     assert_includes @fixture.read("CHANGELOG.md"), "3. Redo step 1 of 3.0.0, and steps 1 and 2 of 2.1.0, then step 2."
   end
 
+  def test_numbered_lines_inside_a_backtick_example_in_a_tilde_fence_are_not_steps
+    merge_fragment("nested", "major",
+                   "### Upgrading\n1. Run it:\n~~~markdown\n```ruby\n7. not a step\n```\n~~~\n")
+    cut
+
+    assert_includes @fixture.read("CHANGELOG.md"), "1. Run it:\n~~~markdown\n```ruby\n7. not a step\n```\n~~~"
+  end
+
   def test_not_due_when_head_is_the_last_release
     assert_not_predicate release, :due?
   end

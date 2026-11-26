@@ -212,6 +212,16 @@ module Semver
     def major; end
   end
 
+  # Follows fenced code blocks one line at a time: a fence closes only on the same character, at least as long.
+  class Fence
+    #: () -> void
+    def initialize; end
+    #: (String) -> bool
+    def code?(line); end               # a fence line, or a line inside a fence; call it once per line, in order; every fence-aware reader uses it
+    #: () -> bool
+    def open?; end                     # a fence is still open
+  end
+
   # One PR's changelog entry.
   class Fragment
     #: (String) -> Fragment
@@ -220,8 +230,6 @@ module Semver
     def self.pending(dir); end         # unordered; Release orders them by the commit that added each file; a nested file raises
     #: (String, String) -> void
     def self.refuse_nested!(file, dir); end # a fragment is a top-level file of the directory
-    #: (String) -> bool
-    def self.fence?(line); end         # a line that opens or closes a ``` or ~~~ code fence; every fence-aware reader uses it
     #: () -> Level
     def level; end
     #: () -> Hash[String, String]

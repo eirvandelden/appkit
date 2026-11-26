@@ -128,6 +128,15 @@ class RepositoryTest < ActiveSupport::TestCase
     assert_equal notes.strip, @runner.releases["1.0.0"]
   end
 
+  def test_reconcile_keeps_a_backtick_example_inside_a_tilde_fence_in_the_notes
+    notes = "### Upgrading\n1. Add:\n~~~markdown\n```ruby\n## Example\n```\n~~~\n2. Run it.\n"
+    @fixture.write("CHANGELOG.md",
+"# Changelog\n\n## 1.0.0 - 2026-01-01\n\n#{notes}\n## 0.9.0 - 2025-01-01\n\n- Older.\n")
+    Dir.chdir(@fixture.dir) { @repository.reconcile(@repository.merged_versions) }
+
+    assert_equal notes.strip, @runner.releases["1.0.0"]
+  end
+
   def test_reconcile_creates_only_the_missing_releases
     @repository.ensure_release(Semver::Version.parse("1.0.0"), "notes")
     @fixture.tag("1.0.1")

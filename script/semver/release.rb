@@ -98,11 +98,8 @@ module Semver
     end
 
     def steps_of(lines)
-      fenced = false
-      lines.slice_before do |line|
-        fenced = !fenced if Fragment.fence?(line)
-        !fenced && line.match?(/\A\d+\.\s/)
-      end.to_a
+      fence = Fence.new
+      lines.slice_before { |line| !fence.code?(line) && line.match?(/\A\d+\.\s/) }.to_a
     end
 
     def renumber(steps, numbers, offset)

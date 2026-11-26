@@ -7,6 +7,6 @@ module Semver
 end
 
 %w[
-  level version fragment repository release stamp
+  level version fence fragment repository release stamp
   parsers finding findings rule rules surface_change check
 ].each { |name| require_relative "semver/#{name}" }

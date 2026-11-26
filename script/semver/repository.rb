@@ -123,11 +123,8 @@ module Semver
     def changelog_section(version)
       lines = File.readlines("CHANGELOG.md")
       start = lines.index { |line| line.match?(/\A## #{Regexp.escape(version.to_s)}\b/) } or return []
-      fenced = false
-      lines.drop(start + 1).take_while do |line|
-        fenced = !fenced if Fragment.fence?(line)
-        fenced || !line.start_with?("## ")
-      end
+      fence = Fence.new
+      lines.drop(start + 1).take_while { |line| fence.code?(line) || !line.start_with?("## ") }
     end
 
     def move_major_tag(newest)
