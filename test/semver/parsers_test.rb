@@ -27,6 +27,15 @@ class ParsersTest < ActiveSupport::TestCase
     assert_not_includes default, "resources :things#destroy"
   end
 
+  def test_string_and_quoted_action_lists_are_parsed
+    words = P.routes("resource :session, only: %w[new create destroy]\n").keys
+    quoted = P.routes("resource :session, only: [\"new\", \"destroy\"]\n").keys
+
+    assert_includes words, "resource :session#destroy"
+    assert_includes quoted, "resource :session#destroy"
+    assert_not_includes quoted, "resource :session#create"
+  end
+
   def test_an_empty_only_list_exposes_no_actions
     keys = P.routes("resource :session, only: []\n").keys
 

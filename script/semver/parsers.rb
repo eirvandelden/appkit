@@ -40,10 +40,20 @@ module Semver
     #: (String, String) -> Array[String]
     def self.route_actions(key, detail)
       kind = key[/\Aresources?\b/] or return []
-      listed = ->(option) { detail[/#{option}:\s*(%i\[[^\]]*\]|\[[^\]]*\]|:\w+)/, 1].to_s.scan(/\w+/) - [ "i" ] }
-      return listed.call("only") if detail.match?(/\bonly:/)
+      return route_action_list("only", detail) if detail.match?(/\bonly:/)
 
-      RESOURCE_ACTIONS.fetch(kind) - listed.call("except")
+      RESOURCE_ACTIONS.fetch(kind) - route_action_list("except", detail)
+    end
+
+    # The actions of one option. A list this parser cannot read becomes an unparsed action, never an empty list.
+    #: (String, String) -> Array[String]
+    def self.route_action_list(option, detail)
+      return [] unless detail.match?(/\b#{option}:/)
+
+      list = detail[/\b#{option}:\s*(%[iw]\[[^\]]*\]|\[[^\]]*\]|:\w+)/, 1]
+      return [ "unparsed:#{option} #{detail[/\b#{option}:\s*([^,]+)/, 1].to_s.strip}" ] unless list
+
+      list.delete_prefix("%i").delete_prefix("%w").scan(/\w+/)
     end
 
     # The options that name a route: its helper name, its URL and the constraints on it.
@@ -202,7 +212,8 @@ Regexp.last_match(2))
       { "content" => Digest::SHA256.hexdigest(text) }
     end
 
-    private_class_method :route_actions, :route_identity, :route_fact, :rbs_line, :qualified, :rbs_member,
-                         :member, :workflow_permissions, :permission_facts, :importmap_target, :flatten_locale
+    private_class_method :route_actions, :route_action_list, :route_identity, :route_fact, :rbs_line,
+                         :qualified, :rbs_member, :member, :workflow_permissions, :permission_facts,
+                         :importmap_key, :importmap_target, :flatten_locale
   end
 end
