@@ -94,6 +94,35 @@ class ReleaseTest < ActiveSupport::TestCase
     assert_not_predicate release, :due?
   end
 
+  def test_release_builds_in_plain_ruby_without_active_support
+    merge_fragment("shiny", "minor")
+    code = "require 'semver'; r = Semver::Release.pending(repository: Semver::Repository.new); puts r.version"
+    out, err, status = Open3.capture3(RbConfig.ruby, "-I", File.expand_path("../../script", __dir__), "-e", code,
+                                      chdir: @fixture.dir)
+
+    assert_predicate status, :success?, err
+    assert_equal "1.1.0", out.strip
+  end
+
+  def test_upgrade_code_block_stays_inside_its_step
+    merge_fragment("blocky", "major", "### Upgrading\n1. Add this:\n   ```ruby\n   config.x = 1\n   ```\n2. Restart.\n")
+    cut
+
+    assert_includes @fixture.read("CHANGELOG.md"),
+                    "1. Add this:\n   ```ruby\n   config.x = 1\n   ```\n2. Restart."
+  end
+
+  def test_release_refuses_when_no_version_tag_exists
+    fixture = GitFixture.new
+    runner = FakeRunner.new(fixture.dir)
+    error = assert_raises(Semver::Release::NoBaseline) do
+      Dir.chdir(fixture.dir) { Semver::Release.pending(repository: Semver::Repository.new(runner: runner)).cut }
+    end
+
+    assert_match(/retro/i, error.message)
+    fixture.cleanup
+  end
+
   def test_a_bad_fragment_fails_before_anything_is_written
     @fixture.write("changelog.d/bad.md", "no front matter\n")
     @fixture.commit("Bad fragment")

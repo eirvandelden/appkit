@@ -1,8 +1,9 @@
 module Semver
   # The next release, cut from the pending fragments.
   class Release
+    class NoBaseline < StandardError; end
+
     ATTEMPTS = 3 #: Integer
-    FIRST = Version.new(0, 0, 0) #: Version
 
     #: (repository: Repository, ?dir: String, ?today: Date) -> Release
     def self.pending(repository:, dir: "changelog.d", today: Date.today)
@@ -14,18 +15,18 @@ module Semver
       @repository = repository
       @dir = dir
       @today = today
-      @last = repository.merged_versions.max
+      @last = repository.merged_versions.max or raise NoBaseline, "no X.Y.Z tag on this branch: run the retro first"
       @fragments = ordered(Fragment.pending(dir))
     end
 
     #: () -> Version
     def version
-      (@last || FIRST).bump(level)
+      @last.bump(level)
     end
 
     #: () -> bool
     def due?
-      !(@last && @repository.head_is?(@last))
+      !@repository.head_is?(@last)
     end
 
     #: () -> String
@@ -71,7 +72,10 @@ module Semver
     end
 
     def number(lines)
-      lines.each_with_index.map { |line, index| "#{index + 1}. #{line.sub(/\A\d+\.\s*/, '')}" }
+      steps = lines.slice_before { |line| line.match?(/\A\d+\.\s/) }.to_a
+      steps.each_with_index.flat_map do |step, index|
+        [ "#{index + 1}. #{step.first.sub(/\A\d+\.\s*/, '')}", *step.drop(1) ]
+      end
     end
 
     def subject_lines
