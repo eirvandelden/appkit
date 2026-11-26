@@ -49,7 +49,7 @@ module Semver
 
     # The paths in the order the first-parent history of main introduced them, so the order of the merges
     # decides, not the date of the branch commit that wrote the file. A filename a release consumed and a
-    # later branch reused counts from its latest addition.
+    # later branch reused counts from its latest addition. Fragments one merge added tie, and the path breaks the tie.
     #: (Array[String]) -> Array[String]
     def in_merge_order(paths)
       out = git("-c", "core.quotepath=false", "log", "--first-parent", "-m", "--reverse", "--name-status",
@@ -58,7 +58,7 @@ module Semver
       out.split("\x1e").drop(1).each_with_index do |record, index|
         added_paths(record.lines.map(&:chomp).reject(&:empty?)).each { |path| introduced[path] = index }
       end
-      paths.sort_by { |path| introduced.fetch(path, introduced.size) }
+      paths.sort_by { |path| [ introduced.fetch(path, introduced.size), path ] }
     end
 
     #: (Array[Version]) -> void

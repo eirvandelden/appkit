@@ -80,6 +80,16 @@ class RepositoryTest < ActiveSupport::TestCase
     assert_equal [ "changelog.d/first.md", "changelog.d/repeat.md" ], ordered
   end
 
+  def test_in_merge_order_breaks_a_tie_between_fragments_of_one_merge_by_path
+    @fixture.write("changelog.d/b.md", "x\n")
+    @fixture.write("changelog.d/a.md", "x\n")
+    @fixture.commit("Add both")
+
+    ordered = @repository.in_merge_order([ "changelog.d/b.md", "changelog.d/a.md" ])
+
+    assert_equal [ "changelog.d/a.md", "changelog.d/b.md" ], ordered
+  end
+
   def test_subjects_without_keeps_a_commit_that_only_modifies_a_file
     @fixture.write("a.md", "x\n")
     @fixture.commit("Add a")
