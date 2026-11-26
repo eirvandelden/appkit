@@ -112,6 +112,15 @@ class ReleaseTest < ActiveSupport::TestCase
                     "1. Add this:\n   ```ruby\n   config.x = 1\n   ```\n2. Restart."
   end
 
+  def test_numbered_lines_inside_an_unindented_fence_are_not_steps
+    merge_fragment("fenced", "major",
+"### Upgrading\n1. Add this list:\n```markdown\n1. First item\n2. Second item\n```\n2. Restart.\n")
+    cut
+
+    assert_includes @fixture.read("CHANGELOG.md"),
+                    "1. Add this list:\n```markdown\n1. First item\n2. Second item\n```\n2. Restart."
+  end
+
   def test_release_refuses_when_no_version_tag_exists
     fixture = GitFixture.new
     runner = FakeRunner.new(fixture.dir)

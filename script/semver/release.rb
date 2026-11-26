@@ -86,7 +86,11 @@ module Semver
     end
 
     def number(lines)
-      steps = lines.slice_before { |line| line.match?(/\A\d+\.\s/) }.to_a
+      fenced = false
+      steps = lines.slice_before do |line|
+        fenced = !fenced if line.lstrip.start_with?("```")
+        !fenced && line.match?(/\A\d+\.\s/)
+      end.to_a
       steps.each_with_index.flat_map do |step, index|
         [ "#{index + 1}. #{step.first.sub(/\A\d+\.\s*/, '')}", *step.drop(1) ]
       end
