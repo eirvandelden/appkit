@@ -58,4 +58,18 @@ class FragmentTest < ActiveSupport::TestCase
       assert_raises(ArgumentError) { Semver::Fragment.pending(dir) }
     end
   end
+
+  def test_headings_inside_a_code_fence_are_text
+    body = "### Upgrading\n1. Add this:\n```ruby\n# config/initializers/appkit.rb\n### Added\n```\n"
+    fragment = Semver::Fragment.parse("---\nlevel: major\n---\n#{body}")
+
+    assert_equal [ "Upgrading" ], fragment.sections.keys
+    assert_includes fragment.sections["Upgrading"], "# config/initializers/appkit.rb"
+  end
+
+  def test_upgrading_line_before_the_first_numbered_step_is_refused
+    text = "---\nlevel: major\n---\n### Upgrading\n- Note first\n1. Run x\n"
+
+    assert_raises(ArgumentError) { Semver::Fragment.validate!(text) }
+  end
 end

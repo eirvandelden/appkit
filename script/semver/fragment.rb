@@ -46,8 +46,14 @@ module Semver
     def self.parse_sections(body)
       sections = {} #: Hash[String, Array[String]]
       current = nil
+      fenced = false
       body.each_line(chomp: true) do |line|
-        if (heading = line[/\A### (.+)\z/, 1])
+        fenced = !fenced if line.lstrip.start_with?("```")
+        if fenced || line.lstrip.start_with?("```")
+          raise ArgumentError, "text before the first section: #{line.inspect}" unless current
+
+          current << line
+        elsif (heading = line[/\A### (.+)\z/, 1])
           raise ArgumentError, "unknown section #{heading.inspect}" unless SECTIONS.include?(heading)
 
           current = sections[heading] ||= []
@@ -75,6 +81,7 @@ module Semver
     #: (?known_rules: Array[String]?) -> void
     def validate!(known_rules: nil)
       raise ArgumentError, "a fragment with an Upgrading section must declare level major" if upgrading? && level < Level::MAJOR
+      raise ArgumentError, "an Upgrading section starts with a numbered step" unless numbered_start?
 
       unknown = overrides.keys - (known_rules || overrides.keys)
       raise ArgumentError, "unknown override rule #{unknown.join(', ')}" unless unknown.empty?
@@ -94,6 +101,11 @@ module Semver
 
     def upgrading?
       sections.fetch("Upgrading", []).any?
+    end
+
+    def numbered_start?
+      first = sections.fetch("Upgrading", []).first
+      first.nil? || first.match?(/\A\d+\.\s/)
     end
   end
 end
