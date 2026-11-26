@@ -25,7 +25,7 @@ module Semver
 
     #: (*String) -> String
     def git(*args)
-      out, err, status = Open3.capture3("git", "-C", @dir, *args)
+      out, err, status = Open3.capture3("git", "-C", @dir, "-c", "core.quotepath=false", *args)
       raise Repository::CommandFailed, "git #{args.join(' ')}: #{err.strip}" unless status.success?
 
       out

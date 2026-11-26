@@ -30,6 +30,13 @@ class CheckTest < ActiveSupport::TestCase
     assert_match(/#{Regexp.escape(TEMPLATE)}.*needs at least major/, verdict.lines.join)
   end
 
+  def test_non_ascii_fragment_name_is_checked_like_any_other
+    @fixture.write("changelog.d/café.md", "---\nlevel: patch\n---\n### Fixed\n- x\n### Upgrading\n1. Run y\n")
+    @fixture.commit("Unicode fragment")
+
+    assert_raises(ArgumentError) { check.verdict }
+  end
+
   def test_major_fragment_passes
     breaking_pr("major")
 
