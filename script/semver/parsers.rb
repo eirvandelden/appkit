@@ -155,6 +155,7 @@ Regexp.last_match(2))
     def self.workflow_permissions(document, facts)
       scopes = [ document["permissions"], *(document["jobs"] || {}).values.map { |job| job["permissions"] } ]
       scopes.grep(Hash).each { |scope| scope.each { |name, value| facts["permission:#{name}"] = value.to_s } }
+      scopes.grep(String).each { |scope| facts["permission:all"] = scope }
     end
 
     #: (String) -> Hash[String, String]

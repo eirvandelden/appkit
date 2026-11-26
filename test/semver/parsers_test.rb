@@ -112,6 +112,13 @@ class ParsersTest < ActiveSupport::TestCase
     assert_includes facts.keys, "bin:bin/rails"
   end
 
+  def test_scalar_permissions_are_facts_at_workflow_and_job_scope
+    text = "permissions: write-all\njobs:\n  j:\n    permissions: read-all\n    steps: []\n"
+
+    assert_equal "read-all", P.workflow_inputs(text)["permission:all"]
+    assert_equal "write-all", P.workflow_inputs("permissions: write-all\n")["permission:all"]
+  end
+
   def test_workflow_input_types_are_facts
     text = "on:\n  workflow_call:\n    inputs:\n      a:\n        type: boolean\n        default: true\n"
 
