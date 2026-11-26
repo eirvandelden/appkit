@@ -48,21 +48,19 @@ module Appkit
         return if File.read(application_controller_file).match?(AUTHENTICATION_INCLUDE)
 
         # inject_into_class comes from Rails generators, which the railties RBS does not describe.
-        # steep:ignore:start
         inject_into_class APPLICATION_CONTROLLER, "ApplicationController", "  include Appkit::Authentication\n"
-        # steep:ignore:end
       end
 
       #: () -> void
       def copy_error_pages
         # copy_file comes from Rails generators, which the railties RBS does not describe.
-        ERROR_PAGES.each { |page| copy_file "public/#{page}", "public/#{page}" } # steep:ignore NoMethod
+        ERROR_PAGES.each { |page| copy_file "public/#{page}", "public/#{page}" }
       end
 
       #: () -> void
       def copy_ci_workflow
         # template comes from Rails generators, which the railties RBS does not describe.
-        template "github/workflows/ci.yml.tt", ".github/workflows/ci.yml" # steep:ignore NoMethod
+        template "github/workflows/ci.yml.tt", ".github/workflows/ci.yml"
       end
 
       private
@@ -76,7 +74,7 @@ module Appkit
         #: () -> String
         def application_controller_file
           # destination_root comes from Rails generators, which the railties RBS does not describe.
-          File.join(destination_root, APPLICATION_CONTROLLER) # steep:ignore NoMethod
+          File.join(destination_root, APPLICATION_CONTROLLER)
         end
     end
   end
