@@ -61,6 +61,7 @@ class RemoteTest < ActiveSupport::TestCase
 
     error = assert_raises(Semver::Repository::CommandFailed) { cut }
     assert_match(/after 3 attempts/, error.message)
+    assert_match(/remote has moved/, error.message)
     assert_equal 3, @runner.calls.count { |call| call[1] == "push" && call.include?("--atomic") }
   end
 

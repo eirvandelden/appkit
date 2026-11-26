@@ -40,7 +40,7 @@ module Semver
       ATTEMPTS.times do
         return if attempt
       end
-      raise Repository::CommandFailed, "release not published after #{ATTEMPTS} attempts"
+      raise Repository::CommandFailed, "release not published after #{ATTEMPTS} attempts: #{@rejection}"
     end
 
     protected
@@ -108,7 +108,8 @@ module Semver
 
       release.publish
       true
-    rescue Repository::Rejected
+    rescue Repository::Rejected => error
+      @rejection = error.message
       false
     end
   end
