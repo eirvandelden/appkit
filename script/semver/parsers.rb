@@ -137,7 +137,9 @@ Regexp.last_match(2))
       (call["secrets"] || {}).each { |name, spec|
  facts["secret:#{name}"] = (spec || {})["required"] ? "required" : "optional" }
       workflow_permissions(document, facts)
-      text.scan(%r{\bbin/[\w-]+}).uniq.each { |bin| facts["bin:#{bin}"] = "" }
+      text.lines.map { |line| line.sub(/(\A|\s)#.*/, "") }.join.scan(%r{\bbin/[\w-]+}).uniq.each { |bin|
+        facts["bin:#{bin}"] = ""
+      }
       facts
     end
 

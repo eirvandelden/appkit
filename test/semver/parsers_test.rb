@@ -96,6 +96,13 @@ class ParsersTest < ActiveSupport::TestCase
     assert_equal "boolean", P.workflow_inputs(text)["inputtype:a"]
   end
 
+  def test_workflow_comments_are_not_bin_facts
+    text = "# run bin/old to see\njobs:\n  j:\n    steps:\n      - run: bin/rails test # not bin/other\n"
+    facts = P.workflow_inputs(text)
+
+    assert_equal [ "bin:bin/rails" ], facts.keys.grep(/\Abin:/)
+  end
+
   def test_importmap_pins
     assert_equal({ "a" => "a.js" }, P.importmap_pins("pin \"a\", to: \"a.js\"\n"))
   end
