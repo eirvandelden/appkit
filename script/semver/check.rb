@@ -37,9 +37,7 @@ module Semver
     private
 
     def added_paths
-      fork = snapshot.git("merge-base", @base, @head).strip
-      snapshot.git("diff", "--diff-filter=A", "--name-only", "--no-renames", fork, @head, "--", DIR).split("\n")
-              .select { |path| path.end_with?(".md") && File.basename(path) != "README.md" }
+      @surface.added_paths(DIR).select { |path| path.end_with?(".md") && File.basename(path) != "README.md" }
     end
 
     def snapshot

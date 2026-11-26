@@ -91,6 +91,12 @@ module Semver
       Verdict.new(findings, declared: declared, overrides: overrides)
     end
 
+    # Files under prefix that the diff adds, from the fork point.
+    #: (String) -> Array[String]
+    def added_paths(prefix)
+      @after.git("diff", "--diff-filter=A", "--name-only", "--no-renames", @fork, @head, "--", prefix).split("\n")
+    end
+
     private
 
     def changed_paths

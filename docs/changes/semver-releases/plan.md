@@ -318,6 +318,8 @@ module Semver
     def paths; end
     #: (String) -> String?
     def read(path); end                # nil when the file is absent at that ref
+    #: (*String) -> String
+    def git(*args); end                # runs git in the snapshot's directory; raises Repository::CommandFailed
   end
 
   # What a diff changes in the public surface: the Rules applied to two Snapshots, base taken at the fork point.
@@ -328,6 +330,8 @@ module Semver
     def findings; end
     #: (Level, ?overrides: Hash[String, String]) -> Verdict
     def check(declared, overrides: {}); end
+    #: (String) -> Array[String]
+    def added_paths(prefix); end       # files under prefix that the diff adds, from the fork point
   end
 
   # The outcome of a check: whether the declared level is enough, and one line per finding.

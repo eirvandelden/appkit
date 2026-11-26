@@ -65,6 +65,14 @@ Semver::SurfaceChange.between(base: "main", head: "work2", dir: @fixture.dir).fi
 Semver::SurfaceChange.between(base: "main", head: "work2", dir: @fixture.dir).findings.floor
   end
 
+  def test_added_paths_lists_files_the_branch_adds_under_a_prefix
+    @fixture.write("changelog.d/new.md", "x\n")
+    @fixture.write("other/new.md", "x\n")
+    @fixture.commit("Add files")
+
+    assert_equal [ "changelog.d/new.md" ], change.added_paths("changelog.d")
+  end
+
   def test_added_route_floor_is_minor
     @fixture.write("config/routes.rb",
 "Rails.application.routes.draw do\n  resource :session\n  resource :other\nend\n")
