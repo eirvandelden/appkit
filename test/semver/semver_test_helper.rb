@@ -120,12 +120,17 @@ end
 # A command runner that runs git for real and fakes gh, recording every call.
 class FakeRunner
   attr_reader :calls, :releases
+  def hide_from_list(tag)
+    @hidden << tag
+  end
+
   attr_accessor :reject_pushes, :on_reject, :reject_major_pushes
 
   def initialize(dir)
     @dir = dir
     @calls = []
     @releases = {}
+    @hidden = []
     @reject_pushes = 0
     @reject_major_pushes = 0
     @gh_failures = []
@@ -161,7 +166,7 @@ class FakeRunner
       raise Semver::Repository::CommandFailed, "release not found" unless @releases.key?(tag)
       @releases[tag]
     when %w[release list]
-      @releases.keys.join("\n")
+      (@releases.keys - @hidden).join("\n")
     when %w[release create]
       @releases[tag] = cmd[(cmd.index("--notes") || 0) + 1].to_s
     else raise "unexpected gh call: #{cmd.inspect}"

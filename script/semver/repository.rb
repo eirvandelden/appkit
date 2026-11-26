@@ -48,7 +48,8 @@ module Semver
     def reconcile(versions)
       existing = @runner.call("gh", "release", "list", "--limit", "1000", "--json", "tagName", "--jq",
                               ".[].tagName").split
-      versions.reject { |version| existing.include?(version.tag) }.each { |version| create_release(version) }
+      versions.reject { |version|
+ existing.include?(version.tag) }.each { |version| ensure_release(version, changelog_notes(version)) }
       versions.group_by(&:major).each_value { |group| move_major_tag(group.max) }
     end
 
