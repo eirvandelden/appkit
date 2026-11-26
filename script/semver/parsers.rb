@@ -7,6 +7,7 @@ module Semver
       "resource" => %w[show new create edit update destroy],
       "resources" => %w[index show new create edit update destroy]
     }.freeze #: Hash[String, Array[String]]
+    ROUTE_IDENTITY = %w[as path path_names param constraints].freeze #: Array[String]
     ROUTE_VERB = /\A(#{ROUTE_VERBS.join('|')})\s+["']([^"']+)["']\s*(.*?)(\s+do)?\z/ #: Regexp
 
     #: (String) -> Hash[String, String]
@@ -27,7 +28,7 @@ module Semver
 
         key, detail, opens = route_fact(line)
         path = [ *stack.compact, key ].join(" > ")
-        facts[path] = detail
+        facts[path] = route_identity(detail)
         route_actions(key, detail).each { |action| facts["#{path}##{action}"] = "" }
         stack << key if opens
         stack << nil if opens.nil? && key.start_with?("unparsed:") && line.match?(/\bdo\b/)
@@ -40,10 +41,17 @@ module Semver
     def self.route_actions(key, detail)
       kind = key[/\Aresources?\b/] or return []
       listed = ->(option) { detail[/#{option}:\s*(%i\[[^\]]*\]|\[[^\]]*\]|:\w+)/, 1].to_s.scan(/\w+/) - [ "i" ] }
-      only = listed.call("only")
-      return only unless only.empty?
+      return listed.call("only") if detail.match?(/\bonly:/)
 
       RESOURCE_ACTIONS.fetch(kind) - listed.call("except")
+    end
+
+    # The options that name a route: its helper name, its URL and the constraints on it.
+    # The actions are facts of their own, and the controller is no part of what an app sees.
+    #: (String) -> String
+    def self.route_identity(detail)
+      options = detail.scan(/\b(#{ROUTE_IDENTITY.join('|')}):\s*(%[iw]\[[^\]]*\]|\{[^}]*\}|"[^"]*"|'[^']*'|[^,\s]+)/)
+      options.sort.map { |name, value| "#{name}: #{value}" }.join(", ")
     end
 
     #: (String) -> Array[untyped]

@@ -21,7 +21,7 @@ module Semver
             Level::MINOR, Level::MAJOR, Level::PATCH),
       build("config", "lib/appkit/configuration.rb", Parsers.method(:config_options).to_proc, CONFIG_ADDED,
 Level::MAJOR, nil),
-      build("routes", "config/routes.rb", Parsers.method(:routes).to_proc, Level::MINOR, Level::MAJOR, nil),
+      build("routes", "config/routes.rb", Parsers.method(:routes).to_proc, Level::MINOR, Level::MAJOR, Level::MAJOR),
       build("rbs", "sig/**/*.rbs", Parsers.method(:rbs).to_proc, Level::MINOR, Level::MAJOR, Level::MAJOR),
       build("gemspec", "appkit.gemspec", Parsers.method(:gemspec_runtime).to_proc, Level::MAJOR, Level::MINOR, Level::MAJOR),
       build("workflow", ".github/workflows/rails-ci.yml", Parsers.method(:workflow_inputs).to_proc,

@@ -27,6 +27,28 @@ class ParsersTest < ActiveSupport::TestCase
     assert_not_includes default, "resources :things#destroy"
   end
 
+  def test_an_empty_only_list_exposes_no_actions
+    keys = P.routes("resource :session, only: []\n").keys
+
+    assert_empty keys.grep(/#/)
+  end
+
+  def test_route_facts_carry_the_options_that_name_the_route
+    plain = P.routes("resource :session\n")["resource :session"]
+    named = P.routes("resource :session, as: :login\n")["resource :session"]
+    moved = P.routes("resource :session, path: \"entrar\"\n")["resource :session"]
+
+    assert_not_equal plain, named
+    assert_not_equal plain, moved
+  end
+
+  def test_route_facts_ignore_the_controller_and_the_action_lists
+    one = P.routes("resource :session, only: :new, controller: \"a/b\"\n")["resource :session"]
+    two = P.routes("resource :session, only: %i[new create], controller: \"c/d\"\n")["resource :session"]
+
+    assert_equal one, two
+  end
+
   def test_unknown_routes_dsl_is_unparsed_fact
     facts = P.routes("Rails.application.routes.draw do\n  mount Foo => \"/foo\"\nend\n")
 

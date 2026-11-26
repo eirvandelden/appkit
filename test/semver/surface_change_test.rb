@@ -73,6 +73,14 @@ Semver::SurfaceChange.between(base: "main", head: "work2", dir: @fixture.dir).fi
     assert_equal [ "changelog.d/new.md" ], change.added_paths("changelog.d")
   end
 
+  def test_renaming_a_route_helper_floor_is_major
+    @fixture.write("config/routes.rb",
+"Rails.application.routes.draw do\n  resource :session, as: :login\nend\n")
+    @fixture.commit("Rename the helper")
+
+    assert_equal Semver::Level::MAJOR, change.findings.floor
+  end
+
   def test_added_route_floor_is_minor
     @fixture.write("config/routes.rb",
 "Rails.application.routes.draw do\n  resource :session\n  resource :other\nend\n")

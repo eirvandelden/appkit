@@ -353,7 +353,7 @@ Rule levels:
 | `migrations` (templates that create tables) | major | major | major |
 | `templates` (error pages, CI caller) | minor | major | patch |
 | `config` | major without a default in `#initialize` (a conservative rule: an unset option is treated as required; override it when optional), else minor | major | not detected |
-| `routes` | minor | major | not applicable |
+| `routes` | minor | major | major (a changed `as:`, `path:`, `path_names:`, `param:` or `constraints:`) |
 | `rbs` | minor | major | major |
 | `gemspec` | major | minor | major |
 | `workflow` | minor when an optional input with a default; major for a required input or secret, a permission or a new `bin/` call | major | major |
