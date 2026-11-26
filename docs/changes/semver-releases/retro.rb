@@ -34,6 +34,14 @@ module Retro
   end
 
   #: (*untyped, **untyped) -> untyped
+  def self.gh(*args, allow_failure: false)
+    out, err, status = Open3.capture3("gh", *args)
+    raise "gh #{args.join(' ')}: #{err}" unless status.success? || allow_failure
+
+    status.success? ? out : nil
+  end
+
+  #: (*untyped, **untyped) -> untyped
   def self.chain(ref)
     git("log", "--first-parent", "--reverse", "--format=%H\t%P\t%cs\t%s", ref).split("\n").map { |line|
  line.split("\t", 4) }
@@ -207,8 +215,8 @@ ref).strip}: a merge happened, run `table` again and review the new rows" unless
     entries.each { |entry| git("tag", entry[:version].to_s, entry[:sha]) }
     git("push", "origin", *entries.map { |entry| "refs/tags/#{entry[:version]}" })
     entries.each do |entry|
-      Open3.capture3("gh", "release", "create", entry[:version].to_s, "--title", entry[:version].to_s, "--verify-tag",
-                     "--notes", entry[:notes].sub(/\A.*?\n\n/m, ""))
+      gh("release", "create", entry[:version].to_s, "--title", entry[:version].to_s, "--verify-tag",
+         "--notes", entry[:notes].sub(/\A.*?\n\n/m, ""))
     end
     entries.group_by { |entry| entry[:version].major }.each_value do |group|
       newest = group.last[:version]
@@ -231,6 +239,8 @@ ref).strip}: a merge happened, run `table` again and review the new rows" unless
     text = File.read(TABLE)
     entries = plan(ref, text)
     problems = entries.flat_map { |entry| tag_problems(entry) }
+    problems += entries.reject { |entry| gh("release", "view", entry[:version].to_s, allow_failure: true) }
+                       .map { |entry| "GitHub Release #{entry[:version]} is missing" }
     changelog = File.read("CHANGELOG.md")
     problems += entries.reject { |entry|
  changelog.include?(entry[:notes]) }.map { |entry| "CHANGELOG.md lacks the section #{entry[:version]}" }
