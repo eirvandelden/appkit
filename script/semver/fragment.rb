@@ -29,9 +29,17 @@ module Semver
 
     #: (String) -> Array[Fragment]
     def self.pending(dir)
-      Dir.glob(File.join(dir, "*.md")).reject { |file| File.basename(file) == "README.md" }.map do |file|
-        validate!(File.read(file), path: file)
-      end
+      files = Dir.glob(File.join(dir, "**", "*.md")).reject { |file| file == File.join(dir, "README.md") }
+      files.each { |file| refuse_nested!(file, dir) }
+      files.map { |file| validate!(File.read(file), path: file) }
+    end
+
+    # A fragment is a top-level file of the directory: the release reads nothing deeper.
+    #: (String, String) -> void
+    def self.refuse_nested!(file, dir)
+      return if File.dirname(file) == dir
+
+      raise ArgumentError, "#{file} is nested: a fragment is a top-level file, #{dir}/<slug>.md"
     end
 
     #: (String) -> Hash[String, Array[String]]

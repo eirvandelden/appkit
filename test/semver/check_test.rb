@@ -55,6 +55,15 @@ class CheckTest < ActiveSupport::TestCase
     assert_not_predicate check.verdict, :passed?
   end
 
+  def test_nested_fragment_path_is_refused
+    @fixture.write(TEMPLATE, "class CreateThings; end\n")
+    @fixture.write("changelog.d/feature/work.md", fragment_text("major"))
+    @fixture.commit("Nested fragment")
+
+    error = assert_raises(ArgumentError) { check.verdict }
+    assert_match(%r{changelog\.d/feature/work\.md.*changelog\.d/<slug>\.md}, error.message)
+  end
+
   def test_override_in_the_fragment_passes
     @fixture.write(TEMPLATE, "class CreateThings; end\n")
     @fixture.write("changelog.d/work.md",

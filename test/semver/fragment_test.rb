@@ -49,4 +49,13 @@ class FragmentTest < ActiveSupport::TestCase
 
     assert_equal({ "config" => "optional option" }, Semver::Fragment.validate!(text, known_rules: %w[config]).overrides)
   end
+
+  def test_pending_refuses_a_nested_fragment
+    Dir.mktmpdir do |dir|
+      FileUtils.mkdir_p(File.join(dir, "feature"))
+      File.write(File.join(dir, "feature", "work.md"), fragment_text("major"))
+
+      assert_raises(ArgumentError) { Semver::Fragment.pending(dir) }
+    end
+  end
 end

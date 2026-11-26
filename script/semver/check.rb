@@ -37,7 +37,8 @@ module Semver
     private
 
     def added_paths
-      @surface.added_paths(DIR).select { |path| path.end_with?(".md") && File.basename(path) != "README.md" }
+      paths = @surface.added_paths(DIR).select { |path| path.end_with?(".md") && path != "#{DIR}/README.md" }
+      paths.each { |path| Fragment.refuse_nested!(path, DIR) }
     end
 
     def snapshot
