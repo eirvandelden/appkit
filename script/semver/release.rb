@@ -113,8 +113,9 @@ module Semver
     end
 
     # Every number in `step 1`, `steps 1 and 2`, `steps 1, 2 and 3` or `steps 1-3` follows its step.
+    # A reference qualified by a version, `step 1 of 3.0.0`, points at a published release: it stays.
     def remap_references(line, numbers)
-      line.gsub(/\b(steps? )(\d+(?:(?:,| and|-|–) ?\d+)*)/i) do
+      line.gsub(/\b(steps? )(\d++(?:(?:,| and|-|–) ?\d++)*+)(?! of \d+\.\d+)/i) do
         "#{Regexp.last_match(1)}#{Regexp.last_match(2).gsub(/\d+/) { |old| numbers.fetch(old, old) }}"
       end
     end

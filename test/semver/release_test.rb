@@ -107,6 +107,15 @@ class ReleaseTest < ActiveSupport::TestCase
     assert_includes @fixture.read("CHANGELOG.md"), "5. Compare steps 2 and 3, steps 2, 3 and 4, steps 2-4."
   end
 
+  def test_a_version_qualified_step_reference_is_left_alone
+    merge_fragment("first", "major", "### Upgrading\n1. Run first.\n")
+    merge_fragment("second", "major",
+                   "### Upgrading\n1. Run second.\n2. Redo step 1 of 3.0.0, and steps 1 and 2 of 2.1.0, then step 1.\n")
+    cut
+
+    assert_includes @fixture.read("CHANGELOG.md"), "3. Redo step 1 of 3.0.0, and steps 1 and 2 of 2.1.0, then step 2."
+  end
+
   def test_not_due_when_head_is_the_last_release
     assert_not_predicate release, :due?
   end
