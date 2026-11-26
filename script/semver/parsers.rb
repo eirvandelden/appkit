@@ -182,5 +182,8 @@ Regexp.last_match(2))
     def self.template_files(text)
       { "content" => Digest::SHA256.hexdigest(text) }
     end
+
+    private_class_method :route_actions, :route_identity, :route_fact, :rbs_line, :qualified, :rbs_member,
+                         :member, :workflow_permissions, :flatten_locale
   end
 end

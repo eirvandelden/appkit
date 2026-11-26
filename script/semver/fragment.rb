@@ -62,6 +62,8 @@ module Semver
       sections
     end
 
+    private_class_method :parse_sections
+
     #: (level: Level, overrides: untyped, sections: Hash[String, Array[String]], ?path: String?) -> void
     def initialize(level:, overrides:, sections:, path: nil)
       @level = level

@@ -5,13 +5,12 @@ module Semver
 
     #: (base: String, head: String, ?dir: String) -> Check
     def self.between(base:, head:, dir: Dir.pwd)
-      new(surface: SurfaceChange.between(base: base, head: head, dir: dir), base: base, head: head, dir: dir)
+      new(surface: SurfaceChange.between(base: base, head: head, dir: dir), head: head, dir: dir)
     end
 
-    #: (surface: SurfaceChange, base: String, head: String, dir: String) -> void
-    def initialize(surface:, base:, head:, dir:)
+    #: (surface: SurfaceChange, head: String, dir: String) -> void
+    def initialize(surface:, head:, dir:)
       @surface = surface
-      @base = base
       @head = head
       @dir = dir
     end

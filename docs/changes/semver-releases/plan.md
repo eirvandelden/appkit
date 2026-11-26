@@ -208,6 +208,8 @@ module Semver
     def tag; end                       # "1.2.3"
     #: () -> String
     def major_tag; end                 # "1"
+    #: () -> Integer
+    def major; end
   end
 
   # One PR's changelog entry.
@@ -215,7 +217,9 @@ module Semver
     #: (String) -> Fragment
     def self.parse(text); end          # raises on a missing or unknown level or section
     #: (String) -> Array[Fragment]
-    def self.pending(dir); end         # unordered; Release orders them by the commit that added each file
+    def self.pending(dir); end         # unordered; Release orders them by the commit that added each file; a nested file raises
+    #: (String, String) -> void
+    def self.refuse_nested!(file, dir); end # a fragment is a top-level file of the directory
     #: () -> Level
     def level; end
     #: () -> Hash[String, String]
@@ -334,6 +338,20 @@ module Semver
     def added_paths(prefix); end       # files under prefix that the diff adds, from the fork point
     #: (String) -> Array[[String, String, String?]]
     def edited(prefix); end            # files under prefix that exist at the fork point and that the diff edits or deletes: path, text before, text after
+  end
+
+  # The PR check: the level the PR's own fragments declare, against the floor its diff sets.
+  class Check
+    #: (base: String, head: String, ?dir: String) -> Check
+    def self.between(base:, head:, dir: Dir.pwd); end
+    #: () -> Verdict
+    def verdict; end
+    #: () -> Level
+    def declared; end                  # the highest level of the fragments the PR adds, never below patch
+    #: () -> Array[Fragment]
+    def fragments; end                 # only the fragments the PR adds
+    #: () -> Array[String]
+    def fragment_problems; end         # a pending fragment the PR deletes or lowers
   end
 
   # The outcome of a check: whether the declared level is enough, and one line per finding.

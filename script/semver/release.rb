@@ -52,6 +52,15 @@ module Semver
       sections.join("\n\n")
     end
 
+    # Only #cut calls this, on a Release it has just replanned from the tip of main.
+    #: () -> void
+    def publish
+      paths = Stamp.apply(version: version, notes: notes, fragments: @fragments)
+      @repository.stage(version, paths: paths)
+      @repository.publish
+      @repository.ensure_release(version, body)
+    end
+
     private
 
     def ordered(fragments)
@@ -95,17 +104,5 @@ module Semver
 
       false
     end
-
-    public
-
-    #: () -> void
-    def publish
-      paths = Stamp.apply(version: version, notes: notes, fragments: @fragments)
-      @repository.stage(version, paths: paths)
-      @repository.publish
-      @repository.ensure_release(version, body)
-    end
-
-    private
   end
 end
