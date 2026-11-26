@@ -372,7 +372,7 @@ Rule levels:
 |---|---|---|---|
 | `migrations` (templates that create tables) | major | major | major |
 | `templates` (error pages, CI caller) | minor | major | patch |
-| `config` | major without a default in `#initialize` (a conservative rule: an unset option is treated as required; override it when optional), else minor | major | not detected |
+| `config` | major without a default in `#initialize` (a conservative rule: an unset option is treated as required; override it when optional), else minor | major | major when the option loses its default in `#initialize`, else not detected |
 | `routes` | minor | major | major (a changed `as:`, `path:`, `path_names:`, `param:` or `constraints:`) |
 | `rbs` | minor | major | major |
 | `gemspec` | major | minor | major |

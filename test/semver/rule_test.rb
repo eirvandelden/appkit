@@ -32,4 +32,14 @@ after: "pin \"a\", to: \"b\"\n")
 
     assert_equal "major", findings.first.level.to_s
   end
+
+  def test_losing_a_config_default_is_major_and_gaining_one_is_not_detected
+    config = Semver::Rules::ALL.find { |candidate| candidate.id == "config" }
+    with = "attr_accessor :a\ndef initialize\n  @a = 1\nend\n"
+    without = "attr_accessor :a\ndef initialize\nend\n"
+    path = "lib/appkit/configuration.rb"
+
+    assert_equal %w[major], config.findings(path: path, before: with, after: without).map { |f| f.level.to_s }
+    assert_empty config.findings(path: path, before: without, after: with)
+  end
 end
