@@ -78,4 +78,10 @@ class FragmentTest < ActiveSupport::TestCase
 
     assert_raises(ArgumentError) { Semver::Fragment.validate!(text) }
   end
+
+  def test_parse_reads_a_heading_indented_by_up_to_three_spaces
+    body = "### Fixed\n- x\n   ### Upgrading\n1. Run y\n"
+
+    assert_raises(ArgumentError) { Semver::Fragment.validate!(fragment_text("patch", body)) }
+  end
 end
