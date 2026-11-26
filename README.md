@@ -40,11 +40,11 @@ If a host app forgets to set it, the login page falls back to magenta rather tha
 ## Installation
 
 ```ruby
-gem "appkit", github: "eirvandelden/appkit", tag: "1.2.3"
+gem "appkit", github: "eirvandelden/appkit", tag: "X.Y.Z"
 gem "mvpa-css", github: "eirvandelden/mvpa.css"
 ```
 
-appkit follows [semver](https://semver.org). A major version marks a change that needs app work, a minor version an opt-in feature, a patch version a fix. Each release is a git tag without a `v` prefix, such as `1.2.3`, and a GitHub Release. `CHANGELOG.md` lists each version, with its `### Upgrading` steps. Read the sections between your version and the new one before you move the tag. A pin on a git SHA keeps working.
+appkit follows [semver](https://semver.org). A major version marks a change that needs app work, a minor version an opt-in feature, a patch version a fix. Each release is a git tag without a `v` prefix, such as `1.2.3`, and a GitHub Release. Replace `X.Y.Z` in the sample with the newest version in `CHANGELOG.md`. `CHANGELOG.md` lists each version, with its `### Upgrading` steps. Read the sections between your version and the new one before you move the tag. A pin on a git SHA keeps working.
 
 Then install the gem, copy the migrations, error pages and CI caller, and migrate:
 
