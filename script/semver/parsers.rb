@@ -153,15 +153,29 @@ Regexp.last_match(2))
 
     #: (Hash[untyped, untyped], Hash[String, String]) -> void
     def self.workflow_permissions(document, facts)
-      scopes = [ document["permissions"], *(document["jobs"] || {}).values.map { |job| job["permissions"] } ]
-      scopes.grep(Hash).each { |scope| scope.each { |name, value| facts["permission:#{name}"] = value.to_s } }
-      scopes.grep(String).each { |scope| facts["permission:all"] = scope }
+      permission_facts(document["permissions"], "permission:", facts)
+      (document["jobs"] || {}).each { |job, spec| permission_facts(spec["permissions"], "permission:#{job}:", facts) }
+    end
+
+    #: (untyped, String, Hash[String, String]) -> void
+    def self.permission_facts(scope, prefix, facts)
+      case scope
+      when Hash then scope.each { |name, value| facts["#{prefix}#{name}"] = value.to_s }
+      when String then facts["#{prefix}all"] = scope
+      end
     end
 
     #: (String) -> Hash[String, String]
     def self.importmap_pins(text)
-      text.scan(/^\s*pin(?:_all_from)?\s+["']([^"']+)["'](?:,\s*to:\s*["']([^"']+)["'])?/).to_h { |name, to|
- [ name, to.to_s ] }
+      pins = text.scan(/^\s*pin(?:_all_from)?\s+["']([^"']+)["']([^\n]*)/)
+      pins.to_h { |name, options| [ name, importmap_target(options) ] }
+    end
+
+    #: (String) -> String
+    def self.importmap_target(options)
+      to = options[/\bto:\s*["']([^"']+)["']/, 1]
+      under = options[/\bunder:\s*["']([^"']+)["']/, 1]
+      [ to, ("under:#{under}" if under) ].compact.join(" ")
     end
 
     #: (String) -> Hash[String, String]
@@ -185,6 +199,6 @@ Regexp.last_match(2))
     end
 
     private_class_method :route_actions, :route_identity, :route_fact, :rbs_line, :qualified, :rbs_member,
-                         :member, :workflow_permissions, :flatten_locale
+                         :member, :workflow_permissions, :permission_facts, :importmap_target, :flatten_locale
   end
 end

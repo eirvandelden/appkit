@@ -115,8 +115,25 @@ class ParsersTest < ActiveSupport::TestCase
   def test_scalar_permissions_are_facts_at_workflow_and_job_scope
     text = "permissions: write-all\njobs:\n  j:\n    permissions: read-all\n    steps: []\n"
 
-    assert_equal "read-all", P.workflow_inputs(text)["permission:all"]
-    assert_equal "write-all", P.workflow_inputs("permissions: write-all\n")["permission:all"]
+    assert_equal "write-all", P.workflow_inputs(text)["permission:all"]
+    assert_equal "read-all", P.workflow_inputs(text)["permission:j:all"]
+  end
+
+  def test_job_permissions_are_facts_per_job
+    text = [ "jobs:", "  lint:", "    permissions:", "      contents: write", "    steps: []", "  test:",
+             "    permissions:", "      contents: read", "    steps: []", "" ].join("\n")
+    facts = P.workflow_inputs(text)
+
+    assert_equal "write", facts["permission:lint:contents"]
+    assert_equal "read", facts["permission:test:contents"]
+  end
+
+  def test_pin_all_from_namespace_is_part_of_the_pin
+    text = 'pin_all_from "app/javascript/appkit/controllers", under: "appkit/controllers"' + "\n"
+    renamed = 'pin_all_from "app/javascript/appkit/controllers", under: "new/controllers"' + "\n"
+
+    assert_equal({ "app/javascript/appkit/controllers" => "under:appkit/controllers" }, P.importmap_pins(text))
+    assert_not_equal P.importmap_pins(text), P.importmap_pins(renamed)
   end
 
   def test_workflow_input_types_are_facts
