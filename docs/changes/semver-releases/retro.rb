@@ -154,24 +154,25 @@ module Retro
     end
   end
 
-  # The version slot and the new position of every Upgrading step, by the number it had before the split.
+  # Every version slot and new position of an Upgrading step, by the number it had before the split, in
+  # version order. A later version may rewrite a numbered step, so a number can sit in several slots.
   #: (*untyped, **untyped) -> untyped
   def self.step_placement(sections)
-    sections.each_with_index.with_object({}) do |(parts, slot), placement|
+    sections.each_with_index.with_object(Hash.new { |hash, key| hash[key] = [] }) do |(parts, slot), placement|
       position = 0
       parts.fetch("Upgrading", []).each_with_index do |line, index|
         next unless line.match?(/\A\d+\.\s/) || index.zero?
 
         position += 1
         old = line[/\A(\d+)\./, 1]
-        placement[old] ||= [ slot, position ] if old
+        placement[old] << [ slot, position ] if old
       end
     end
   end
 
   #: (*untyped, **untyped) -> untyped
   def self.renumbered(old, slot, placement, versions)
-    target, position = placement[old]
+    target, position = placement[old].find { |candidate, _| candidate == slot } || placement[old].first
     return old unless target
 
     target == slot ? position.to_s : "#{position} of #{versions[target]}"
