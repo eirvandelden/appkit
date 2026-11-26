@@ -111,4 +111,14 @@ class RemoteTest < ActiveSupport::TestCase
     assert_not_includes @runner.releases["1.0.1"], "Release 1.0.1"
     assert_not_includes @fixture.read("CHANGELOG.md"), "- Release 1.0.1"
   end
+
+  def test_a_stale_checkout_never_moves_the_major_tag_backwards
+    merge_fragment("one", "minor")
+    cut
+    @fixture.git(@fixture.dir, "reset", "--hard", "1.0.0")
+    cut
+
+    assert_equal @fixture.git(@fixture.dir, "ls-remote", "origin", "refs/tags/1.1.0").split.first,
+                 @fixture.git(@fixture.dir, "ls-remote", "origin", "refs/tags/1").split.first
+  end
 end

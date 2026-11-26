@@ -36,6 +36,7 @@ module Semver
 
     #: () -> void
     def cut
+      @repository.refresh
       @repository.reconcile(@repository.merged_versions)
       ATTEMPTS.times do
         return if attempt
