@@ -37,6 +37,17 @@ module Semver
       git("log", "--format=%s", *range).split("\n")
     end
 
+    # The subjects since the version of the first-parent commits that added none of the given paths,
+    # so a merge that carried a fragment is not listed a second time.
+    #: (Version?, without: Array[String]) -> Array[String]
+    def subjects_without(version, without:)
+      range = version ? [ "refs/tags/#{version.tag}..HEAD" ] : []
+      out = git("-c", "core.quotepath=false", "log", "--first-parent", "-m", "--diff-filter=A", "--name-only",
+                "--format=%x1e%s", *range)
+      records = out.split("\x1e").drop(1).map { |record| record.lines.map(&:chomp).reject(&:empty?) }
+      records.reject { |subject, *added| (added & without).any? }.map(&:first)
+    end
+
     #: (Array[String]) -> Array[String]
     def in_merge_order(paths)
       position = git("rev-list", "--reverse", "HEAD").split("\n").each_with_index.to_h

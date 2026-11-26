@@ -112,6 +112,19 @@ class RemoteTest < ActiveSupport::TestCase
     assert_not_includes @fixture.read("CHANGELOG.md"), "- Release 1.0.1"
   end
 
+  def test_a_merge_without_fragment_stays_in_the_notes_of_a_mixed_batch
+    @fixture.write("lib/thing.rb", "x\n")
+    @fixture.commit("Fix the thing")
+    merge_fragment("shiny", "minor")
+    cut
+
+    assert_includes @runner.releases["1.1.0"], "- Fix the thing"
+    assert_includes @runner.releases["1.1.0"], "- A thing."
+    assert_not_includes @runner.releases["1.1.0"], "Merge shiny"
+    assert_not_includes @runner.releases["1.1.0"], "Add shiny"
+    assert_includes @fixture.read("CHANGELOG.md"), "- Fix the thing"
+  end
+
   def test_a_stale_checkout_never_moves_the_major_tag_backwards
     merge_fragment("one", "minor")
     cut

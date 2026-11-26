@@ -73,14 +73,13 @@ module Semver
     end
 
     def render_body
-      sections = Fragment::SECTIONS.filter_map { |name| section(name) }
-      sections = [ "### Changed\n#{subject_lines}" ] if sections.empty?
-      sections.join("\n\n")
+      Fragment::SECTIONS.filter_map { |name| section(name) }.join("\n\n")
     end
 
     def section(name)
       lines = name == "Upgrading" ? upgrading_lines : @fragments.flat_map { |fragment|
  fragment.sections.fetch(name, []) }
+      lines += subject_lines if name == "Changed"
       return if lines.empty?
 
       "### #{name}\n#{lines.join("\n")}"
@@ -120,8 +119,15 @@ module Semver
       end
     end
 
+    # Merges that carry no fragment, so a mixed batch loses none of them. With no fragment at all,
+    # that is every commit since the last release.
     def subject_lines
-      @repository.subjects_since(@last).map { |subject| "- #{subject}" }.join("\n")
+      subjects = if @fragments.empty?
+        @repository.subjects_since(@last)
+      else
+        @repository.subjects_without(@last, without: @fragments.map(&:path))
+      end
+      subjects.map { |subject| "- #{subject}" }
     end
 
     # Replans from the tip of main. Returns true when nothing is left to do.

@@ -240,6 +240,8 @@ module Semver
     def head_is?(version); end
     #: (Version) -> Array[String]
     def subjects_since(version); end
+    #: (Version?, without: Array[String]) -> Array[String]
+    def subjects_without(version, without:); end   # first-parent subjects since the version whose commit added none of the paths: a mixed batch lists the merges that carried no fragment
     #: (Array[String]) -> Array[String]
     def in_merge_order(paths); end     # orders fragment paths by the commit that added each
     #: (Array[Version]) -> void
@@ -383,7 +385,7 @@ Rule levels:
 ### Complexity
 
 - A PR check starts a constant number of git processes plus two `git show` per changed surface file: O(C) in the changed surface files. Unchanged files are never read.
-- A release run is O(T + F + C): one tag listing, F fragment reads, one log of C commits, one commit, one atomic push, one `<major>` push and one `gh release list` call, then one `gh release view` per tag the list lacks and one `gh release create` per tag that has no Release (normally zero or one). A rejected push repeats the run up to three times.
+- A release run is O(T + F + C): one tag listing, F fragment reads, one log of C commits (a second first-parent log when fragments exist), one commit, one atomic push, one `<major>` push and one `gh release list` call, then one `gh release view` per tag the list lacks and one `gh release create` per tag that has no Release (normally zero or one). A rejected push repeats the run up to three times.
 - The retro runs the check cost once per first-parent merge (24 merges).
 - No database queries.
 
