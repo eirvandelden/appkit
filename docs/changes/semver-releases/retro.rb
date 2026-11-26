@@ -101,25 +101,40 @@ module Retro
     levels.each_with_index.map { |level, index| index.zero? ? version : version = version.bump(Semver::Level.parse(level)) }
   end
 
-  # CHANGELOG.md text per unit, by blaming the baseline file: each final line goes to the unit that introduced it.
+  # CHANGELOG.md text per unit, as it stood then: the lines each merge added to the file, with the text they
+  # had in that merge. A later edit of a line belongs to the merge that made it, so an app that reads only
+  # the sections up to one version still finds the steps that version needed. Slot 0 is the baseline file.
   #: (*untyped, **untyped) -> untyped
-  def self.changelog_sections(ref, baseline_sha, units)
-    text = git("show", "#{ref}:CHANGELOG.md").lines
-    owners = blame(ref)
-    positions = chain(ref).each_with_index.to_h { |(sha, *), index| [ sha, index ] }
-    boundaries = [ positions.fetch(baseline_sha), *units.map(&:tip_index) ]
-    sections = Array.new(boundaries.size) { Hash.new { |hash, key| hash[key] = [] } }
+  def self.changelog_sections(_ref, baseline_sha, units)
+    shas = [ baseline_sha, *units.map(&:sha) ]
+    shas.each_with_index.map { |sha, index| added_changelog(index.zero? ? nil : shas[index - 1], sha) }
+  end
+
+  #: (*untyped, **untyped) -> untyped
+  def self.added_changelog(base, head)
+    lines = git("show", "#{head}:CHANGELOG.md", allow_failure: true).lines
+    added = added_indexes(base, head, lines.size)
+    section = Hash.new { |hash, key| hash[key] = [] }
     heading = nil
-    text.each_with_index do |line, index|
+    lines.each_with_index do |line, index|
       heading = line[/\A### (.+)/, 1] || heading
-      next if line.start_with?("#") || line.strip.empty? || heading.nil?
+      next if line.start_with?("#") || line.strip.empty? || heading.nil? || !added.include?(index)
 
-      slot = boundaries.index { |boundary| positions.fetch(owners.fetch(index)) <= boundary }
-      raise "line #{index + 1} of CHANGELOG.md is newer than the last merge" unless slot
-
-      sections[slot][heading] << line.chomp
+      section[heading] << line.chomp
     end
-    sections
+    section
+  end
+
+  # Zero-based line numbers of the head file that the base lacks. Without a base, every line.
+  #: (*untyped, **untyped) -> untyped
+  def self.added_indexes(base, head, size)
+    return (0...size).to_a unless base
+
+    diff = git("diff", "-U0", "--no-color", base, head, "--", "CHANGELOG.md")
+    diff.scan(/^@@ -\S+ \+(\d+)(?:,(\d+))? @@/).flat_map do |start, count|
+      first = start.to_i - 1
+      (first...(first + (count ? count.to_i : 1))).to_a
+    end
   end
 
   # The split numbers the Upgrading steps again within each version, so "step 8" in a step's text follows
@@ -160,15 +175,6 @@ module Retro
     return old unless target
 
     target == slot ? position.to_s : "#{position} of #{versions[target]}"
-  end
-
-  #: (*untyped, **untyped) -> untyped
-  def self.blame(ref)
-    owners = []
-    git("blame", "--first-parent", "--porcelain", ref, "--", "CHANGELOG.md").each_line do |line|
-      owners << line.split.first if line.match?(/\A\h{40} \d+ \d+/)
-    end
-    owners
   end
 
   #: (*untyped, **untyped) -> untyped
@@ -320,11 +326,13 @@ allow_failure: true) && git("diff", "--cached", "--name-only").strip.empty?
   end
 end
 
-ref = "origin/main"
-Retro.git("fetch", "origin", "main")
-case ARGV.first
-when "table" then Retro.table(ref)
-when "apply" then Retro.apply(ref, ARGV.include?("--execute"))
-when "verify" then Retro.verify(ref)
-else abort "usage: retro.rb table|apply|verify"
+if $PROGRAM_NAME == __FILE__
+  ref = "origin/main"
+  Retro.git("fetch", "origin", "main")
+  case ARGV.first
+  when "table" then Retro.table(ref)
+  when "apply" then Retro.apply(ref, ARGV.include?("--execute"))
+  when "verify" then Retro.verify(ref)
+  else abort "usage: retro.rb table|apply|verify"
+  end
 end
