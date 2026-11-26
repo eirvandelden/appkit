@@ -48,6 +48,22 @@ class RepositoryTest < ActiveSupport::TestCase
     assert_equal [ "Plain change" ], subjects
   end
 
+  def test_subjects_without_keeps_a_commit_that_only_modifies_a_file
+    @fixture.write("a.md", "x\n")
+    @fixture.commit("Add a")
+    @fixture.write("a.md", "y\n")
+    @fixture.commit("Fix a")
+    @fixture.branch("feature")
+    @fixture.write("changelog.d/feature.md", "x\n")
+    @fixture.commit("Add feature")
+    @fixture.checkout("main")
+    @fixture.merge("feature", "Merge feature")
+
+    subjects = @repository.subjects_without(Semver::Version.parse("1.0.0"), without: [ "changelog.d/feature.md" ])
+
+    assert_equal [ "Fix a", "Add a" ], subjects
+  end
+
   def test_publish_uses_the_staged_version
     @fixture.write("a.md", "x\n")
     @repository.stage(Semver::Version.parse("1.1.0"), paths: [ "a.md" ])

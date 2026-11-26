@@ -42,10 +42,9 @@ module Semver
     #: (Version?, without: Array[String]) -> Array[String]
     def subjects_without(version, without:)
       range = version ? [ "refs/tags/#{version.tag}..HEAD" ] : []
-      out = git("-c", "core.quotepath=false", "log", "--first-parent", "-m", "--diff-filter=A", "--name-only",
-                "--format=%x1e%s", *range)
+      out = git("-c", "core.quotepath=false", "log", "--first-parent", "-m", "--name-status", "--format=%x1e%s", *range)
       records = out.split("\x1e").drop(1).map { |record| record.lines.map(&:chomp).reject(&:empty?) }
-      records.reject { |subject, *added| (added & without).any? }.map(&:first)
+      records.reject { |_subject, *changes| (added_paths(changes) & without).any? }.map(&:first)
     end
 
     #: (Array[String]) -> Array[String]
@@ -102,6 +101,11 @@ module Semver
 
     def git(*args)
       @runner.call("git", *args)
+    end
+
+    # The paths of the `A\t<path>` lines of a `--name-status` listing.
+    def added_paths(changes)
+      changes.filter_map { |change| change.delete_prefix("A\t") if change.start_with?("A\t") }
     end
 
     def create_release(version, notes = changelog_notes(version))
