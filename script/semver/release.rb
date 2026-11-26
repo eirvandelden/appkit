@@ -79,21 +79,37 @@ module Semver
     end
 
     def section(name)
-      lines = @fragments.flat_map { |fragment| fragment.sections.fetch(name, []) }
+      lines = name == "Upgrading" ? upgrading_lines : @fragments.flat_map { |fragment|
+ fragment.sections.fetch(name, []) }
       return if lines.empty?
 
-      lines = number(lines) if name == "Upgrading"
       "### #{name}\n#{lines.join("\n")}"
     end
 
-    def number(lines)
+    # One continuous list across fragments, in the order they were added. A step reference in a
+    # fragment follows its step to the new number.
+    def upgrading_lines
+      offset = 0
+      @fragments.flat_map do |fragment|
+        steps = steps_of(fragment.sections.fetch("Upgrading", []))
+        numbers = steps.each_with_index.to_h { |step, index| [ step.first[/\A\d+/], (offset + index + 1).to_s ] }
+        offset += steps.size
+        renumber(steps, numbers, offset - steps.size)
+      end
+    end
+
+    def steps_of(lines)
       fenced = false
-      steps = lines.slice_before do |line|
+      lines.slice_before do |line|
         fenced = !fenced if line.lstrip.start_with?("```")
         !fenced && line.match?(/\A\d+\.\s/)
       end.to_a
+    end
+
+    def renumber(steps, numbers, offset)
       steps.each_with_index.flat_map do |step, index|
-        [ "#{index + 1}. #{step.first.sub(/\A\d+\.\s*/, '')}", *step.drop(1) ]
+        text = step.map { |line| line.gsub(/\b(steps? )(\d+)\b/i) { "#{$1}#{numbers.fetch($2, $2)}" } }
+        [ "#{offset + index + 1}. #{text.first.sub(/\A\d+\.\s*/, '')}", *text.drop(1) ]
       end
     end
 
