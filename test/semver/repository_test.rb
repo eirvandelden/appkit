@@ -65,6 +65,21 @@ class RepositoryTest < ActiveSupport::TestCase
     assert_equal [ "changelog.d/later.md", "changelog.d/early.md" ], ordered
   end
 
+  def test_in_merge_order_uses_the_current_addition_of_a_reused_fragment_name
+    @fixture.write("changelog.d/repeat.md", "old\n")
+    @fixture.commit("Add repeat")
+    @fixture.remove("changelog.d/repeat.md")
+    @fixture.commit("Release consumes repeat")
+    @fixture.write("changelog.d/first.md", "x\n")
+    @fixture.commit("Add first")
+    @fixture.write("changelog.d/repeat.md", "new\n")
+    @fixture.commit("Add repeat again")
+
+    ordered = @repository.in_merge_order([ "changelog.d/repeat.md", "changelog.d/first.md" ])
+
+    assert_equal [ "changelog.d/first.md", "changelog.d/repeat.md" ], ordered
+  end
+
   def test_subjects_without_keeps_a_commit_that_only_modifies_a_file
     @fixture.write("a.md", "x\n")
     @fixture.commit("Add a")
