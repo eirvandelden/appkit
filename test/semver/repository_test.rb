@@ -48,6 +48,23 @@ class RepositoryTest < ActiveSupport::TestCase
     assert_equal [ "Plain change" ], subjects
   end
 
+  def test_in_merge_order_follows_the_merge_into_main_not_the_branch_commit
+    @fixture.branch("early")
+    @fixture.write("changelog.d/early.md", "x\n")
+    commit_on("2020-01-01T00:00:00Z", "Add early")
+    @fixture.checkout("main")
+    @fixture.branch("later")
+    @fixture.write("changelog.d/later.md", "x\n")
+    commit_on("2020-01-02T00:00:00Z", "Add later")
+    @fixture.checkout("main")
+    @fixture.merge("later")
+    @fixture.merge("early")
+
+    ordered = @repository.in_merge_order([ "changelog.d/early.md", "changelog.d/later.md" ])
+
+    assert_equal [ "changelog.d/later.md", "changelog.d/early.md" ], ordered
+  end
+
   def test_subjects_without_keeps_a_commit_that_only_modifies_a_file
     @fixture.write("a.md", "x\n")
     @fixture.commit("Add a")
@@ -165,5 +182,14 @@ class RepositoryTest < ActiveSupport::TestCase
     @runner.fail_gh("view", "network down")
 
     assert_raises(Semver::Repository::CommandFailed) { @repository.ensure_release(Semver::Version.parse("1.0.0"), "n") }
+  end
+
+  private
+
+  def commit_on(date, message)
+    ENV["GIT_COMMITTER_DATE"] = date
+    @fixture.commit(message)
+  ensure
+    ENV.delete("GIT_COMMITTER_DATE")
   end
 end

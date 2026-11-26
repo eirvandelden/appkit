@@ -253,7 +253,7 @@ module Semver
     #: (Version?, without: Array[String]) -> Array[String]
     def subjects_without(version, without:); end   # first-parent subjects since the version whose commit added none of the paths: a mixed batch lists the merges that carried no fragment
     #: (Array[String]) -> Array[String]
-    def in_merge_order(paths); end     # orders fragment paths by the commit that added each
+    def in_merge_order(paths); end     # orders fragment paths by the first-parent commit of main that introduced each
     #: (Array[Version]) -> void
     def reconcile(versions); end       # ensure every merged tag has a GitHub Release and the newest of each major has its <major> tag
     #: (Version, paths: Array[String]) -> void
