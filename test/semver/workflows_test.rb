@@ -31,4 +31,11 @@ class WorkflowsTest < ActiveSupport::TestCase
     assert check[true].key?("pull_request")
     assert_equal "read", check["permissions"]["contents"]
   end
+
+  def test_check_workflow_pins_third_party_actions_like_the_release_workflow
+    steps = workflow("changelog-check").dig("jobs", "check", "steps")
+    third_party = steps.map { |step| step["uses"] }.compact.reject { |use| use.start_with?("actions/") }
+
+    assert_empty third_party.grep_v(/@\h{40}\z/)
+  end
 end

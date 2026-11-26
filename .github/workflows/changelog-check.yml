@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Ruby
-        uses: spinel-coop/setup-rv@main
+        uses: spinel-coop/setup-rv@789f43073788bc826ed91610498297012e8e6438
         with:
           ruby-version: current
 
