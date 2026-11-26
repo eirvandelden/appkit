@@ -42,14 +42,20 @@ module Semver
       raise ArgumentError, "#{file} is nested: a fragment is a top-level file, #{dir}/<slug>.md"
     end
 
+    # A line that opens or closes a fenced code block, written with backticks or tildes.
+    #: (String) -> bool
+    def self.fence?(line)
+      line.lstrip.start_with?("```", "~~~")
+    end
+
     #: (String) -> Hash[String, Array[String]]
     def self.parse_sections(body)
       sections = {} #: Hash[String, Array[String]]
       current = nil
       fenced = false
       body.each_line(chomp: true) do |line|
-        fenced = !fenced if line.lstrip.start_with?("```")
-        if fenced || line.lstrip.start_with?("```")
+        fenced = !fenced if fence?(line)
+        if fenced || fence?(line)
           raise ArgumentError, "text before the first section: #{line.inspect}" unless current
 
           current << line

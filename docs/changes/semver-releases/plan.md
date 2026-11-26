@@ -220,6 +220,8 @@ module Semver
     def self.pending(dir); end         # unordered; Release orders them by the commit that added each file; a nested file raises
     #: (String, String) -> void
     def self.refuse_nested!(file, dir); end # a fragment is a top-level file of the directory
+    #: (String) -> bool
+    def self.fence?(line); end         # a line that opens or closes a ``` or ~~~ code fence; every fence-aware reader uses it
     #: () -> Level
     def level; end
     #: () -> Hash[String, String]

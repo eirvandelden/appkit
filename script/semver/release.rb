@@ -100,7 +100,7 @@ module Semver
     def steps_of(lines)
       fenced = false
       lines.slice_before do |line|
-        fenced = !fenced if line.lstrip.start_with?("```")
+        fenced = !fenced if Fragment.fence?(line)
         !fenced && line.match?(/\A\d+\.\s/)
       end.to_a
     end

@@ -75,6 +75,13 @@ class FragmentTest < ActiveSupport::TestCase
     assert_includes fragment.sections["Upgrading"], "# config/initializers/appkit.rb"
   end
 
+  def test_headings_inside_a_tilde_fence_are_text
+    body = "### Upgrading\n1. Add this:\n~~~ruby\n### Added\n~~~\n"
+    fragment = Semver::Fragment.parse("---\nlevel: major\n---\n#{body}")
+
+    assert_equal [ "Upgrading" ], fragment.sections.keys
+  end
+
   def test_a_code_fence_left_open_is_refused
     text = "---\nlevel: patch\n---\n### Fixed\n- x\n```ruby\nfoo\n### Upgrading\n1. Run y\n"
 

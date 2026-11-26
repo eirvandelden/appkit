@@ -121,7 +121,7 @@ module Semver
       start = lines.index { |line| line.match?(/\A## #{Regexp.escape(version.to_s)}\b/) } or return []
       fenced = false
       lines.drop(start + 1).take_while do |line|
-        fenced = !fenced if line.lstrip.start_with?("```")
+        fenced = !fenced if Fragment.fence?(line)
         fenced || !line.start_with?("## ")
       end
     end
