@@ -5,6 +5,8 @@ module Semver
 
     CONFIG_ADDED = ->(_key, value) { value == "has_default" ? Level::MINOR : Level::MAJOR } #: Proc
     WORKFLOW_ADDED = lambda do |key, value|
+      return Level::MINOR if key.start_with?("inputtype:")
+
       key.start_with?("input:") && value == "optional" ? Level::MINOR : Level::MAJOR
     end #: Proc
 

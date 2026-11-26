@@ -34,6 +34,37 @@ class SurfaceChangeTest < ActiveSupport::TestCase
     assert_equal Semver::Level::MAJOR, change.findings.floor
   end
 
+  def test_removing_a_resource_action_floor_is_major
+    @fixture.write("config/routes.rb",
+"Rails.application.routes.draw do\n  resource :session, only: %i[new create destroy]\nend\n")
+    @fixture.commit("Base routes")
+    @fixture.checkout("main")
+    @fixture.merge("work")
+    @fixture.branch("work2")
+    @fixture.write("config/routes.rb",
+"Rails.application.routes.draw do\n  resource :session, only: %i[new create]\nend\n")
+    @fixture.commit("Drop destroy")
+
+    assert_equal Semver::Level::MAJOR,
+Semver::SurfaceChange.between(base: "main", head: "work2", dir: @fixture.dir).findings.floor
+  end
+
+  def test_changing_a_workflow_input_type_floor_is_major
+    path = ".github/workflows/rails-ci.yml"
+    spec = ->(type) {
+ "on:\n  workflow_call:\n    inputs:\n      flag:\n        type: #{type}\n        default: true\n" }
+    @fixture.write(path, spec.call("boolean"))
+    @fixture.commit("Workflow")
+    @fixture.checkout("main")
+    @fixture.merge("work")
+    @fixture.branch("work2")
+    @fixture.write(path, spec.call("string"))
+    @fixture.commit("Change type")
+
+    assert_equal Semver::Level::MAJOR,
+Semver::SurfaceChange.between(base: "main", head: "work2", dir: @fixture.dir).findings.floor
+  end
+
   def test_added_route_floor_is_minor
     @fixture.write("config/routes.rb",
 "Rails.application.routes.draw do\n  resource :session\n  resource :other\nend\n")

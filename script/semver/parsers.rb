@@ -3,6 +3,10 @@ module Semver
   module Parsers
     ROUTE_VERBS = %w[get post patch put delete].freeze #: Array[String]
     ROUTE_RESOURCE = /\A(resources?)\s+(:\w+)(.*?)(\s+do(\s*\|.*\|)?)?\z/ #: Regexp
+    RESOURCE_ACTIONS = {
+      "resource" => %w[show new create edit update destroy],
+      "resources" => %w[index show new create edit update destroy]
+    }.freeze #: Hash[String, Array[String]]
     ROUTE_VERB = /\A(#{ROUTE_VERBS.join('|')})\s+["']([^"']+)["']\s*(.*?)(\s+do)?\z/ #: Regexp
 
     #: (String) -> Hash[String, String]
@@ -22,11 +26,24 @@ module Semver
         next stack.pop if line == "end"
 
         key, detail, opens = route_fact(line)
-        facts[[ *stack.compact, key ].join(" > ")] = detail
+        path = [ *stack.compact, key ].join(" > ")
+        facts[path] = detail
+        route_actions(key, detail).each { |action| facts["#{path}##{action}"] = "" }
         stack << key if opens
         stack << nil if opens.nil? && key.start_with?("unparsed:") && line.match?(/\bdo\b/)
       end
       facts
+    end
+
+    # The actions a resource exposes, from its only: and except: options.
+    #: (String, String) -> Array[String]
+    def self.route_actions(key, detail)
+      kind = key[/\Aresources?\b/] or return []
+      listed = ->(option) { detail[/#{option}:\s*(%i\[[^\]]*\]|\[[^\]]*\]|:\w+)/, 1].to_s.scan(/\w+/) - [ "i" ] }
+      only = listed.call("only")
+      return only unless only.empty?
+
+      RESOURCE_ACTIONS.fetch(kind) - listed.call("except")
     end
 
     #: (String) -> Array[untyped]
@@ -96,7 +113,10 @@ module Semver
       trigger = document["on"] || document[true] || {}
       call = trigger.is_a?(Hash) ? trigger["workflow_call"] || {} : {}
       facts = {} #: Hash[String, String]
-      (call["inputs"] || {}).each { |name, spec| facts["input:#{name}"] = spec["required"] ? "required" : "optional" }
+      (call["inputs"] || {}).each do |name, spec|
+        facts["input:#{name}"] = spec["required"] ? "required" : "optional"
+        facts["inputtype:#{name}"] = spec["type"].to_s
+      end
       (call["secrets"] || {}).each { |name, spec|
  facts["secret:#{name}"] = (spec || {})["required"] ? "required" : "optional" }
       workflow_permissions(document, facts)

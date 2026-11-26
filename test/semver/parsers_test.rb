@@ -12,9 +12,19 @@ class ParsersTest < ActiveSupport::TestCase
   def test_routes_nest_resources_and_read_verbs
     text = [ "Rails.application.routes.draw do", "  resource :session, only: :new do",
              "    resources :transfers", "  end", "  get \"manifest\" => \"pwa#m\"", "end", "" ].join("\n")
-    facts = P.routes(text)
+    keys = P.routes(text).keys.reject { |key| key.include?("#") }
 
-    assert_equal [ "resource :session", "resource :session > resources :transfers", "GET /manifest" ], facts.keys
+    assert_equal [ "resource :session", "resource :session > resources :transfers", "GET /manifest" ], keys
+  end
+
+  def test_routes_list_the_actions_a_resource_exposes
+    only = P.routes("resource :session, only: %i[new create destroy]\n").keys
+    default = P.routes("resources :things, except: :destroy\n").keys
+
+    assert_includes only, "resource :session#destroy"
+    assert_not_includes only, "resource :session#show"
+    assert_includes default, "resources :things#index"
+    assert_not_includes default, "resources :things#destroy"
   end
 
   def test_unknown_routes_dsl_is_unparsed_fact
@@ -57,6 +67,12 @@ class ParsersTest < ActiveSupport::TestCase
     assert_equal "required", facts["secret:s"]
     assert_equal "read", facts["permission:contents"]
     assert_includes facts.keys, "bin:bin/rails"
+  end
+
+  def test_workflow_input_types_are_facts
+    text = "on:\n  workflow_call:\n    inputs:\n      a:\n        type: boolean\n        default: true\n"
+
+    assert_equal "boolean", P.workflow_inputs(text)["inputtype:a"]
   end
 
   def test_importmap_pins
