@@ -55,8 +55,8 @@ module Semver
     private
 
     def ordered(fragments)
-      by_path = fragments.index_by { |fragment| fragment.path }
-      @repository.in_merge_order(by_path.keys).map { |path| by_path.fetch(path) }
+      order = @repository.in_merge_order(fragments.map(&:path))
+      fragments.sort_by { |fragment| order.index(fragment.path) }
     end
 
     def level

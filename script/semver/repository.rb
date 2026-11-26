@@ -43,7 +43,9 @@ module Semver
 
     #: (Array[Version]) -> void
     def reconcile(versions)
-      versions.each { |version| ensure_release(version, changelog_notes(version)) }
+      existing = @runner.call("gh", "release", "list", "--limit", "1000", "--json", "tagName", "--jq",
+                              ".[].tagName").split
+      versions.reject { |version| existing.include?(version.tag) }.each { |version| create_release(version) }
       versions.group_by(&:major).each_value { |group| move_major_tag(group.max) }
     end
 
@@ -78,13 +80,17 @@ module Semver
     rescue CommandFailed => error
       raise unless error.message.match?(/not found/i)
 
-      @runner.call("gh", "release", "create", version.tag, "--title", version.tag, "--notes", notes, "--verify-tag")
+      create_release(version, notes)
     end
 
     private
 
     def git(*args)
       @runner.call("git", *args)
+    end
+
+    def create_release(version, notes = changelog_notes(version))
+      @runner.call("gh", "release", "create", version.tag, "--title", version.tag, "--notes", notes, "--verify-tag")
     end
 
     def changelog_notes(version)

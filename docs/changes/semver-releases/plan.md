@@ -363,7 +363,7 @@ Rule levels:
 ### Complexity
 
 - A PR check starts a constant number of git processes plus two `git show` per changed surface file: O(C) in the changed surface files. Unchanged files are never read.
-- A release run is O(T + F + C): one tag listing, F fragment reads, one log of C commits, one commit, one atomic push, one `<major>` push and one `gh` call per merged tag that lacks a Release (normally zero or one). A rejected push repeats the run up to three times.
+- A release run is O(T + F + C): one tag listing, F fragment reads, one log of C commits, one commit, one atomic push, one `<major>` push and one `gh release list` call and one `gh release create` per merged tag that lacks a Release (normally zero or one). A rejected push repeats the run up to three times.
 - The retro runs the check cost once per first-parent merge (24 merges).
 - No database queries.
 

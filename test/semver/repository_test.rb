@@ -62,6 +62,23 @@ class RepositoryTest < ActiveSupport::TestCase
     assert_equal [ "Remote commit" ], @repository.subjects_since(Semver::Version.parse("1.0.0"))
   end
 
+  def test_reconcile_lists_releases_once_whatever_the_number_of_tags
+    %w[1.0.1 1.0.2 1.0.3].each { |tag| @fixture.tag(tag) }
+    @repository.reconcile(@repository.merged_versions)
+
+    assert_equal 1, @runner.calls.count { |call| call[1..2] == %w[release list] }
+    assert_equal 4, @runner.calls.count { |call| call[1..2] == %w[release create] }
+    assert_equal 0, @runner.calls.count { |call| call[1..2] == %w[release view] }
+  end
+
+  def test_reconcile_creates_only_the_missing_releases
+    @repository.ensure_release(Semver::Version.parse("1.0.0"), "notes")
+    @fixture.tag("1.0.1")
+    @repository.reconcile(@repository.merged_versions)
+
+    assert_equal [ "1.0.0", "1.0.1" ], @runner.releases.keys.sort
+  end
+
   def test_ensure_release_creates_only_when_missing
     version = Semver::Version.parse("1.0.0")
     @repository.ensure_release(version, "notes")

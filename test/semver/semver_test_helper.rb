@@ -151,6 +151,8 @@ class FakeRunner
     when %w[release view]
       raise Semver::Repository::CommandFailed, "release not found" unless @releases.key?(tag)
       @releases[tag]
+    when %w[release list]
+      @releases.keys.join("\n")
     when %w[release create]
       @releases[tag] = cmd[(cmd.index("--notes") || 0) + 1].to_s
     else raise "unexpected gh call: #{cmd.inspect}"
