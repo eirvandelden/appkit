@@ -168,14 +168,18 @@ Regexp.last_match(2))
     #: (String) -> Hash[String, String]
     def self.importmap_pins(text)
       pins = text.scan(/^\s*pin(?:_all_from)?\s+["']([^"']+)["']([^\n]*)/)
-      pins.to_h { |name, options| [ name, importmap_target(options) ] }
+      pins.to_h { |name, options| [ importmap_key(name, options), importmap_target(options) ] }
+    end
+
+    #: (String, String) -> String
+    def self.importmap_key(name, options)
+      under = options[/\bunder:\s*["']([^"']+)["']/, 1]
+      [ name, ("under:#{under}" if under) ].compact.join(" ")
     end
 
     #: (String) -> String
     def self.importmap_target(options)
-      to = options[/\bto:\s*["']([^"']+)["']/, 1]
-      under = options[/\bunder:\s*["']([^"']+)["']/, 1]
-      [ to, ("under:#{under}" if under) ].compact.join(" ")
+      options[/\bto:\s*["']([^"']+)["']/, 1].to_s
     end
 
     #: (String) -> Hash[String, String]

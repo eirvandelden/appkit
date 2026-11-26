@@ -132,8 +132,8 @@ class ParsersTest < ActiveSupport::TestCase
     text = 'pin_all_from "app/javascript/appkit/controllers", under: "appkit/controllers"' + "\n"
     renamed = 'pin_all_from "app/javascript/appkit/controllers", under: "new/controllers"' + "\n"
 
-    assert_equal({ "app/javascript/appkit/controllers" => "under:appkit/controllers" }, P.importmap_pins(text))
-    assert_not_equal P.importmap_pins(text), P.importmap_pins(renamed)
+    assert_equal [ "app/javascript/appkit/controllers under:appkit/controllers" ], P.importmap_pins(text).keys
+    assert_empty P.importmap_pins(text).keys & P.importmap_pins(renamed).keys
   end
 
   def test_workflow_input_types_are_facts
