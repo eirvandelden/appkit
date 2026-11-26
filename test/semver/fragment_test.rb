@@ -59,6 +59,14 @@ class FragmentTest < ActiveSupport::TestCase
     end
   end
 
+  def test_pending_reads_a_dot_prefixed_fragment
+    Dir.mktmpdir do |dir|
+      File.write(File.join(dir, ".breaking.md"), fragment_text("major"))
+
+      assert_equal 1, Semver::Fragment.pending(dir).size
+    end
+  end
+
   def test_headings_inside_a_code_fence_are_text
     body = "### Upgrading\n1. Add this:\n```ruby\n# config/initializers/appkit.rb\n### Added\n```\n"
     fragment = Semver::Fragment.parse("---\nlevel: major\n---\n#{body}")

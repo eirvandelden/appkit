@@ -29,7 +29,7 @@ module Semver
 
     #: (String) -> Array[Fragment]
     def self.pending(dir)
-      files = Dir.glob(File.join(dir, "**", "*.md")).reject { |file| file == File.join(dir, "README.md") }
+      files = Dir.glob(File.join(dir, "**", "*.md"), File::FNM_DOTMATCH).reject { |file| file == File.join(dir, "README.md") }
       files.each { |file| refuse_nested!(file, dir) }
       files.map { |file| validate!(File.read(file), path: file) }
     end
