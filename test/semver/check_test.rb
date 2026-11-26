@@ -100,6 +100,18 @@ class CheckTest < ActiveSupport::TestCase
     assert_empty check.fragment_problems
   end
 
+  def test_upgrading_added_to_a_pending_minor_fragment_is_a_problem
+    @fixture.checkout("main")
+    @fixture.write("changelog.d/old.md", fragment_text("minor"))
+    @fixture.commit("Pending minor on main")
+    @fixture.checkout("work")
+    @fixture.git(@fixture.dir, "merge", "-q", "main")
+    @fixture.write("changelog.d/old.md", fragment_text("minor", "### Upgrading\n1. Run x\n"))
+    @fixture.commit("Add upgrading steps")
+
+    assert_match(%r{changelog\.d/old\.md.*Upgrading.*major}, check.fragment_problems.join)
+  end
+
   def test_no_problem_without_touching_pending_fragments
     breaking_pr("major")
 

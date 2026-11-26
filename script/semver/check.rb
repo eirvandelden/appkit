@@ -40,7 +40,7 @@ module Semver
       @surface.edited(DIR).filter_map do |path, before, after|
         next unless fragment_path?(path)
 
-        problem(path, Fragment.parse(before).level, after && Fragment.parse(after).level)
+        invalid(path, after) || problem(path, Fragment.parse(before).level, after && Fragment.parse(after).level)
       end
     end
 
@@ -57,6 +57,16 @@ module Semver
 
     def snapshot
       Snapshot.at(@head, dir: @dir)
+    end
+
+    # An edited fragment must stay valid, or the release run rejects it and nothing is published.
+    def invalid(path, text)
+      return unless text
+
+      Fragment.validate!(text, known_rules: Rule::ALL.map(&:id), path: path)
+      nil
+    rescue ArgumentError => error
+      "#{path}: #{error.message}"
     end
 
     def problem(path, was, now)
