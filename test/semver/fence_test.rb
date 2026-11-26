@@ -23,6 +23,21 @@ class FenceTest < ActiveSupport::TestCase
     assert_not_predicate fence, :open?
   end
 
+  def test_a_line_indented_four_spaces_does_not_open_a_fence
+    assert_not Semver::Fence.new.code?("    ```ruby")
+  end
+
+  def test_a_closing_fence_indented_four_spaces_does_not_close
+    fence = Semver::Fence.new
+    [ "```", "    ```" ].each { |line| fence.code?(line) }
+
+    assert_predicate fence, :open?
+  end
+
+  def test_a_fence_indented_three_spaces_still_opens
+    assert Semver::Fence.new.code?("   ```")
+  end
+
   def test_a_shorter_fence_does_not_close_a_longer_one
     fence = Semver::Fence.new
     [ "````", "```" ].each { |line| fence.code?(line) }

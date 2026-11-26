@@ -212,7 +212,7 @@ module Semver
     def major; end
   end
 
-  # Follows fenced code blocks one line at a time: a fence closes only on the same character, at least as long.
+  # Follows fenced code blocks one line at a time: a fence is indented at most three spaces and closes only on the same character, at least as long.
   class Fence
     #: () -> void
     def initialize; end

@@ -1,10 +1,11 @@
 module Semver
   # Follows the fenced code blocks of a Markdown text, one line at a time. A fence opens with three
   # or more backticks or tildes. Only a fence of the same character, at least as long and with no text
-  # after it, closes it: a backtick example inside a tilde block stays text.
+  # after it, closes it: a backtick example inside a tilde block stays text. A fence is indented by at most
+  # three spaces: four or more make an indented code block, which holds no fence.
   class Fence
-    OPENING = /\A\s*(?:(`{3,})[^`]*|(~{3,}).*)\z/
-    CLOSING = /\A\s*(`+|~+)\s*\z/
+    OPENING = /\A {0,3}(?:(`{3,})[^`]*|(~{3,}).*)\z/
+    CLOSING = /\A {0,3}(`+|~+)\s*\z/
 
     #: () -> void
     def initialize
