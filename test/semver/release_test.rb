@@ -98,6 +98,15 @@ class ReleaseTest < ActiveSupport::TestCase
     assert_includes @fixture.read("CHANGELOG.md"), "2. Add the key.\n3. Use the value from step 2."
   end
 
+  def test_every_number_in_a_plural_step_reference_follows_the_renumbering
+    merge_fragment("first", "major", "### Upgrading\n1. Run first.\n")
+    merge_fragment("second", "major",
+                   "### Upgrading\n1. A.\n2. B.\n3. C.\n4. Compare steps 1 and 2, steps 1, 2 and 3, steps 1-3.\n")
+    cut
+
+    assert_includes @fixture.read("CHANGELOG.md"), "5. Compare steps 2 and 3, steps 2, 3 and 4, steps 2-4."
+  end
+
   def test_not_due_when_head_is_the_last_release
     assert_not_predicate release, :due?
   end

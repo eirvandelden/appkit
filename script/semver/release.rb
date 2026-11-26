@@ -108,8 +108,15 @@ module Semver
 
     def renumber(steps, numbers, offset)
       steps.each_with_index.flat_map do |step, index|
-        text = step.map { |line| line.gsub(/\b(steps? )(\d+)\b/i) { "#{$1}#{numbers.fetch($2, $2)}" } }
+        text = step.map { |line| remap_references(line, numbers) }
         [ "#{offset + index + 1}. #{text.first.sub(/\A\d+\.\s*/, '')}", *text.drop(1) ]
+      end
+    end
+
+    # Every number in `step 1`, `steps 1 and 2`, `steps 1, 2 and 3` or `steps 1-3` follows its step.
+    def remap_references(line, numbers)
+      line.gsub(/\b(steps? )(\d+(?:(?:,| and|-|–) ?\d+)*)/i) do
+        "#{Regexp.last_match(1)}#{Regexp.last_match(2).gsub(/\d+/) { |old| numbers.fetch(old, old) }}"
       end
     end
 
