@@ -122,6 +122,46 @@ module Retro
     sections
   end
 
+  # The split numbers the Upgrading steps again within each version, so "step 8" in a step's text follows
+  # the step it names: the new number inside the same version, or "step 2 of 6.0.0" when it moved to another.
+  #: (*untyped, **untyped) -> untyped
+  def self.remap_step_references(sections, versions)
+    placement = step_placement(sections)
+    sections.each_with_index do |parts, slot|
+      next unless parts.key?("Upgrading")
+
+      parts["Upgrading"] = parts["Upgrading"].map do |line|
+        line.gsub(/\b(steps?) (\d+(?:(?:,| and|–|-) ?\d+)*)/) do
+          "#{Regexp.last_match(1)} #{Regexp.last_match(2).gsub(/\d+/) { |old|
+ renumbered(old, slot, placement, versions) }}"
+        end
+      end
+    end
+  end
+
+  # The version slot and the new position of every Upgrading step, by the number it had before the split.
+  #: (*untyped, **untyped) -> untyped
+  def self.step_placement(sections)
+    sections.each_with_index.with_object({}) do |(parts, slot), placement|
+      position = 0
+      parts.fetch("Upgrading", []).each_with_index do |line, index|
+        next unless line.match?(/\A\d+\.\s/) || index.zero?
+
+        position += 1
+        old = line[/\A(\d+)\./, 1]
+        placement[old] ||= [ slot, position ] if old
+      end
+    end
+  end
+
+  #: (*untyped, **untyped) -> untyped
+  def self.renumbered(old, slot, placement, versions)
+    target, position = placement[old]
+    return old unless target
+
+    target == slot ? position.to_s : "#{position} of #{versions[target]}"
+  end
+
   #: (*untyped, **untyped) -> untyped
   def self.blame(ref)
     owners = []
@@ -158,6 +198,7 @@ module Retro
 
     versions = versions(rows.map { |row| row[9] })
     sections = changelog_sections(ref, baseline_sha, units)
+    remap_step_references(sections, versions)
     entries = [ [ baseline_sha, git("show", "-s", "--format=%cs", baseline_sha).strip, "Baseline" ] ] +
               units.map { |unit| [ unit.sha, unit.date, unit.title ] }
     entries.each_with_index.map do |(sha, date, title), index|
