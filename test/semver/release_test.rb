@@ -116,6 +116,18 @@ class ReleaseTest < ActiveSupport::TestCase
     assert_includes @fixture.read("CHANGELOG.md"), "3. Redo step 1 of 3.0.0, and steps 1 and 2 of 2.1.0, then step 2."
   end
 
+  def test_step_text_inside_a_code_fence_or_code_span_is_not_remapped
+    merge_fragment("first", "major", "### Upgrading\n1. Run first.\n")
+    merge_fragment("second", "major",
+                   "### Upgrading\n1. Run second, see step 1 and `step 1`.\n```ruby\nrule = /step 1/\n```\n")
+    cut
+
+    changelog = @fixture.read("CHANGELOG.md")
+
+    assert_includes changelog, "2. Run second, see step 2 and `step 1`."
+    assert_includes changelog, "rule = /step 1/"
+  end
+
   def test_numbered_lines_inside_a_backtick_example_in_a_tilde_fence_are_not_steps
     merge_fragment("nested", "major",
                    "### Upgrading\n1. Run it:\n~~~markdown\n```ruby\n7. not a step\n```\n~~~\n")

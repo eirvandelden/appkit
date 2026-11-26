@@ -104,9 +104,15 @@ module Semver
 
     def renumber(steps, numbers, offset)
       steps.each_with_index.flat_map do |step, index|
-        text = step.map { |line| remap_references(line, numbers) }
+        fence = Fence.new
+        text = step.map { |line| fence.code?(line) ? line : remap_prose(line, numbers) }
         [ "#{offset + index + 1}. #{text.first.sub(/\A\d+\.\s*/, '')}", *text.drop(1) ]
       end
+    end
+
+    # Prose only: a code span stays as written, like a fenced block.
+    def remap_prose(line, numbers)
+      line.split(/(`[^`]*`)/).map { |part| part.start_with?("`") ? part : remap_references(part, numbers) }.join
     end
 
     # Every number in `step 1`, `steps 1 and 2`, `steps 1, 2 and 3` or `steps 1-3` follows its step.
