@@ -119,12 +119,12 @@ module Semver
       section.empty? ? "Release #{version}" : section
     end
 
-    # The lines under `## <version>`, up to the next `## ` heading that is not inside a code fence.
+    # The lines under `## <version>`, up to the next `## ` heading. Neither heading counts inside a code fence.
     def changelog_section(version)
-      lines = File.readlines("CHANGELOG.md")
-      start = lines.index { |line| line.match?(/\A## #{Regexp.escape(version.to_s)}\b/) } or return []
       fence = Fence.new
-      lines.drop(start + 1).take_while { |line| fence.code?(line) || !line.start_with?("## ") }
+      heading = /\A## #{Regexp.escape(version.to_s)}\b/
+      lines = File.readlines("CHANGELOG.md").drop_while { |line| fence.code?(line) || !line.match?(heading) }
+      lines.drop(1).take_while { |line| fence.code?(line) || !line.start_with?("## ") }
     end
 
     def move_major_tag(newest)

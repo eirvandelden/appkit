@@ -137,6 +137,14 @@ class RepositoryTest < ActiveSupport::TestCase
     assert_equal notes.strip, @runner.releases["1.0.0"]
   end
 
+  def test_reconcile_finds_the_heading_outside_a_fenced_example_in_newer_notes
+    newer = "## 2.0.0 - 2026-02-01\n\n### Upgrading\n1. Add:\n```markdown\n## 1.0.0 - example\nfake\n```\n\n"
+    @fixture.write("CHANGELOG.md", "# Changelog\n\n#{newer}## 1.0.0 - 2026-01-01\n\n- Real.\n")
+    Dir.chdir(@fixture.dir) { @repository.reconcile(@repository.merged_versions) }
+
+    assert_equal "- Real.", @runner.releases["1.0.0"]
+  end
+
   def test_reconcile_creates_only_the_missing_releases
     @repository.ensure_release(Semver::Version.parse("1.0.0"), "notes")
     @fixture.tag("1.0.1")
