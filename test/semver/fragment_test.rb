@@ -20,6 +20,14 @@ class FragmentTest < ActiveSupport::TestCase
     assert_raises(ArgumentError) { Semver::Fragment.parse(fragment_text("minor", "### Removed\n- x\n")) }
   end
 
+  def test_parse_refuses_an_h2_heading
+    assert_raises(ArgumentError) { Semver::Fragment.parse(fragment_text("patch", "## Upgrading\n1. Run x\n")) }
+  end
+
+  def test_parse_refuses_text_before_the_first_section
+    assert_raises(ArgumentError) { Semver::Fragment.parse(fragment_text("patch", "Loose text.\n### Added\n- x\n")) }
+  end
+
   def test_blank_override_reason_raises
     text = "---\nlevel: major\noverrides:\n  config: \"  \"\n---\n### Added\n- x\n"
 

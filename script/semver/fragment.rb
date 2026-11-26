@@ -43,7 +43,11 @@ module Semver
           raise ArgumentError, "unknown section #{heading.inspect}" unless SECTIONS.include?(heading)
 
           current = sections[heading] ||= []
-        elsif current && !line.strip.empty?
+        elsif line.match?(/\A\#{1,6} /)
+          raise ArgumentError, "only ### section headings are allowed: #{line.inspect}"
+        elsif !line.strip.empty?
+          raise ArgumentError, "text before the first section: #{line.inspect}" unless current
+
           current << line
         end
       end
